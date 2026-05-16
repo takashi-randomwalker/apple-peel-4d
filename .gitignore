@@ -12,8 +12,10 @@
 *.stl
 STLs/
 STLs_v3/
-STLs_v4/
 STLs_120cell_faceup/
+# STLs_v4/ は公開対象（有効な 3D nets, 280 枚）—*.stl の例外
+!STLs_v4/
+!STLs_v4/*.stl
 
 # ============================================================
 # LaTeX コンパイル生成物
@@ -30,6 +32,9 @@ STLs_120cell_faceup/
 *.nav
 *.snm
 *.vrb
+
+# 未投稿論文（arXiv 投稿後に公開予定）
+paper_draft.tex
 
 # LaTeX から生成される PDF（ソース .tex から再生成可能）
 paper_draft.pdf
