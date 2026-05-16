@@ -1,0 +1,1321 @@
+% !TEX program = lualatex
+\documentclass[12pt,a4paper]{article}
+
+% ---- Japanese support (LuaLaTeX + luatexja) ----------------------
+% On macOS/MacTeX: Hiragino fonts are used automatically.
+% On Linux/TeX Live: IPAex fonts are used automatically.
+\usepackage{luatexja}
+% ------------------------------------------------------------------
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\theoremstyle{definition}
+\newtheorem{defn}{定義}[section]
+\newtheorem{remark}{注意}[section]
+\algrenewcommand\algorithmicrequire{\textbf{入力:}}
+\algrenewcommand\algorithmicensure{\textbf{出力:}}
+\newcommand{\algorithmicbreak}{\textbf{break}}
+\newcommand{\Break}{\State\algorithmicbreak}
+\floatname{algorithm}{アルゴリズム}
+
+\geometry{margin=25mm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!60!black},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  tabsize=2,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt,
+  xleftmargin=12pt,
+  keepspaces=true
+}
+
+% ────────────────────────────────────────────────────────────────────────────
+\title{\textbf{4次元正多胞体に対するApple-Peel展開}\\[0.4em]
+  \large アルゴリズム設計と実装のまとめ}
+\author{Takashi Yoshino}
+\date{\today}
+% ────────────────────────────────────────────────────────────────────────────
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+% ============================================================
+\section{背景と目的}
+% ============================================================
+
+\subsection{Apple-Peel展開とは}
+
+\textbf{Apple-Peel展開}（りんごの皮剥き展開）とは，多面体や多胞体の面（セル）を
+リンゴの皮を螺旋状に剥くように順番に選択し，
+展開図を得る手法である．
+Yoshino, Chaidee, Sawatdithep によって多面体（3次元）向けに定式化され，
+論文 \texttt{applePeelingV01.pdf} に記載されている．
+
+本プロジェクトの目的は，この手法を \textbf{4次元正多胞体}に拡張することである．
+
+\subsection{対象とする正多胞体}
+
+6種類の正多胞体を対象とする（表~\ref{tab:polytopes}）．
+
+\begin{table}[h]
+\centering
+\caption{正多胞体の基本情報}
+\label{tab:polytopes}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+名称 & $\{p,q,r\}$ & セル数 & 面の種類 & 頂点数 & データファイル \\
+\midrule
+5胞体 (pentachoron)           & $\{3,3,3\}$ &   5 & 三角形   &   5 & \texttt{f5.m}  \\
+8胞体 / 超立方体 (tesseract)  & $\{4,3,3\}$ &   8 & 正方形   &  16 & \texttt{f8.m}  \\
+16胞体 (hexadecachoron)       & $\{3,3,4\}$ &  16 & 三角形   &   8 & \texttt{f16.m} \\
+24胞体 (icositetrachoron)     & $\{3,4,3\}$ &  24 & 正八面体 &  24 & \texttt{f24.m} \\
+120胞体 (hecatonicosachoron)  & $\{5,3,3\}$ & 120 & 正十二面体 & 600 & \texttt{f120.m}\\
+600胞体 (hexacosichoron)      & $\{3,3,5\}$ & 600 & 三角形   & 120 & \texttt{f600.m}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{参照文献}
+
+\begin{itemize}
+  \item Yoshino, Chaidee, Sawatdithep: \textit{Apple-Peel Unfolding of Polyhedra}
+        (\texttt{applePeelingV01.pdf}) -- 3D版の定式化
+  \item Kaino (2019): 24胞体，120胞体，600胞体の4D展開図を
+        直交射影を用いて幾何的・手作業で構成した先行研究
+\end{itemize}
+
+
+% ============================================================
+\section{3次元アルゴリズムの概要}
+% ============================================================
+
+\subsection{Algorithm 1 (applePeelingV01)}
+
+\begin{algorithm}[h]
+\caption{Apple-Peel Unfolding（3次元版）}
+\label{alg:3d}
+\begin{algorithmic}[1]
+\Require 多面体の頂点座標 $\mathit{vers}$，面リスト $\mathit{faces}$，
+         隣接リスト $\mathit{nbrs}$，出発面 $F_1$，次面 $F_2$
+\Ensure  $(F_1, F_2)$ から始まる面選択順序 $\mathit{order}$，成功フラグ $\mathit{success}$
+\State $v \gets \mathit{vers} - \overline{\mathit{vers}}$
+  \Comment{重心を原点に移動}
+\State $\hat{c}_1 \gets$ 面 $F_1$ の重心（単位ベクトル）
+\State $v \gets \mathrm{Rotate}(v,\; \hat{c}_1 \to +\hat{z})$
+  \Comment{$F_1$ を $+z$ 方向へ整列}
+\State $\mathit{order} \gets [F_1,\; F_2]$
+\State $\hat{c}_i \gets$ 全面 $i$ の重心を再計算
+\State $\mathit{last} \gets F_2$
+\While{未選択の隣接面が存在する}
+  \State $L \gets \bigl\{j \in \mathit{nbrs}[\mathit{last}] \mid
+           \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+           - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+    \Comment{左半空間候補}
+  \If{$L \neq \emptyset$}
+    \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,z}$
+      \Comment{左側候補の中で $z$ 最大}
+  \Else
+    \State $\mathit{next} \gets \arg\min_{j \in \mathit{nbrs}[\mathit{last}]}\; \hat{c}_{j,z}$
+      \Comment{フォールバック：$z$ 最小}
+  \EndIf
+  \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+  \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$ \textbf{for all} $i$
+  \State $\mathit{last} \gets \mathit{next}$
+\EndWhile
+\State \Return $\bigl(\mathit{order},\; |\mathit{order}| = |\mathit{faces}|\bigr)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{剥きやすさの分類}
+
+\begin{itemize}
+  \item \textbf{Perfect}: すべての $(F_1, F_2)$ の組み合わせで全面選択に成功
+  \item \textbf{Possible}: 一部の $(F_1, F_2)$ で成功，一部で失敗
+  \item \textbf{Impossible}: すべての $(F_1, F_2)$ で失敗
+\end{itemize}
+
+\noindent Archimedean 立体13種：Perfect 4，Possible 3，Impossible 6 が報告されている．
+
+\subsection{Mathematica 実装 \texttt{peeling3Df}}
+
+実装は \texttt{221026ArchimedeanSolidsPt02.nb} 中の \texttt{peeling3Df} 関数にある．
+シグネチャは以下のとおり：
+
+\begin{lstlisting}
+peeling3Df[origVers_, faces_, top_]
+\end{lstlisting}
+
+\noindent 隣接面の計算には \texttt{RotateLeft} による辺ペアのトリックを用いる．
+フォールバック（右側候補のみの場合）は，論文の「最小 $z$」ではなく
+\texttt{neighbors[[lastChosen]][[1]]}（最初の要素）を取る簡略実装になっている．
+
+返り値は各 $F_2$ に対して \texttt{\{rotatedVers, faceOrder, successBool\}} のリスト．
+
+
+\subsection{コンパニオン論文（arXiv:2604.16204）との実装差異}
+
+\texttt{peeling3DLoxo.m}（本論文の実装）はコンパニオン論文の \texttt{peeling3Df}
+と以下の3点で異なる．
+
+\begin{enumerate}
+\item \textbf{フィルタの参照点}：
+  旧実装では現在のステップの面重心 $\mathbf{c}_k$ を参照し，
+  条件は $(\mathbf{c}_k \times \hat{z})_{xy}\cdot\mathbf{c}_{j,xy}>0$
+  （厳密不等式，$\varepsilon$ なし）であった．
+  現行実装では開始面の重心 $\mathbf{c}_1$（固定参照）を用い，
+  $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j)\le\varepsilon$
+  （$\varepsilon=10^{-10}$）とした．
+
+\item \textbf{タイブレーク}：
+  旧実装では同値 $z$ 候補のタイブレークにリスト順（最初の要素）を用いた．
+  これは面の番号付け順という非幾何的な基準であり，意図せず等変性を破る．
+  現行実装では min Det（幾何学的・等変な基準）を使う．
+
+\item \textbf{RS 規則}：
+  旧実装に RS（min Det 選択）は存在しない．本論文で新規に追加した．
+\end{enumerate}
+
+旧実装の $\mathbf{c}_k$ 参照とリスト順タイブレークは暗黙的に等変性を破る：
+フィルタ方向が毎ステップ回転し，タイ結果が面の番号付け順に依存するため，
+回転対称操作 $\sigma$ で $(F_1,F_2)$ ペアが別ペアに写されたとき，
+同じ結果が保証されない．
+結果として正十二面体で 53.3\% という，等変性理論（0\% か 100\% のみ）に
+矛盾する値が現れていた．
+現行実装の $\mathbf{c}_1$ 固定参照・min Det タイブレーク・$\varepsilon$ 閾値が
+等変性を回復し，数値的にも堅牢にした．
+
+% ============================================================
+\section{4次元への拡張}
+% ============================================================
+
+\subsection{座標系と剥き軸}
+
+4次元空間を $O\text{-}xyzw$ と定め，\textbf{$w$ 軸}を剥き軸（3Dの $z$ 軸に対応）とする．
+
+\subsection{4Dデータ構造}
+
+データは \texttt{\_4DData/f[n].m} に格納されており，
+読み込むと以下の6要素リストが返る：
+
+\begin{center}
+\texttt{\{vers, edgs, neis, faces, fneis, cells\}}
+\end{center}
+
+\noindent 各要素の意味を表~\ref{tab:data} に示す．
+
+\begin{table}[h]
+\centering
+\caption{f[n].m のデータ構造}
+\label{tab:data}
+\begin{tabular}{lll}
+\toprule
+変数名 & 形状 & 内容 \\
+\midrule
+\texttt{vers}  & $(\text{頂点数}) \times 4$ & 4次元頂点座標 \\
+\texttt{edgs}  & $(\text{辺数}) \times 2$   & 辺を構成する頂点番号のペア \\
+\texttt{neis}  & $(\text{頂点数}) \times *$  & 各頂点の隣接頂点番号リスト \\
+\texttt{faces} & $(\text{面数}) \times *$    & 面を構成する頂点番号リスト \\
+\texttt{fneis} & $(\text{面数}) \times *$    & 各面の隣接面番号リスト \\
+\texttt{cells} & $(\text{セル数}) \times *$  & \textbf{セルを構成する面番号リスト} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent \textbf{重要}: \texttt{cells[[i]]} は\textbf{面番号のリスト}（頂点番号ではない）．
+セル $i$ の頂点集合は
+\begin{equation}
+  V_i = \bigcup_{f \in \texttt{cells}[[i]]} \texttt{faces}[[f]]
+\end{equation}
+として得られる．
+
+例（5胞体, $n=5$）：
+\begin{lstlisting}
+cells = {{1,2,4,7}, {1,3,5,8}, {2,3,6,9}, {4,5,6,10}, {7,8,9,10}}
+(* 各セルは4枚の三角形面からなる四面体 *)
+\end{lstlisting}
+
+\subsection{3D から 4D へのアナロジー対応}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+3次元 & 4次元 \\
+\midrule
+多面体の面 $F$ & 多胞体のセル $C$（3D多面体） \\
+剥き軸 $z$ & 剥き軸 $w$ \\
+面の重心 $\hat{c} \in \mathbb{R}^3$ & セルの重心 $\hat{c} \in \mathbb{R}^4$ \\
+$F_1$ を $+z$ 方向へ回転 & $C_1$ を $+w$ 方向へ回転 \\
+左半空間 $(c_k \times \hat{z}) \cdot c' \geq 0$ & 左半空間 $c_y c'_x - c_x c'_y \geq 0$ \\
+隣接 = 辺共有（頂点2点以上共有） & 隣接 = 2D面共有（面番号1つ以上共有） \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{左半空間条件の導出}
+
+3Dの条件 $(\hat{c}_k \times \hat{z}) \cdot \hat{c}' \geq 0$ を $\hat{z} = (0,0,1)$ で展開すると
+\[
+  (c_{k,y},\, -c_{k,x},\, 0) \cdot c' = c_{k,y}\,c'_x - c_{k,x}\,c'_y \geq 0.
+\]
+この式は $c$ と $c'$ の $xy$ 成分のみに依存しており，
+4次元空間においても \textbf{同じ式をそのまま適用できる}：
+\[
+  \boxed{c_y\,c'_x - c_x\,c'_y \geq 0}
+  \quad (\geq 0 : \text{右利き},\quad \leq 0 : \text{左利き}).
+\]
+これは，3Dの外積規準を4Dに拡張するより，
+$w$ 軸まわりの回転（$wz$ 平面内での回転）と等価であり，
+数式的に最も簡潔な拡張形である．
+
+\subsection{4D回転の実装}
+
+$C_1$ の重心 $\hat{c}_1$ を $+w$ 方向に向ける回転には，
+Mathematicaの \texttt{RotationMatrix} を用いる：
+
+\begin{lstlisting}
+angle4D = ArcCos[Clip[cc1 . wHat / Norm[cc1], {-1, 1}]];
+RotationMatrix[angle4D, {cc1/Norm[cc1], wHat}] . # & /@ localVers
+\end{lstlisting}
+
+\noindent \texttt{RotationMatrix[\textit{angle}, \{u, v\}]} は
+任意次元で $u$--$v$ 平面内の回転行列を生成するため，
+4次元にも直接適用できる．
+
+
+% ============================================================
+\section{左側条件の再検討と4次元への厳密な拡張}
+\label{sec:left}
+% ============================================================
+
+本節では，3次元 Apple-Peel における「一番左の胞を選ぶ」という条件を
+厳密に数学的に定式化し，4次元への正しい拡張を議論する．
+
+% ----------------------------------------------------------
+\subsection{3次元における左側条件の幾何学的意味}
+% ----------------------------------------------------------
+
+3次元多面体の Apple-Peel では，
+剥き軸（z軸）に平行な方向に胞（多面体の面）を整列させた後，
+各ステップで「現在の面の重心 $\mathbf{c}_k$ から見て最も左にある隣接面」を選ぶ．
+この「左」は $xy$ 平面上の角度として定義される：
+
+\begin{equation}
+  c_{k,y}\, c'_x - c_{k,x}\, c'_y \;\ge\; 0,
+  \label{eq:3dleft}
+\end{equation}
+ただし $\mathbf{c}' = (c'_x, c'_y)$ は候補面の重心の $xy$ 成分である．
+
+\paragraph{Darboux フレームによる解釈．}
+各ステップに局所フレーム（Darboux フレーム）を導入する：
+\begin{itemize}
+  \item 法線方向：$\hat{n}_k = \mathbf{c}_k / |\mathbf{c}_k|$（球面上の位置）
+  \item 前進方向：$\hat{f}_k = \mathbf{c}_{k-1} \times \mathbf{c}_k \,/\, |\mathbf{c}_{k-1} \times \mathbf{c}_k|$
+  （前のステップから現在への進行方向の「左方向」を与える外積）
+  \item 左方向：$\hat{L}_k = \hat{n}_k \times \hat{f}_k$
+\end{itemize}
+
+候補面 $\mathbf{c}_j$ が「左半空間」にあるとは $\hat{L}_k \cdot \mathbf{c}_j \ge 0$ のことである．
+これは行列式
+\begin{equation}
+  \det\!\bigl(\mathbf{c}_{k-1},\, \mathbf{c}_k,\, \mathbf{c}_j\bigr) \;\ge\; 0
+  \label{eq:det3d}
+\end{equation}
+と正確に等価である．実際，
+\[
+  \hat{L}_k \cdot \mathbf{c}_j
+  = \frac{\det(\mathbf{c}_{k-1}, \mathbf{c}_k, \mathbf{c}_j)}{|\mathbf{c}_k|\,|\hat{d}_k^\perp|},
+\]
+ただし $\hat{d}_k^\perp$ は $\mathbf{c}_{k-1}$ の $\mathbf{c}_k$ への垂直成分の正規化ベクトルである
+（スカラー倍は正）．したがって式~\eqref{eq:3dleft} と式~\eqref{eq:det3d} は等号・不等号の向きが一致する．
+
+\begin{remark}
+  3次元では $\mathbf{c}_{k-1} \times \mathbf{c}_k$ が1次元の（一意な）左方向を与える．
+  これが「左が一意に定まる」理由である．
+\end{remark}
+
+% ----------------------------------------------------------
+\subsection{4次元への拡張の困難：直交補空間の次元}
+% ----------------------------------------------------------
+
+$\mathbb{R}^4$ では，2つのベクトル $\mathbf{c}_{k-1}, \mathbf{c}_k$ が張る2次元部分空間の
+直交補空間は \textbf{2次元}になる（$\mathbb{R}^3$ では1次元）．
+したがって外積のような単一の「左ベクトル」は存在せず，
+「左」の方向は一意に定まらない．
+
+この困難を回避するために，以下の方針をとる：
+4次元多胞体の Apple-Peel では，各胞の重心を $xyz$-超平面（w成分を無視）に射影して
+3次元ベクトル $\tilde{\mathbf{c}}_k = (c_{k,x}, c_{k,y}, c_{k,z})$ を得，
+この射影空間で行列式条件を適用する．
+
+% ----------------------------------------------------------
+\subsection{4次元への正しい拡張：直前ステップを参照した行列式条件}
+% ----------------------------------------------------------
+
+\begin{defn}[4次元 Apple-Peel 左側条件]
+  \label{defn:4dleft}
+  $k \ge 2$ ステップ目において，
+  現在の胞の重心の $xyz$ 射影を $\tilde{\mathbf{c}}_k \in \mathbb{R}^3$，
+  直前の胞の重心の $xyz$ 射影を $\tilde{\mathbf{c}}_{k-1} \in \mathbb{R}^3$，
+  候補胞 $j$ の重心の $xyz$ 射影を $\tilde{\mathbf{c}}_j \in \mathbb{R}^3$ とするとき，
+  胞 $j$ が \textbf{左半空間}にあるとは
+  \begin{equation}
+    \det\!\bigl(\tilde{\mathbf{c}}_{k-1},\, \tilde{\mathbf{c}}_k,\, \tilde{\mathbf{c}}_j\bigr) \;\ge\; 0
+    \label{eq:4dleft}
+  \end{equation}
+  が成立することをいう．
+\end{defn}
+
+この条件は，$xyz$ 超平面に制限した Darboux フレームの左方向と同値である．
+
+\paragraph{初期条件の不定性．}
+$k=1$（最初の選択）では $\tilde{\mathbf{c}}_{k-1}$ がまだ存在しないため，
+式~\eqref{eq:4dleft} は適用できない．
+現在の実装（\texttt{peeling4Df.m}）では，$k=1$ において
+$\tilde{\mathbf{c}}_{k-1} = \mathbf{0}$ に相当する条件（2成分行列式 $c_{k,y} c'_x - c_{k,x} c'_y \ge 0$）
+を使用しており，これは $\tilde{\mathbf{c}}_{k-1}$ として $xy$ 平面上の
+$z$ 軸方向ベクトル $(0,0,1)$ に相当する特定の参照ベクトルを仮定している．
+初期条件の選択が結果に影響する可能性がある．
+
+% ----------------------------------------------------------
+\subsection{三つの選択規則}
+% ----------------------------------------------------------
+
+右半空間条件を満たす複数の候補の中から次の胞を1つ選ぶ規則として，
+以下の三つが考えられる．
+重心の $xyz$ 射影を球面 $S^2$ 上の点と見なすと，
+各規則の幾何学的意味が明確になる．
+また $\hat{n} = \tilde{\mathbf{c}}_k / |\tilde{\mathbf{c}}_k|$ を現在の位置の単位ベクトル，
+$\hat{f}$ を Darboux フレームの前進方向，$\varphi_j$ を
+$\hat{n}$ から $\tilde{\mathbf{c}}_j$ へ向かう方向と $\hat{f}$ のなす角と定義する．
+
+\begin{defn}[選択規則]
+  \label{defn:rules}
+  右半空間条件を満たす候補集合を $\mathcal{R}_k$ とする．
+  \begin{itemize}
+    \item \textbf{規則1 / RS（最小 Det，最大右旋回）:}
+      $\displaystyle j^* = \arg\min_{j \in \mathcal{R}_k} \det(\mathbf{c}_1, \mathbf{c}_k, \mathbf{c}_j)$．
+      行列式が最も負（= 外積 $\mathbf{c}_1 \times \mathbf{c}_k$ との内積が最も負）の候補を選ぶ．
+      これは最大右旋回（外側から見て CW の密な螺旋）に対応する．
+      フォールバック時（右候補なし）のみ Darboux フレームの $\arg\min \varphi_j$ を使用する．
+    \item \textbf{規則2（最大 Det / loxodrome）:}
+      $\displaystyle j^* = \arg\max_{j \in \mathcal{R}_k} \det(\mathbf{c}_1, \mathbf{c}_k, \mathbf{c}_j)$．
+      行列式が最も 0 に近い（最小右旋回 = 最も直進）候補を選ぶ．これは球面上の
+      \textbf{loxodrome（等角螺旋，rhumb line）}の近似に相当する．
+    \item \textbf{規則3 / RZ（最大 $w$ / 緯度優先）:}
+      $\displaystyle j^* = \arg\max_{j \in \mathcal{R}_k} \hat{c}_{j,w}$．
+      $w$ 座標が最大の候補を選ぶ（タイは min $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j)$）．
+      これは球面上の「緯度」（極からの距離）を
+      優先的に下降する軌跡に対応し，同じ緯度を一周してから次の緯度へ移行する
+      \textbf{緯度別走査（latitude-by-latitude scan）}の連続版と解釈できる．
+  \end{itemize}
+\end{defn}
+
+% ----------------------------------------------------------
+\subsection{規則2（loxodrome）と規則3（緯度優先）の幾何学的比較}
+% ----------------------------------------------------------
+
+\paragraph{3次元球面上での比較．}
+3次元では，規則2 は球面上の loxodrome（等角螺旋）に対応し，
+規則3 は緯度ごとに輪を描いてから次の緯度に降りる軌跡に対応する．
+両者は一般には異なる経路をたどる：
+\begin{itemize}
+  \item \textbf{loxodrome} は常に子午線に対して一定の角度を保って進む曲線で，
+    球面をどこまでも巻き続けて極点に収束する無限螺旋になる（有限多面体では近似）．
+  \item \textbf{緯度優先（規則3）} は各緯度の円を完全に一周するように選択する離散版軌跡で，
+    緯度が固定された区間では東西方向に進み，胞がなくなると次の緯度（小さい $w$）に移る．
+\end{itemize}
+
+\paragraph{多胞体での差異．}
+離散的な多胞体では，各ステップで選べる胞の数が限られるため，
+連続的な意味での loxodrome や緯度周回は近似にすぎない．
+しかし選択基準の違いにより，成功率（全胞を剥き終えられる割合）が異なる可能性がある．
+
+\paragraph{3次元多面体での検証可能性．}
+この2つの規則の差は，3次元の多面体（特に Archimedean 立体のような
+十分な対称性を持つ多面体）でも検証できる．
+球面上の点として考えれば，小さな正多面体でも規則1・2・3の成功率の違いが現れうる．
+
+% ----------------------------------------------------------
+\subsection{Kaino (2019) との対応}
+% ----------------------------------------------------------
+
+Kaino (2019) \cite{Kaino2019} の手法は，球面に外接する正多面体の面を
+緯度ごとに走査するという構造を持つ．
+これは本稿の \textbf{規則3（最大 $w$）}に相当する：
+最初の胞（top）付近の高い緯度から始め，次第に低い緯度（$w$ が小さい方向）へ進む．
+
+現在の \texttt{peeling4Df.m} の実装は，左半空間候補がある場合に
+$\hat{c}_{j,w}$ の降順（\texttt{Ordering[..., -1]}）で選択しており，
+概念的に規則3 に対応する．ただし，厳密な左条件として
+式~\eqref{eq:4dleft} ではなく式~\eqref{eq:3dleft} の2成分版を用いている点が現状の実装との相違である．
+
+% ----------------------------------------------------------
+\subsection{2段階選択の提案}
+% ----------------------------------------------------------
+
+議論の結果，以下の2段階選択方針を提案する：
+
+\begin{table}[h]
+\centering
+\caption{2段階選択方針（提案）}
+\label{tab:twostage}
+\begin{tabular}{cll}
+\toprule
+段階 & 条件 & 内容 \\
+\midrule
+第1段階 & 規則3（最大 $w$）でフィルタ &
+  $\hat{c}_{j,w}$ が最大の候補を試みる（現在の実装に相当） \\
+第2段階 & 規則2（loxodrome）で補完 &
+  規則3が詰まった場合，loxodrome 条件（最小 $\varphi$）で再選択 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+この方針の根拠：
+\begin{itemize}
+  \item 規則3 は定義が簡単で Kaino との整合性がある．
+  \item 規則2 は理論的に興味深い（球面 loxodrome の離散近似）が，
+    多胞体では規則3 の方が直観的に「螺旋状に剥く」動作を再現する．
+  \item 定義はまず簡単な規則を優先し，うまくいかなければより精緻な規則を適用する，
+    という段階的アプローチが実装上も合理的である．
+\end{itemize}
+
+将来的には，規則1・規則2・規則3の成功率を5胞体・8胞体などの小さな多胞体で
+組織的に比較し，最適な選択規則を同定することが課題である（§\ref{sec:future} 参照）．
+
+% ============================================================
+\section{\texttt{peeling4Df} の実装}
+% ============================================================
+
+\subsection{関数シグネチャ}
+
+\begin{lstlisting}
+peeling4Df[origVers_, faces_, cells_, top_]
+\end{lstlisting}
+
+\noindent 引数：
+\begin{itemize}
+  \item \texttt{origVers}: 頂点の4次元座標リスト（\texttt{vers} に対応）
+  \item \texttt{faces}: 面の頂点番号リスト
+  \item \texttt{cells}: セルの面番号リスト（\texttt{f[n].m} の第6要素）
+  \item \texttt{top}: 出発セル $C_1$ のインデックス
+\end{itemize}
+
+返り値：各 $C_2$ 候補（$C_1$ の隣接セル）に対して
+\texttt{\{rotatedVers, selectionOrder, successBool\}} のリスト．
+
+\subsection{アルゴリズムの流れ}
+
+\begin{algorithm}[h]
+\caption{peeling4Df（4次元版，グリーディ）}
+\label{alg:4d}
+\begin{algorithmic}[1]
+\Require 4次元頂点座標 $\mathit{vers}$，面リスト $\mathit{faces}$，
+         セルリスト $\mathit{cells}$，出発セル $\mathit{top}$
+\Ensure  各 $C_2$ に対して
+         $(v',\; \mathit{order},\; \mathit{success})$ のリスト
+\Function{CellVerts}{$i$}
+  \Return $\bigcup_{f \in \mathit{cells}[i]} \mathit{faces}[f]$
+    \Comment{セル $i$ の頂点インデックス集合}
+\EndFunction
+\Statex
+\State $v \gets \mathit{vers} - \overline{\mathit{vers}}$
+  \Comment{重心を原点に移動}
+\State $\hat{c}_1 \gets \overline{v[\textsc{CellVerts}(\mathit{top})]}$
+  \Comment{出発セル $C_1$ の重心}
+\State $v \gets \mathrm{Rotate}(v,\; \hat{c}_1 \to +\hat{w})$
+  \Comment{$C_1$ を $+w$ 方向へ整列（回転行列，4次元）}
+\For{$i \gets 1$ \textbf{to} $|\mathit{cells}|$}
+  \State $\hat{c}_i \gets \overline{v[\textsc{CellVerts}(i)]}$
+    \Comment{全セルの重心}
+\EndFor
+\For{$i \gets 1$ \textbf{to} $|\mathit{cells}|$}
+  \State $\mathit{adj}[i] \gets
+    \{j \neq i : \mathit{cells}[i] \cap \mathit{cells}[j] \neq \emptyset\}$
+    \Comment{面共有による隣接リスト構築}
+\EndFor
+\Statex
+\For{$C_2 \in \mathit{adj}[\mathit{top}]$}
+  \Comment{各第2セルについてペーリング}
+  \State $\mathit{order} \gets [\mathit{top},\; C_2]$
+  \State $\mathit{nbrs} \gets \mathit{adj}$ のコピー（全エントリから $\mathit{top}$，$C_2$ を除去）
+  \State $\mathit{last} \gets C_2$
+  \While{$\mathit{nbrs}[\mathit{last}] \neq \emptyset$}
+    \State $L \gets \bigl\{j \in \mathit{nbrs}[\mathit{last}] \mid
+             \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+             - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+      \Comment{左半空間条件}
+    \If{$L \neq \emptyset$}
+      \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,w}$
+        \Comment{左側候補の中で $w$ 座標最大}
+    \Else
+      \State $\mathit{next} \gets \arg\min_{j \in \mathit{nbrs}[\mathit{last}]}\; \hat{c}_{j,w}$
+        \Comment{フォールバック：右側候補の中で $w$ 最小}
+    \EndIf
+    \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+    \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$
+      \hspace{2em}\textbf{for all} $i$
+    \State $\mathit{last} \gets \mathit{next}$
+  \EndWhile
+  \State \textbf{yield} $\bigl(v,\; \mathit{order},\; |\mathit{order}| = |\mathit{cells}|\bigr)$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{3D実装との主な相違点}
+
+\begin{itemize}
+  \item セル頂点の取得に \texttt{Union @@ faces[[ cells[[i]] ]]} が必要
+        （\texttt{cells} が面番号リストのため）．
+  \item 隣接判定が頂点共有数 $\geq 3$ から面番号共有数 $\geq 1$ に変更．
+  \item フォールバックを「右側で $w$ 最小」として\textbf{正確に実装}
+        （3D版は \texttt{neighbors[[lastChosen]][[1]]} という簡略実装だった）．
+  \item 4D回転に \texttt{RotationMatrix[angle, \{u, v\}]} の4次元版を利用．
+\end{itemize}
+
+
+% ============================================================
+\section{ファイル構成と使い方}
+% ============================================================
+
+\subsection{ファイル一覧}
+
+\begin{table}[h]
+\centering
+\caption{主なファイル}
+\begin{tabular}{ll}
+\toprule
+ファイル & 内容 \\
+\midrule
+\texttt{peeling4Df.m}       & アルゴリズム本体（単体で \texttt{Get} して使用可） \\
+\texttt{run4DPeeling.m}     & 全6胞体の実行・分類スクリプト \\
+\texttt{4DPeelingAll.nb}    & 上記2ファイルをまとめたNotebook \\
+\texttt{\_4DData/f[n].m}    & 各正多胞体のデータ ($n=5,8,16,24,120,600$) \\
+\texttt{applePeelingV01.pdf}& 3D版アルゴリズムの論文 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{実行方法}
+
+\paragraph{方法 1 --- Notebook を使用}
+\begin{lstlisting}
+(* 4DPeelingAll.nb を Mathematica で開き，
+   Evaluation -> Evaluate Notebook を実行 *)
+\end{lstlisting}
+
+\paragraph{方法 2 --- スクリプトとして実行}
+\begin{lstlisting}
+SetDirectory["/path/to/260324Peeling4D"];
+Get["peeling4Df.m"];
+Get["run4DPeeling.m"];
+\end{lstlisting}
+
+\paragraph{方法 3 --- 個別に呼び出す}
+\begin{lstlisting}
+(* 5胞体のデータを読み込む *)
+{vers, edgs, neis, faces, fneis, cells} =
+    Get["/path/to/_4DData/f5.m"];
+
+(* 出発セル 1 に対してペーリングを実行 *)
+result = peeling4Df[N[vers], faces, cells, 1];
+
+(* result[[k]] = {rotatedVers, order, successBool} for k-th F2 *)
+result[[1, 3]]   (* True/False *)
+result[[1, 2]]   (* cell selection order *)
+\end{lstlisting}
+
+\subsection{分類の確認方法}
+
+\begin{lstlisting}
+(* 全 F1, F2 の結果を取得 *)
+ans = Table[peeling4Df[N[vers], faces, cells, top],
+            {top, Length[cells]}];
+
+allBools  = Flatten[Map[Last, ans, {2}]];
+trueCount = Count[allBools, True];
+
+classification = Which[
+  Count[allBools, False] == 0, "Perfect",
+  trueCount == 0,              "Impossible",
+  True,                        "Possible"
+];
+\end{lstlisting}
+
+
+% ============================================================
+\section{計算結果}
+% ============================================================
+
+\subsection{3次元正多面体}
+\label{ssec:res3dplatonic}
+
+現行アルゴリズム（大域 $c_1$ 参照・$\varepsilon = 10^{-10}$・単一候補優先なし）による
+5種の正多面体の成功率を表~\ref{tab:res3dplatonic} に示す．
+RS は螺旋規則（min $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j)$，フォールバックのみ Darboux フレーム min $\varphi$），
+RZ は緯度帯規則（max $z$，$z$ 同値は min $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j)$）．
+Det を主基準とすることでフィルタ（右条件）と選択基準が同じ量を使い，一貫性を保証する．
+インデックス依存のタイブレークを排除する（正多面体・アルキメデス多面体の全テスト例では未発生）．
+「w」はフォールバックあり，「n」はフォールバックなしを表す．
+
+\begin{table}[h]
+\centering
+\caption{3次元正多面体の成功率}
+\label{tab:res3dplatonic}
+\begin{tabular}{llrcccc}
+\toprule
+多面体 & $\{p,q\}$ & ペア数 & RS(w) & RS(n) & RZ(w) & RZ(n) \\
+\midrule
+正四面体  & $\{3,3\}$ & 12 & 100\% & 100\% & 100\% & 100\% \\
+正六面体  & $\{4,3\}$ & 24 & 100\% & 100\% & 100\% & 100\% \\
+正八面体  & $\{3,4\}$ & 24 & 100\% & 100\% & 100\% & 100\% \\
+正十二面体 & $\{5,3\}$ & 60 & 100\% & 100\% & 100\% & 100\% \\
+正二十面体 & $\{3,5\}$ & 60 & 100\% & 100\% & 100\% & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+フォールバックの有無にかかわらず，全5種で RS・RZ ともに 100\% となる．
+この全か無か（0\%/100\%）のパターンは等変性定理と整合する：
+正多面体は面推移的であるため，任意の $(F_1, F_2)$ ペアの成否は
+対称群で関連付けられた全ペアの成否と一致する．
+（厳密条件 $\varepsilon<0$ では，フォールバックなしの成功率が
+正四面体を除く4種で 0\% に落ちる；詳細はアルゴリズム節を参照．）
+
+\subsection{3次元アルキメデス多面体}
+\label{ssec:res3darchimedean}
+
+大域 $c_1$ 参照によるアルキメデス多面体の成功率を
+表~\ref{tab:res3darchimedean} に示す（フォールバックあり：
+\texttt{run\_archi\-medean\_faceup.m}；
+フォールバックなし：\texttt{run\_archi\-medean\_nofallback.m}）．
+
+\begin{table}[h]
+\centering
+\caption{3次元アルキメデス多面体の成功率（w = フォールバックあり，n = フォールバックなし）}
+\label{tab:res3darchimedean}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrcccc}
+\toprule
+& & & \multicolumn{2}{c}{RS\,(\%)} & \multicolumn{2}{c}{RZ\,(\%)} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+多面体 & 頂点配置 & ペア数 & w & n & w & n \\
+\midrule
+截頂正四面体 (Truncated Tetrahedron)       & 3.6.6       &  36 & 66.7 & 66.7 & 33.3 & 33.3 \\
+立方八面体 (Cuboctahedron)                 & 3.4.3.4     &  48 &  0.0 &  0.0 &  0.0 &  0.0 \\
+截頂正六面体 (Truncated Cube)              & 3.8.8       &  72 &  0.0 &  0.0 &  0.0 &  0.0 \\
+截頂正八面体 (Truncated Octahedron)        & 4.6.6       &  72 & 41.7 & 41.7 & 100  & 100  \\
+小菱形立方八面体 (Rhombicuboctahedron)     & 3.4.4.4     &  96 &  0.0 &  0.0 &  0.0 &  0.0 \\
+大菱形立方八面体 (Truncated Cuboctahedron) & 4.6.8       & 144 &  0.0 &  0.0 & 100  & 100  \\
+歪み立方体 (Snub Cube)                    & 3.3.3.3.4   & 120 & 20.0 &  0.0 & 40.0 & 20.0 \\
+二十・十二面体 (Icosidodecahedron)         & 3.5.3.5     & 120 &  0.0 &  0.0 &  0.0 &  0.0 \\
+截頂正十二面体 (Truncated Dodecahedron)    & 3.10.10     & 180 &  0.0 &  0.0 &  0.0 &  0.0 \\
+截頂正二十面体 (Truncated Icosahedron)     & 5.6.6       & 180 &  0.0 &  0.0 & 100  & 100  \\
+小菱形二十・十二面体 (Rhombicosidodecahedron) & 3.4.5.4  & 240 &  0.0 &  0.0 &  0.0 &  0.0 \\
+大菱形二十・十二面体 (Truncated Icosidodecahedron) & 4.6.10 & 360 & 0.0 & 0.0 & 66.7 & 66.7 \\
+歪み十二面体 (Snub Dodecahedron)           & 3.3.3.3.5   & 300 &  0.0 &  0.0 &  0.0 &  0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+主な知見：
+\begin{itemize}
+  \item 7種（54\%）が RS・RZ ともに 0\%（展開不可）．
+  \item \textbf{RZ が 100\% の3種}：截頂正八面体・大菱形立方八面体・截頂正二十面体．
+        大菱形二十・十二面体は RZ が 66.7\%（RS は 0\%）．
+  \item \textbf{RS が RZ を上回る唯一の例}：截頂正四面体（RS = 66.7\% $>$ RZ = 33.3\%）．
+  \item \textbf{RZ $>$ RS の4種}：截頂正八面体（100\% vs 41.7\%），
+        大菱形立方八面体（100\% vs 0\%），截頂正二十面体（100\% vs 0\%），
+        大菱形二十・十二面体（66.7\% vs 0\%）．
+  \item \textbf{RZ 結果は Det ベース選択への変更で不変}（min-$\varphi$ タイブレーク $\equiv$ min-Det タイブレーク）．
+        RS 結果は大幅変化（min-Det $\ne$ min-$\varphi$）．
+  \item \textbf{フォールバックが有効なのは歪み立方体のみ．}
+        12/13種でフォールバック除去による変化なし．
+        歪み立方体のみ RS が 20.0\%（24/120）から 0\% に，
+        RZ が 40.0\%（48/120）から 20.0\%（24/120）に減少．
+\end{itemize}
+
+\paragraph{等変性の検証．}
+各多面体に対し，同じ面タイプ組合せ（$F_1$ と $F_2$ の面の辺数）を持つ
+$(F_1, F_2)$ ペアが常に同じ結果（全成功または全失敗）を示すかを確認した．
+13種中12種が RS・RZ ともに検証を通過した．
+
+唯一の例外は歪み立方体（Snub Cube）であり，$(3,3)$ 面タイプグループで
+72ペア中24ペアのみ成功する MIXED 状態が生じる．
+ただしこれは数値誤差ではなく，幾何学的に正しい結果である．
+歪み立方体の三角形面には，キラル正八面体群 $O$（位数24）の下で
+対称的に非同値な2種類が存在する：
+正方形面と辺を共有する \emph{snub 三角形}（24面）と
+正方形面と辺を共有しない \emph{gyrate 三角形}（8面）．
+サブ軌道ごとに分解すると，
+$\{\text{snub},\text{snub}\}: 24/24$，
+$\{\text{snub},\text{gyrate}\}: 0/24$，
+$\{\text{gyrate},\text{snub}\}: 0/24$ とすべて一様である．
+
+\emph{反球面ケースのバグと修正．}
+$\{4,3\}$（正方形--三角形）グループの4件の失敗を調査したところ，
+\texttt{p3lAlignTopToZ} において top 面の重心が $-z$ 方向を向く場合に
+座標反転 $-\mathbf{v}$ を用いていたことが判明した．
+$\mathbb{R}^3$ では $\det(-I_3)=-1$（不正回転）であり，
+左半空間条件の符号が逆転する．
+修正として $x$ 軸周りの $180°$ 回転 $(x,y,z)\mapsto(x,-y,-z)$（$\det=+1$）
+に置き換えた結果，$\{\mathrm{sq},\mathrm{snub}\}$ が $20/24$ から $24/24$ となり，
+RS/RZ 全体の成功率も 36.7\% から 40.0\% に改善した．
+
+\emph{2D 展開図のキラリティと表示規約．}
+アルゴリズムは右半空間条件 $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j) \le \varepsilon$ を用いて
+外側から見て時計回り（CW）方向の候補面を直接選ぶ．
+\texttt{p3lUnfoldNet} では $\mathbf{c}_1 \to \mathbf{c}_2$ を $+x$ 方向に揃えるだけで，
+$F_3$ は自然に $y < 0$（$x$ 軸より下）に現れる—
+外側から見て螺旋が\textbf{時計回り（CW）}に見える右利きが左方向に剥く動作の表示と一致する．
+
+下半球の $F_1$（$x$ 軸回転 $(x,y,z)\mapsto(x,-y,-z)$，$\det=+1$）では
+$y$ 座標が既に反転しているため，右半空間条件の下で $F_3$ は同様に $y<0$ となり
+補正なしで上半球・下半球の $F_1$ が一致したレイアウトを生む．
+
+\paragraph{鏡像対称性の検証．}
+反射 $\rho\colon(x,y,z)\mapsto(-x,y,z)$（$\det(\rho)=-1$）を各多面体に適用すると，
+右半空間条件の行列式の符号が反転し，右螺旋アルゴリズムが左螺旋として動作する．
+全13種のアルキメデス多面体について元の多面体と鏡像の両方で RS・RZ を実行した結果，
+\textbf{全13種で成功数が一致}した（表~\ref{tab:mirror}）．
+
+\begin{table}[h]
+\centering
+\caption{元の多面体と鏡像の成功数比較（アルキメデス多面体13種）}
+\label{tab:mirror}
+\small
+\begin{tabular}{llrrrrrr}
+\toprule
+多面体 & 頂点配置 & ペア数 & RS(元) & RS(鏡) & RZ(元) & RZ(鏡) \\
+\midrule
+截頂正四面体   & 3.6.6     &  36 & 24 & 24 & 12 & 12 \\
+立方八面体     & 3.4.3.4   &  48 &  0 &  0 &  0 &  0 \\
+截頂正六面体   & 3.8.8     &  72 &  0 &  0 &  0 &  0 \\
+截頂正八面体   & 4.6.6     &  72 & 30 & 30 & 72 & 72 \\
+小菱形立方八面体 & 3.4.4.4  &  96 &  0 &  0 &  0 &  0 \\
+大菱形立方八面体 & 4.6.8    & 144 &  0 &  0 &144 &144 \\
+歪み立方体$^*$ & 3.3.3.3.4 & 120 & 24 & 24 & 48 & 48 \\
+二十・十二面体  & 3.5.3.5   & 120 &  0 &  0 &  0 &  0 \\
+截頂正十二面体  & 3.10.10   & 180 &  0 &  0 &  0 &  0 \\
+截頂正二十面体  & 5.6.6     & 180 &  0 &  0 &180 &180 \\
+小菱形二十・十二面体 & 3.4.5.4 & 240 & 0 & 0 & 0 & 0 \\
+大菱形二十・十二面体 & 4.6.10 & 360 &  0 &  0 &240 &240 \\
+歪み十二面体$^*$ & 3.3.3.3.5 & 300 &  0 &  0 &  0 &  0 \\
+\bottomrule
+\multicolumn{7}{l}{\small$^*$ キラル多面体（エナンチオマー対）．}
+\end{tabular}
+\end{table}
+
+11種のアンフィキラル多面体では鏡像が正回転で元の多面体と合同であり，等変性から自明に成立する．
+2種のキラル多面体については以下の通り：
+
+\begin{itemize}
+  \item \textbf{歪み十二面体（Snub Dodecahedron）}：元・鏡像ともに 0\%（自明に一致）．
+  \item \textbf{歪み立方体（Snub Cube）}：RZ では元・鏡像ともに 48/120 (40\%) だが，
+        成功する $(F_1, F_2)$ ペアの集合が異なる（共通24件・元のみ24件・鏡像のみ24件）．
+        キラル正八面体群 $O$ のサブ軌道で分解すると：
+\end{itemize}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lccc}
+\toprule
+$(F_1\text{-型},\,F_2\text{-型})$ & $n$ & 元（左螺旋） & 鏡像（右螺旋） \\
+\midrule
+$\{\mathrm{snub},\mathrm{snub}\}$   & 24 & 24/24 & 24/24 \\
+$\{\mathrm{sq},\mathrm{snub}\}$     & 24 & 24/24 & \ 0/24 \\
+$\{\mathrm{gyrate},\mathrm{snub}\}$ & 24 & \ 0/24 & 24/24 \\
+$\{\mathrm{snub},\mathrm{gyrate}\}$ & 24 & \ 0/24 & \ 0/24 \\
+$\{\mathrm{snub},\mathrm{sq}\}$     & 24 & \ 0/24 & \ 0/24 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$\{\mathrm{sq},\mathrm{snub}\}$ と $\{\mathrm{gyrate},\mathrm{snub}\}$ は
+反射によって入れ替わる（正方形面と gyrate 三角形が2つのエナンチオマーで対称的な役割を持つ）．
+両サブ軌道のサイズが等しい（各24ペア）ため，合計成功数が一致する．
+アルゴリズムは成功数を保ちつつ軌道レベルでキラリティを正しく検出している．
+
+\subsection{4次元正多胞体：分類表}
+\label{ssec:res4d}
+
+\texttt{peeling4Df4}（大域 $c_1$--$c_2$ 参照）を RZ（緯度帯規則）と RS（螺旋規則）の
+両方で全 $(C_1, C_2)$ ペアに適用した結果を表~\ref{tab:results} に示す．
+
+\begin{table}[h]
+\centering
+\caption{4次元正多胞体の Apple-Peel 展開結果（\texttt{peeling4Df4}，RZ と RS の比較）．
+  RZ = 緯度帯規則（max-$w$ 主基準），RS = 螺旋規則（max-Det 主基準）．
+  全多胞体で True $=$ Unique．分類は RZ に基づく．}
+\label{tab:results}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrrrl}
+\toprule
+名称 & $\{p,q,r\}$ & セル数 & 隣接数 & $(C_1,C_2)$ & RZ & RS & 分類 (RZ) \\
+\midrule
+5胞体 (pentachoron)           & $\{3,3,3\}$ &   5 &  4 &    20   &     20 &     20 & \textbf{Perfect}    \\
+8胞体 (tesseract)             & $\{4,3,3\}$ &   8 &  6 &    48   &     48 &     48 & \textbf{Perfect}    \\
+16胞体 (hexadecachoron)       & $\{3,3,4\}$ &  16 &  4 &    64   &     25 &      0 & \textbf{Possible}   \\
+24胞体 (icositetrachoron)     & $\{3,4,3\}$ &  24 &  8 &   192   &    192 &    192 & \textbf{Perfect}    \\
+120胞体 (hecatonicosachoron)  & $\{5,3,3\}$ & 120 & 12 & 1{,}440 & 1{,}250 &      0 & \textbf{Possible}   \\
+600胞体 (hexacosichoron)      & $\{3,3,5\}$ & 600 &  4 & 2{,}400 &      0 &      0 & \textbf{Impossible} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{「RZ」}は緯度帯規則（主基準：max-$w$，同点タイブレーク：max-Det）で
+完全なペーリング順序が得られた $(C_1, C_2)$ ペアの数，
+\textbf{「RS」}は螺旋規則（主基準：max-Det，同点タイブレーク：max-$w$）での対応する数である．
+
+\smallskip\noindent
+\textbf{RZ と RS の比較．}
+4次元では RZ が RS を大きく上回る．RS は 16胞体と 120胞体で完全失敗（Impossible）であるのに対し，
+RZ はそれぞれ 39.1\%・86.8\% を達成する．
+5胞体・8胞体・24胞体ではどちらの規則も同じ成功数を示す．
+
+\smallskip\noindent
+\textbf{補足．}
+8胞体は特殊ケースで，全セル重心が座標軸上（$\pm e_i$）に位置するため
+$\det(c_1,c_2,c_k,c_j)\equiv 0$ となり，全ステップで全候補が通過する．
+選択は max-$w$ のみに帰着し，RZ と RS が一致する．
+600胞体は両規則とも Impossible であり，全 2\,400 ペアがわずか5通りの終了ステップ
+（146，150，276，279，284）のいずれかで停止する——
+正二十面体対称に由来する構造的ボトルネックの証拠である．
+
+\subsection{旧4次元アルゴリズム（\texttt{peeling4Df}）との比較}
+\label{ssec:res4dcomp}
+
+\texttt{peeling4Df}（xy 2成分外積，局所参照）と
+\texttt{peeling4Df4}（4次元行列式条件，大域 $c_1$--$c_2$ 参照）の
+ユニーク成功数を表~\ref{tab:res4dcomp} で比較する．
+
+\begin{table}[h]
+\centering
+\caption{ユニーク成功数の比較：\texttt{peeling4Df} vs.\ \texttt{peeling4Df4}（Det タイブレーク版）}
+\label{tab:res4dcomp}
+\begin{tabular}{llrrl}
+\toprule
+名称 & $\{p,q,r\}$ & \texttt{peeling4Df} & \texttt{peeling4Df4} & 変化 \\
+\midrule
+5胞体   & $\{3,3,3\}$ &   20 &       20 & 変化なし \\
+8胞体   & $\{4,3,3\}$ &   48 &       48 & 変化なし（退化$^\dagger$） \\
+16胞体  & $\{3,3,4\}$ &   26 &       25 & $-1$ \\
+24胞体  & $\{3,4,3\}$ &  119 &      192 & $+73$（Perfect） \\
+120胞体 & $\{5,3,3\}$ &  357 & 1{,}250 & $+893$ \\
+600胞体 & $\{3,3,5\}$ & --- (未完了) &        0 & Impossible \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+$^\dagger$ 8胞体は行列式が恒等的に零に退化するため，両アルゴリズムとも
+max-$w$ 選択に帰着する．
+
+大域参照と幾何学的タイブレークにより 24胞体・120胞体の成功数が大幅に改善した．
+特に24胞体は Perfect（192/192），120胞体は 86.8\%（1250/1440）を達成した．
+16胞体は 25/64（39.1\%）とほぼ旧版（26/64）と同等であった．
+\texttt{peeling4Df} で計算時間内に完了しなかった 600胞体は，
+大域条件のもとで Impossible と確定した．
+
+\subsection{成功率}
+\label{ssec:successrates}
+
+\begin{table}[h]
+\centering
+\caption{$(C_1, C_2)$ ペアに対する成功率（\texttt{peeling4Df4}，RZ と RS の比較）}
+\label{tab:successrate}
+\begin{tabular}{lrrl}
+\toprule
+名称 & RZ 成功率 & RS 成功率 & 分類 (RZ) \\
+\midrule
+5胞体   & 100.0\% ($20/20$)     & 100.0\% ($20/20$)   & Perfect    \\
+8胞体   & 100.0\% ($48/48$)     & 100.0\% ($48/48$)   & Perfect    \\
+16胞体  &  39.1\% ($25/64$)     &   0.0\% ($0/64$)    & Possible   \\
+24胞体  & 100.0\% ($192/192$)   & 100.0\% ($192/192$) & Perfect    \\
+120胞体 &  86.8\% ($1250/1440$) &   0.0\% ($0/1440$)  & Possible   \\
+600胞体 &   0.0\% ($0/2400$)    &   0.0\% ($0/2400$)  & Impossible \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+4次元では RZ が RS を大きく凌駕する．
+RZ は 24胞体で \textbf{Perfect}（100\%），120胞体で 86.8\% を達成するのに対し，
+RS は 16胞体・120胞体で完全に失敗（Impossible）する．
+5胞体・8胞体・24胞体では両規則が同一の成功数を示す．
+
+% ============================================================
+\section{展開図の3次元可視化と検証}
+% ============================================================
+
+\subsection{4D $\to$ 3D 展開（\texttt{unfold3DExport.m}）}
+
+得られたセル選択順序をもとに，各セル（3次元多面体）を
+3次元空間に連接させた展開図を生成する実装を \texttt{unfold3DExport.m} に記述した．
+手順は以下のとおりである．
+
+\begin{enumerate}[label=\textbf{Step \arabic*.}]
+  \item \textbf{SVD 射影}:
+        各セルの頂点群（4次元）を特異値分解で最良3次元超平面に等長射影し，
+        局所3次元座標を得る．
+
+  \item \textbf{Procrustes 整列}:
+        隣接するセル間の共有面の頂点座標が一致するよう，
+        回転行列 $R$ と平行移動 $\boldsymbol{t}$ を最適化する（スケールなし）．
+
+  \item \textbf{鏡映補正}:
+        Procrustes 整列後，前セルと新セルが共有面に対して同じ側にある場合，
+        共有面を通した鏡映によって「外側」へ展開する．
+
+  \item \textbf{STL 出力}:
+        展開されたセル群を三角形分割し，\texttt{Graphics3D} + \texttt{Export} で
+        STL ファイルとして保存する．
+\end{enumerate}
+
+\subsection{重なり判定（Separating Axis Theorem）}
+
+3次元に展開した際に異なるセル同士が重なるかどうかを，
+分離軸定理（SAT）を用いて全ペアに対して検査する．
+
+\begin{itemize}
+  \item 候補軸：各セルの面法線ベクトルおよび辺ベクトルの外積
+  \item AABB（軸並行バウンディングボックス）による事前フィルタで高速化
+  \item \texttt{eps} $= 10^{-6}$ により共有面での接触は重なりと見なさない
+\end{itemize}
+
+生成された STL ファイルの一覧を表~\ref{tab:stlcount} に示す．
+
+\begin{table}[h]
+\centering
+\caption{STL 出力数（\texttt{STLs/} フォルダ）}
+\label{tab:stlcount}
+\begin{tabular}{lr}
+\toprule
+多胞体 & 出力 STL 数 \\
+\midrule
+5胞体   &   20 \\
+8胞体   &   48 \\
+16胞体  &   26 \\
+24胞体  &  119 \\
+120胞体 &  357 \\
+600胞体 &  — (未完了) \\
+\midrule
+合計    &  570 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+STL ファイルには重なりのある展開図も含まれる．
+重なりなし（valid net）の数については今後の確認事項である（\S\ref{sec:future} 参照）．
+
+\subsection{4D展開図の可視化（\texttt{unfold4D.m}）}
+\label{ssec:unfold4D}
+
+\texttt{unfold4D.m} は，\texttt{ans4DGlobal.mx} に保存された
+ペーリング計算結果を読み込み，各正多胞体の 4D$\to$3D 展開図を
+\texttt{Graphics3D} で描画するスクリプトである．
+SVD\,+\,Procrustes の中核アルゴリズム（上記 Step~1--3）は
+\texttt{unfold3DExport.m} に依存する．
+
+\paragraph{開始セルの固定．}
+等変性により，どの $C_1$ を選んでも同じ位相構造の展開図が得られる．
+そのため \texttt{fixedTop = 3} として $C_1 = 3$ を代表として固定し，
+対応する全成功ペーリング順序（order でユニーク化）を列挙して描画する．
+
+\paragraph{色付け．}
+ペーリング順に応じてセルを着色する：
+\begin{itemize}
+  \item $C_1$：青（RGB $0.20, 0.45, 0.80$）
+  \item 中間セル：緑（RGB $0.15, 0.70, 0.40$）
+  \item 末尾セル：赤（RGB $0.90, 0.25, 0.15$）
+\end{itemize}
+中間色は線形ブレンド（\texttt{Blend}）で補間する．
+
+\paragraph{5胞体の座標補正．}
+\texttt{ans4DGlobal.mx} に格納された \texttt{localVers} は，
+誤った第5頂点 $v_5 \approx (0.191,\ldots)$ を持つ旧版 \texttt{f5.m}
+から計算されたものである．正しい値は
+$v_5 = \tfrac{1-\varphi}{2}(1,1,1,1) \approx (-0.309,\ldots)$ であり，
+$|v_k - v_5|^2 = 2$（$k=1,\ldots,4$）を満たす正則5胞体の辺長に対応する．
+\texttt{f5.m} は 2026-05-08 に修正済み．
+\texttt{recomputeLocalVers} 関数が現在の頂点データから
+face-up 回転済み座標を再計算するため，
+\texttt{ans4DGlobal.mx} の再生成前でも正しい正四面体が表示される．
+
+\paragraph{使い方．}
+\begin{verbatim}
+SetDirectory["/path/to/260324Peeling4D"];
+Get["unfold4D.m"]
+\end{verbatim}
+スクリプトを実行すると，各多胞体の展開図が Notebook 出力に順次表示される．
+画像サイズは \texttt{netImageSize}（デフォルト 500\,px）で変更できる．
+
+
+% ============================================================
+\section{1段バックトラック拡張（\texttt{peeling1back.m}）}
+% ============================================================
+
+グリーディ・アルゴリズムでは，左側候補もフォールバック候補も
+ない状態（行き詰まり）が生じた場合に展開が失敗する．
+この問題に対処するため，\textbf{1段バックトラック}拡張を実装した
+（\texttt{peeling1back.m}）．
+
+\subsection{アルゴリズム}
+
+グリーディ版（アルゴリズム~\ref{alg:4d}）と同じ前処理（重心移動・回転・重心計算・隣接リスト構築）
+を行った後，以下の選択ループを実行する．
+
+\begin{algorithm}[h]
+\caption{peeling1back（1段バックトラック版，選択ループ部分）}
+\label{alg:1back}
+\begin{algorithmic}[1]
+\Require セル重心配列 $\hat{c}$，隣接リスト $\mathit{adj}$，
+         出発セル $\mathit{top}$，第2セル $C_2$
+\Ensure  $(\mathit{order},\; \mathit{success})$
+\State $\mathit{order} \gets [\mathit{top},\; C_2]$
+\State $\mathit{nbrs} \gets \mathit{adj}$ のコピー（全エントリから $\mathit{top}$，$C_2$ を除去）
+\State $\mathit{last} \gets C_2$
+\State $\mathit{justBT} \gets \mathrm{False}$
+\State $\mathit{tried} \gets \{\}$
+  \Comment{位置 $\to$ 試行済みセルの集合}
+\While{$|\mathit{order}| < |\mathit{cells}|$}
+  \State $\mathit{pos} \gets |\mathit{order}|$
+  \State $\mathit{cands} \gets \mathit{nbrs}[\mathit{last}]
+           \setminus \mathit{tried}[\mathit{pos}]$
+    \Comment{未試行の候補}
+  \If{$\mathit{cands} = \emptyset$}
+    \Comment{行き詰まり}
+    \If{$\mathit{justBT}$ \textbf{or} $|\mathit{order}| \leq 2$}
+      \Break
+        \Comment{2段以上のバックトラックは行わない}
+    \EndIf
+    \State $\mathit{bad} \gets \mathit{order}.\mathrm{last}()$
+    \State $\mathit{order}.\mathrm{removeLast}()$
+    \State $\mathit{nbrs} \gets$ 直前の前進前の状態を復元
+    \State $\mathit{tried}[|\mathit{order}|] \gets
+             \mathit{tried}[|\mathit{order}|] \cup \{\mathit{bad}\}$
+    \State $\mathit{justBT} \gets \mathrm{True}$
+  \Else
+    \Comment{前進}
+    \State $L \gets \bigl\{j \in \mathit{cands} \mid
+               \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+               - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+    \If{$L \neq \emptyset$}
+      \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,w}$
+    \Else
+      \State $\mathit{next} \gets \arg\min_{j \in \mathit{cands}}\; \hat{c}_{j,w}$
+    \EndIf
+    \State $\mathit{nbrs}$ の現在状態を保存
+    \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+    \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$
+      \hspace{2em}\textbf{for all} $i$
+    \State $\mathit{last} \gets \mathit{next}$
+    \State $\mathit{justBT} \gets \mathrm{False}$
+  \EndIf
+\EndWhile
+\State \Return $\bigl(\mathit{order},\; |\mathit{order}| = |\mathit{cells}|\bigr)$
+\end{algorithmic}
+\end{algorithm}
+
+この拡張により，グリーディ版で失敗していた一部の $(C_1, C_2)$ ペアが
+成功する可能性がある（詳細な比較は今後の課題）．
+
+% ============================================================
+\section{今後の課題}
+\label{sec:future}
+% ============================================================
+
+\begin{enumerate}
+  \item \textbf{600胞体の計算完了}\\
+        600胞体は計算量が大きく（600セル，$(C_1,C_2)$ 総数 2,400），
+        現時点で完全な分類が得られていない．
+        分割実行あるいは計算資源の増強が必要である．
+
+  \item \textbf{重なり判定の統計整理}\\
+        570枚の STL について，重なりなし（valid net）の比率を
+        多胞体ごとに集計し，表として整理する．
+
+  \item \textbf{アルキメデス多面体：フォールバック有無の比較}（完了）\\
+        \texttt{run\_archimedean\_nofallback.m} を実行し，
+        表~\ref{tab:res3darchimedean} に with/without fallback 双方の結果を追記した．
+        13種中12種はフォールバックの有無で結果が変わらず，
+        唯一の例外は歪み立方体（40.0\% $\to$ 20.0\%）であった．
+
+  \item \textbf{4次元正多胞体：フォールバック有無の比較}\\
+        \texttt{peeling4Df4.m}（グローバル参照・規則3）の
+        フォールバックなし版を実装し，6種の正多胞体に適用する．
+        フォールバックなしで成功するペア数を調べることで，
+        Impossible と分類された600胞体が純粋なフォールバック依存による
+        失敗なのか，アルゴリズム本体の選択規則に起因する失敗なのかを
+        切り分けることができる．
+        また，24胞体・120胞体における高い成功率
+        （100\%・86.8\%）がフォールバックを必要とする割合も確認する．
+
+  \item \textbf{1段バックトラック拡張との比較}\\
+        \texttt{peeling1back.m} による成功率と
+        グリーディ版 \texttt{peeling4Df} との比較を定量化する．
+
+  \item \textbf{Kaino (2019) との比較}\\
+        本アルゴリズムが生成した展開図が，
+        Kaino の先行研究（直交射影による手作業構成）と
+        整合するかを確認する．
+
+  \item \textbf{左利きペーリングの対称性検討}\\
+        $c_y c'_x - c_x c'_y \leq 0$ による左利きペーリングとの
+        結果の対称性・双対性を確認する．
+
+  \item \textbf{選択規則の体系的比較}\\
+        §\ref{sec:left} で提案した規則1（最大角度），規則2（loxodrome），
+        規則3（最大 $w$）の三つの選択規則を，5胞体・8胞体など
+        小規模な正多胞体に適用して成功率を比較する．
+        3次元多面体（Archimedean 立体など）での検証も有効である．
+
+  \item \textbf{厳密な4次元左条件の実装}\\
+        現在の \texttt{peeling4Df.m} が用いる2成分左条件
+        $c_{k,y}c'_x - c_{k,x}c'_y \ge 0$ を，
+        定義~\ref{defn:4dleft} の行列式条件
+        $\det(\tilde{\mathbf{c}}_{k-1}, \tilde{\mathbf{c}}_k, \tilde{\mathbf{c}}_j) \ge 0$
+        に置き換えて成功率の変化を確認する（初期条件 $k=1$ の扱いに注意）．
+
+  \item \textbf{2段階選択の実装と評価}\\
+        表~\ref{tab:twostage} の2段階選択方針（規則3 優先 $\to$ 規則2 補完）を
+        実装し，グリーディ版および1段バックトラック版と成功率を比較する．
+\end{enumerate}
+
+
+% ============================================================
+\appendix
+\section{peeling4Df 完全コード}
+% ============================================================
+
+\begin{lstlisting}
+peeling4Df[origVers_, faces_, cells_, top_] :=
+  Module[
+    {wHat, cc1, localVers, cCenters,
+     neighbors, neighborsInit,
+     order, cansInit, chosenFrom1,
+     lastChosen, newChoice, cans,
+     angle4D, rCans, cellVerts},
+
+    wHat = {0, 0, 0, 1};
+
+    (* セル i の頂点番号を返す補助関数 *)
+    cellVerts[i_] := Union @@ faces[[ cells[[i]] ]];
+
+    (* Step 1: 重心を原点に移動 *)
+    localVers = (# - Mean[origVers]) & /@ origVers;
+
+    (* Step 2: 出発セル C1 の重心 *)
+    cc1 = Mean[ localVers[[ cellVerts[top] ]] ];
+
+    (* Step 3: +w 方向へ回転 *)
+    localVers = Which[
+      Abs[(cc1/Norm[cc1]).wHat - 1] < 0.0001, localVers,
+      Abs[(cc1/Norm[cc1]).wHat + 1] < 0.0001, -localVers,
+      True,
+        angle4D = ArcCos[Clip[cc1.wHat/Norm[cc1], {-1,1}]];
+        RotationMatrix[angle4D, {cc1/Norm[cc1], wHat}] . # & /@ localVers
+    ];
+
+    (* Step 4: 全セル重心 *)
+    cCenters = Mean[localVers[[ cellVerts[#] ]]] & /@ Range[Length[cells]];
+
+    (* Step 5: 隣接判定（面番号共有 >= 1） *)
+    neighbors = Table[
+      Select[Range[Length[cells]],
+        Function[j, j!=i &&
+          Length[Intersection[cells[[i]], cells[[j]]]] >= 1]],
+      {i, Length[cells]}];
+
+    (* Step 6: C1 を隣接リストから除外 *)
+    neighbors = neighborsInit = Complement[#, {top}] & /@ neighbors;
+
+    (* Step 7: C2 の候補 *)
+    cansInit = neighbors[[top]];
+
+    (* Step 8: 各 C2 に対してペーリング *)
+    Table[
+      order = {top}; neighbors = neighborsInit;
+      chosenFrom1 = cansInit[[i]];
+      AppendTo[order, chosenFrom1];
+      neighbors = Complement[#, {chosenFrom1}] & /@ neighbors;
+      lastChosen = chosenFrom1; newChoice = lastChosen;
+
+      While[
+        Length[Flatten[neighbors]] != 0 &&
+        Length[neighbors[[newChoice]]] != 0,
+
+        (* 左半空間: c_y * c'_x - c_x * c'_y >= 0 *)
+        cans = Select[neighbors[[lastChosen]],
+          Function[j, With[{c = cCenters[[lastChosen]]},
+            c[[2]]*cCenters[[j]][[1]] -
+            c[[1]]*cCenters[[j]][[2]] >= 0]]];
+
+        newChoice = Which[
+          Length[cans] > 1,
+            cans[[ First[First[
+              Position[cCenters[[cans,4]], Max[cCenters[[cans,4]]]]
+            ]] ]],
+          Length[cans] == 1, cans[[1]],
+          True,  (* フォールバック: 右側で w 最小 *)
+            With[{rc = neighbors[[lastChosen]]},
+              rc[[ First[First[
+                Position[cCenters[[rc,4]], Min[cCenters[[rc,4]]]]
+              ]] ]]]
+        ];
+
+        lastChosen = newChoice;
+        AppendTo[order, newChoice];
+        neighbors = Complement[#, {newChoice}] & /@ neighbors;
+      ];
+
+      {localVers, order, Length[order] == Length[cells]}
+      , {i, Length[cansInit]}]
+  ]
+\end{lstlisting}
+
+\begin{thebibliography}{9}
+
+\bibitem{applePeeling}
+  T.~Yoshino, S.~Chaidee, P.~Sawatdithep,
+  \textit{Apple-Peel Unfolding of Polyhedra},
+  \texttt{applePeelingV01.pdf}.
+
+\bibitem{Kaino2019}
+  海野啓明,
+  \textit{正多胞体の展開図},
+  対称性学会 金沢大会 (2019), \texttt{Kaino2019\_SymmetryCongressKanazawa.pdf}.
+
+\end{thebibliography}
+
+\end{document}

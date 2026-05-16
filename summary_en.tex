@@ -1,0 +1,1384 @@
+% !TEX program = lualatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{luatexja}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\newcommand{\algorithmicbreak}{\textbf{break}}
+\newcommand{\Break}{\State\algorithmicbreak}
+\floatname{algorithm}{Algorithm}
+
+\geometry{margin=25mm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!60!black},
+  frame=single,
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  tabsize=2,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=6pt,
+  xleftmargin=12pt,
+  keepspaces=true
+}
+
+\title{\textbf{Apple-Peel Unfolding of Four-Dimensional Regular Polytopes}\\[0.4em]
+  \large Algorithm Design and Implementation Notes}
+\author{Takashi Yoshino}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+
+% ============================================================
+\section{Background and Motivation}
+% ============================================================
+
+\subsection{What Is Apple-Peel Unfolding?}
+
+\textbf{Apple-Peel Unfolding} is a method for selecting the faces (or cells) of a
+polyhedron or polytope one by one in a spiral order---analogous to peeling an
+apple in a single continuous strip---so as to produce an unfolding (net).
+The method was formalised for three-dimensional polyhedra by
+Yoshino, Chaidee, and Sawatdithep in \texttt{applePeelingV01.pdf}.
+
+The goal of this project is to extend the method to
+\textbf{four-dimensional regular polytopes}.
+
+\subsection{Target Polytopes}
+
+The six regular convex 4-polytopes are studied (Table~\ref{tab:polytopes}).
+
+\begin{table}[h]
+\centering
+\caption{Basic data of the regular 4-polytopes}
+\label{tab:polytopes}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Name & $\{p,q,r\}$ & Cells & Cell type & Vertices & Data file \\
+\midrule
+5-cell (pentachoron)            & $\{3,3,3\}$ &   5 & tetrahedron      &   5 & \texttt{f5.m}  \\
+8-cell / hypercube (tesseract)  & $\{4,3,3\}$ &   8 & cube             &  16 & \texttt{f8.m}  \\
+16-cell (hexadecachoron)        & $\{3,3,4\}$ &  16 & tetrahedron      &   8 & \texttt{f16.m} \\
+24-cell (icositetrachoron)      & $\{3,4,3\}$ &  24 & octahedron       &  24 & \texttt{f24.m} \\
+120-cell (hecatonicosachoron)   & $\{5,3,3\}$ & 120 & dodecahedron     & 600 & \texttt{f120.m}\\
+600-cell (hexacosichoron)       & $\{3,3,5\}$ & 600 & tetrahedron      & 120 & \texttt{f600.m}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{References}
+
+\begin{itemize}
+  \item Yoshino, Chaidee, Sawatdithep:
+        \textit{Apple-Peel Unfolding of Polyhedra}
+        (\texttt{applePeelingV01.pdf}) --- original 3D formulation.
+  \item Kaino (2019): prior work constructing 4D nets of the 24-cell,
+        120-cell, and 600-cell geometrically by orthogonal projection.
+\end{itemize}
+
+
+% ============================================================
+\section{Overview of the 3D Algorithm}
+% ============================================================
+
+\subsection{Algorithm 1 (applePeelingV01)}
+
+\begin{algorithm}[h]
+\caption{Apple-Peel Unfolding (3D version)}
+\label{alg:3d}
+\begin{algorithmic}[1]
+\Require
+  Vertex coordinates $\mathit{vers}$ (list of 3D points),
+  face list $\mathit{faces}$ (each entry: list of vertex indices forming one face),
+  adjacency list $\mathit{nbrs}$ ($\mathit{nbrs}[i]$: indices of faces adjacent to face $i$),
+  starting face $F_1$, second face $F_2$
+\Ensure
+  Face selection order $\mathit{order}$ starting from $(F_1, F_2)$;
+  success flag $\mathit{success}$
+
+\State $\mathit{vers} \gets \mathit{vers} - \bar{\mathit{vers}}$
+  \Comment{Translate so that the centroid of all vertices is at the origin}
+\State $\hat{c}_1 \gets$ centroid of face $F_1$, normalised to a unit vector
+\State $\mathit{vers} \gets \mathrm{Rotate}(\mathit{vers},\;\hat{c}_1 \to +\hat{z})$
+  \Comment{Rotate so that $\hat{c}_1$ aligns with the $+z$ axis}
+\State $\mathit{order} \gets [F_1,\; F_2]$
+\State $\hat{c}_i \gets$ centroid of face $i$ \textbf{for all} $i$
+  \Comment{Recompute centroids after rotation}
+\State $\mathit{last} \gets F_2$
+  \Comment{Index of the most recently selected face}
+\While{there exists an unselected adjacent face}
+  \State $L \gets \bigl\{j \in \mathit{nbrs}[\mathit{last}]
+           \mid \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+                - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+    \Comment{Left half-space candidates ($x,y$: first two coordinates of $\hat{c}$)}
+  \If{$L \neq \emptyset$}
+    \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,z}$
+      \Comment{Among left candidates, choose the one with the largest $z$ coordinate}
+  \Else
+    \State $\mathit{next} \gets \arg\min_{j \in \mathit{nbrs}[\mathit{last}]}\; \hat{c}_{j,z}$
+      \Comment{Fallback: choose the candidate with the smallest $z$}
+  \EndIf
+  \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+  \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$
+    \hspace{1.5em}\textbf{for all} $i$
+    \Comment{Remove $\mathit{next}$ from every adjacency list}
+  \State $\mathit{last} \gets \mathit{next}$
+\EndWhile
+\State \Return $\bigl(\mathit{order},\;|\mathit{order}| = |\mathit{faces}|\bigr)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Peelability Classification}
+
+\begin{itemize}
+  \item \textbf{Perfect}: every $(F_1, F_2)$ pair yields a complete unfolding.
+  \item \textbf{Possible}: some pairs succeed and some fail.
+  \item \textbf{Impossible}: no $(F_1, F_2)$ pair yields a complete unfolding.
+\end{itemize}
+
+\noindent
+For the 13 Archimedean solids the reported counts are:
+Perfect~4, Possible~3, Impossible~6.
+
+\subsection{Mathematica Implementation \texttt{peeling3Df}}
+
+The implementation resides in function \texttt{peeling3Df} inside
+\texttt{221026ArchimedeanSolidsPt02.nb}.
+Its signature is:
+
+\begin{lstlisting}
+peeling3Df[origVers_, faces_, top_]
+\end{lstlisting}
+
+\noindent
+Here \texttt{origVers} is the list of vertex coordinates, \texttt{faces} is
+the list of faces (each face given as a list of vertex indices), and
+\texttt{top} is the index of the starting face $F_1$.
+Adjacent faces are detected with a \texttt{RotateLeft}-based edge-pair trick.
+The fallback (when only right-side candidates exist) takes
+\texttt{neighbors[[lastChosen]][[1]]} (the first element of the list),
+which is a simplification of the ``min-$z$'' rule in the paper.
+
+The return value is, for each $F_2$, a triple
+\texttt{\{rotatedVers, faceOrder, successBool\}}.
+
+
+% ============================================================
+\section{Extension to Four Dimensions}
+% ============================================================
+
+\subsection{Coordinate System and Peeling Axis}
+
+The four-dimensional space is coordinatised as $O\text{-}xyzw$.
+The \textbf{$w$-axis} serves as the peeling axis, playing the role of the
+$z$-axis in the 3D algorithm.
+
+\subsection{4D Data Structure}
+
+Data are stored in \texttt{\_4DData/f[n].m}.
+Loading the file returns a six-element list:
+
+\begin{center}
+\texttt{\{vers, edgs, neis, faces, fneis, cells\}}
+\end{center}
+
+\noindent
+The meaning of each element is given in Table~\ref{tab:data}.
+
+\begin{table}[h]
+\centering
+\caption{Data structure of \texttt{f[n].m}}
+\label{tab:data}
+\begin{tabular}{lll}
+\toprule
+Variable & Shape & Contents \\
+\midrule
+\texttt{vers}  & $(\text{\#vertices}) \times 4$ & 4D vertex coordinates \\
+\texttt{edgs}  & $(\text{\#edges}) \times 2$    & Pairs of vertex indices forming each edge \\
+\texttt{neis}  & $(\text{\#vertices}) \times *$ & Adjacent vertex indices for each vertex \\
+\texttt{faces} & $(\text{\#faces}) \times *$    & Vertex indices forming each 2D face \\
+\texttt{fneis} & $(\text{\#faces}) \times *$    & Adjacent face indices for each face \\
+\texttt{cells} & $(\text{\#cells}) \times *$    & \textbf{Face indices forming each 3D cell} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{Important}: \texttt{cells[[i]]} contains \textbf{face indices}
+(not vertex indices).
+The vertex set of cell $i$ is therefore
+
+\begin{equation}
+  V_i = \bigcup_{f \in \texttt{cells}[[i]]} \texttt{faces}[[f]].
+\end{equation}
+
+Example (5-cell, $n=5$):
+\begin{lstlisting}
+cells = {{1,2,4,7}, {1,3,5,8}, {2,3,6,9}, {4,5,6,10}, {7,8,9,10}}
+(* each cell is a tetrahedron consisting of 4 triangular faces *)
+\end{lstlisting}
+
+\subsection{Analogy between 3D and 4D}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+3D & 4D \\
+\midrule
+Face $F$ of a polyhedron & Cell $C$ of a 4-polytope (a 3D polyhedron) \\
+Peeling axis $z$ & Peeling axis $w$ \\
+Face centroid $\hat{c} \in \mathbb{R}^3$ & Cell centroid $\hat{c} \in \mathbb{R}^4$ \\
+Rotate $F_1$ toward $+z$ & Rotate $C_1$ toward $+w$ \\
+Left half-space $(c_k \times \hat{z}) \cdot c' \geq 0$ &
+  Left half-space $c_y c'_x - c_x c'_y \geq 0$ \\
+Adjacency: $\geq 2$ shared vertices & Adjacency: $\geq 1$ shared face \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Derivation of the Left Half-Space Condition}
+
+Expanding the 3D condition $(\hat{c}_k \times \hat{z}) \cdot \hat{c}' \geq 0$
+with $\hat{z} = (0,0,1)$ gives:
+\[
+  (c_{k,y},\, -c_{k,x},\, 0) \cdot c' = c_{k,y}\,c'_x - c_{k,x}\,c'_y \geq 0.
+\]
+Here $c_{k,x}, c_{k,y}$ are the $x$- and $y$-components of the centroid
+$\hat{c}_k$ of the current face, and $c'_x, c'_y$ are the $x$- and
+$y$-components of the centroid of the candidate face.
+Because this expression depends only on the $xy$-components of the two
+centroids, it can be \textbf{applied directly in four dimensions}:
+\[
+  \boxed{c_y\,c'_x - c_x\,c'_y \geq 0}.
+\]
+This is equivalent to a rotation in the $xy$-plane (about the $zw$-plane)
+and is the most compact 4D extension.
+
+\subsection{Implementation of the 4D Rotation}
+
+To rotate the vertices so that the centroid $\hat{c}_1$ of cell $C_1$ points
+in the $+w$ direction, we use Mathematica's \texttt{RotationMatrix}:
+
+\begin{lstlisting}
+angle4D = ArcCos[Clip[cc1 . wHat / Norm[cc1], {-1, 1}]];
+RotationMatrix[angle4D, {cc1/Norm[cc1], wHat}] . # & /@ localVers
+\end{lstlisting}
+
+\noindent
+Here \texttt{cc1} is the centroid of $C_1$ and
+\texttt{wHat} $= (0,0,0,1)$ is the unit vector along the $+w$ axis.
+\texttt{RotationMatrix[}\textit{angle}\texttt{, \{u, v\}]} generates a rotation
+matrix in the plane spanned by unit vectors $u$ and $v$,
+which works in any dimension and therefore applies directly to 4D.
+
+
+% ============================================================
+\section{Re-examination of the Left Condition and Rigorous 4D Extension}
+\label{sec:left}
+% ============================================================
+
+This section formalises the ``choose the leftmost cell'' condition of the
+3D Apple-Peel algorithm and derives its correct extension to four dimensions.
+
+% ----------------------------------------------------------
+\subsection{Geometric Meaning of the Left Condition in 3D}
+% ----------------------------------------------------------
+
+After aligning the peeling axis with the $z$-axis, each step selects the
+neighbour of the current face whose centroid lies farthest to the ``left''.
+``Left'' is defined by the $xy$-plane angle:
+
+\begin{equation}
+  c_{k,y}\, c'_x - c_{k,x}\, c'_y \;\ge\; 0,
+  \label{eq:3dleft}
+\end{equation}
+where $c_{k,x}, c_{k,y}$ are the $x$- and $y$-components of $\mathbf{c}_k$
+(centroid of the current face at step $k$), and $c'_x, c'_y$ are
+the $x$- and $y$-components of $\mathbf{c}'$ (centroid of the candidate face).
+
+\paragraph{Interpretation via the Darboux frame.}
+Introduce a local frame (Darboux frame) at each step:
+\begin{itemize}
+  \item Normal direction:
+    $\hat{n}_k = \mathbf{c}_k / |\mathbf{c}_k|$
+    (position on the unit sphere; $\mathbf{c}_k$ is the centroid of the
+     current face, treated as a point on a sphere centred at the origin).
+  \item Forward direction:
+    $\hat{f}_k = (\mathbf{c}_{k-1} \times \mathbf{c}_k) /
+                  |\mathbf{c}_{k-1} \times \mathbf{c}_k|$,
+    where $\mathbf{c}_{k-1}$ is the centroid of the \emph{previous} face.
+    This cross product lies in the tangent plane at $\hat{n}_k$ and points
+    in the ``left'' direction orthogonal to the path from $\mathbf{c}_{k-1}$
+    to $\mathbf{c}_k$.
+  \item Left direction:
+    $\hat{L}_k = \hat{n}_k \times \hat{f}_k$
+    (90° to the left of the forward direction within the tangent plane).
+\end{itemize}
+
+The candidate face $j$ with centroid $\mathbf{c}_j$ lies in the
+\emph{left half-space} if and only if $\hat{L}_k \cdot \mathbf{c}_j \ge 0$.
+This is exactly equivalent to the determinant condition
+\begin{equation}
+  \det\!\bigl(\mathbf{c}_{k-1},\, \mathbf{c}_k,\, \mathbf{c}_j\bigr) \;\ge\; 0,
+  \label{eq:det3d}
+\end{equation}
+because
+\[
+  \hat{L}_k \cdot \mathbf{c}_j
+  = \frac{\det(\mathbf{c}_{k-1}, \mathbf{c}_k, \mathbf{c}_j)}
+         {|\mathbf{c}_k|\,|\hat{d}_k^\perp|},
+\]
+where $\hat{d}_k^\perp$ is the normalised component of
+$\mathbf{c}_{k-1}$ perpendicular to $\mathbf{c}_k$
+(the scalar factor is positive), so the signs of
+\eqref{eq:3dleft} and \eqref{eq:det3d} always agree.
+
+\begin{remark}
+  In three dimensions, $\mathbf{c}_{k-1} \times \mathbf{c}_k$ yields a
+  unique one-dimensional ``left'' direction.
+  This is why ``left'' is well-defined in 3D.
+\end{remark}
+
+% ----------------------------------------------------------
+\subsection{Difficulty in 4D: Dimension of the Orthogonal Complement}
+% ----------------------------------------------------------
+
+In $\mathbb{R}^4$, the orthogonal complement of the 2D subspace spanned by
+$\mathbf{c}_{k-1}$ and $\mathbf{c}_k$ is \textbf{2-dimensional}
+(in $\mathbb{R}^3$ it is 1-dimensional).
+Hence no unique ``left vector'' analogous to the cross product exists,
+and the notion of ``left'' is not canonically determined.
+
+To circumvent this, we adopt the following approach.
+In the 4D Apple-Peel, we project each cell centroid onto the
+$xyz$-hyperplane (discarding the $w$-component) to obtain a 3D vector
+$\tilde{\mathbf{c}}_k = (c_{k,x},\, c_{k,y},\, c_{k,z}) \in \mathbb{R}^3$,
+and apply the determinant condition in this projected space.
+
+% ----------------------------------------------------------
+\subsection{Rigorous 4D Extension: Determinant Condition Using the Previous Step}
+% ----------------------------------------------------------
+
+\begin{defn}[4D Apple-Peel Left Condition]
+  \label{defn:4dleft}
+  At step $k \ge 2$, let
+  $\tilde{\mathbf{c}}_k \in \mathbb{R}^3$ be the $xyz$-projection of the
+  centroid of the \emph{current} cell,
+  $\tilde{\mathbf{c}}_{k-1} \in \mathbb{R}^3$ be the $xyz$-projection of the
+  centroid of the \emph{previous} cell, and
+  $\tilde{\mathbf{c}}_j \in \mathbb{R}^3$ be the $xyz$-projection of the
+  centroid of \emph{candidate cell} $j$.
+  Cell $j$ is said to lie in the \textbf{left half-space} if
+  \begin{equation}
+    \det\!\bigl(\tilde{\mathbf{c}}_{k-1},\, \tilde{\mathbf{c}}_k,\, \tilde{\mathbf{c}}_j\bigr)
+    \;\ge\; 0.
+    \label{eq:4dleft}
+  \end{equation}
+\end{defn}
+
+This condition is equivalent to the left direction of the Darboux frame
+restricted to the $xyz$-hyperplane.
+
+\paragraph{Ambiguity at the initial step.}
+At step $k = 1$ (the very first selection after $C_2$ is fixed),
+$\tilde{\mathbf{c}}_{k-1}$ does not yet exist, so \eqref{eq:4dleft} cannot
+be applied.
+The current implementation (\texttt{peeling4Df.m}) uses at $k = 1$ the
+2-component condition
+$c_{k,y} c'_x - c_{k,x} c'_y \ge 0$,
+which corresponds to taking $(0,0,1)$ as the implicit reference vector
+$\tilde{\mathbf{c}}_{k-1}$.
+The choice of initial condition may affect the results.
+
+% ----------------------------------------------------------
+\subsection{Three Selection Rules}
+% ----------------------------------------------------------
+
+Given that multiple candidates satisfy the left half-space condition,
+the following three rules define how to select the next cell.
+Viewing the $xyz$-projected centroids as points on the sphere $S^2$,
+the geometric meaning of each rule becomes clear.
+Let $\hat{n} = \tilde{\mathbf{c}}_k / |\tilde{\mathbf{c}}_k|$
+be the unit vector of the current position,
+$\hat{f}$ be the forward direction of the Darboux frame,
+and $\varphi_j$ be the signed angle between the projection of
+$\tilde{\mathbf{c}}_j$ onto the tangent plane and $\hat{f}$
+(positive $=$ to the left).
+
+\begin{defn}[Selection Rules]
+  \label{defn:rules}
+  Let $\mathcal{L}_k$ denote the set of left half-space candidates.
+  \begin{itemize}
+    \item \textbf{Rule~1 (max angle):}
+      $\displaystyle j^* = \arg\max_{j \in \mathcal{L}_k} \varphi_j.$
+      Select the candidate making the sharpest left turn.
+      A large $\varphi_j$ (close to $90°$) corresponds to a tight spiral.
+    \item \textbf{Rule~2 (min angle / loxodrome):}
+      $\displaystyle j^* = \arg\min_{j \in \mathcal{L}_k} \varphi_j.$
+      Select the candidate closest to the forward direction while still
+      turning left.
+      This approximates a \textbf{loxodrome (rhumb line)} on the sphere:
+      the path maintains a constant small left bearing relative to the
+      direction of travel.
+    \item \textbf{Rule~3 (max $w$ / latitude-first):}
+      $\displaystyle j^* = \arg\max_{j \in \mathcal{L}_k} \hat{c}_{j,w},$
+      where $\hat{c}_{j,w}$ is the $w$-coordinate of the centroid of
+      candidate cell $j$.
+      This selects the cell at the highest ``latitude'' (greatest $w$),
+      corresponding to a \textbf{latitude-by-latitude scan}: complete one
+      latitude band before descending to the next.
+  \end{itemize}
+\end{defn}
+
+% ----------------------------------------------------------
+\subsection{Geometric Comparison of Rule~2 (Loxodrome) and Rule~3 (Latitude-First)}
+% ----------------------------------------------------------
+
+\paragraph{Comparison on the 3D sphere.}
+In three dimensions, Rule~2 traces a loxodrome (equiangular spiral) on
+the sphere, while Rule~3 traces a path that completes each latitude circle
+before descending.
+The two are generally different:
+\begin{itemize}
+  \item A \textbf{loxodrome} maintains a constant angle with every meridian
+        and spirals infinitely toward the pole (approximated on a finite polyhedron).
+  \item The \textbf{latitude-first path (Rule~3)} is a discrete analogue that
+        traverses cells at a fixed latitude before moving to a lower latitude
+        (smaller $w$).
+\end{itemize}
+
+\paragraph{Difference on polytopes.}
+On a discrete polytope only finitely many cells are available at each step,
+so neither rule exactly reproduces its continuous counterpart.
+Nevertheless, the difference in selection criteria can lead to different
+success rates.
+
+% ----------------------------------------------------------
+\subsection{Correspondence with Kaino (2019)}
+% ----------------------------------------------------------
+
+Kaino (2019) constructs 4D nets by scanning the faces of a sphere-inscribed
+regular polytope latitude by latitude.
+This structure corresponds to \textbf{Rule~3 (max $w$)} in our framework:
+start from the high-latitude cells near $C_1$ (top) and descend to lower
+latitudes (smaller $w$) step by step.
+
+The current \texttt{peeling4Df.m} selects cells in decreasing order of
+$\hat{c}_{j,w}$ among left candidates, matching Rule~3 conceptually.
+The one difference is that the implementation uses the 2-component left
+condition \eqref{eq:3dleft} rather than the rigorous Definition~\ref{defn:4dleft}.
+
+% ----------------------------------------------------------
+\subsection{Proposed Two-Stage Selection}
+% ----------------------------------------------------------
+
+As a result of the above discussion, we propose the following two-stage
+strategy:
+
+\begin{table}[h]
+\centering
+\caption{Proposed two-stage selection strategy}
+\label{tab:twostage}
+\begin{tabular}{cll}
+\toprule
+Stage & Condition & Action \\
+\midrule
+1st & Try Rule~3 (max $w$) &
+  Select the left candidate with the largest $w$ (current implementation) \\
+2nd & Fall back to Rule~2 (loxodrome) &
+  If Rule~3 gets stuck, re-select using the min-$\varphi$ criterion \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rationale:
+\begin{itemize}
+  \item Rule~3 is simple to define and consistent with Kaino's approach.
+  \item Rule~2 is theoretically interesting (discrete approximation of a
+        spherical loxodrome), but Rule~3 more intuitively reproduces a
+        spiral peel on a polytope.
+  \item A staged approach---try the simpler rule first, then apply the more
+        refined one on failure---is also pragmatically efficient.
+\end{itemize}
+
+Systematically comparing the success rates of Rules 1, 2, and 3 on small
+polytopes (5-cell, 8-cell, etc.) to identify the best strategy is a future
+task (see \S\ref{sec:future}).
+
+
+% ============================================================
+\section{Implementation of \texttt{peeling4Df}}
+% ============================================================
+
+\subsection{Function Signature}
+
+\begin{lstlisting}
+peeling4Df[origVers_, faces_, cells_, top_]
+\end{lstlisting}
+
+\noindent Arguments:
+\begin{itemize}
+  \item \texttt{origVers}: list of 4D vertex coordinates
+        (one 4-element vector per vertex).
+  \item \texttt{faces}: list of 2D faces; \texttt{faces[[f]]} is a list of
+        vertex indices forming face $f$.
+  \item \texttt{cells}: list of 3D cells; \texttt{cells[[i]]} is a list of
+        \emph{face indices} forming cell $i$.
+  \item \texttt{top}: index of the starting cell $C_1$.
+\end{itemize}
+
+Return value: for each $C_2$ candidate (each neighbour of $C_1$), a triple
+\texttt{\{rotatedVers, selectionOrder, successBool\}}, where
+\texttt{rotatedVers} is the vertex array after the $+w$ rotation,
+\texttt{selectionOrder} is the list of cell indices in the order they were
+selected, and \texttt{successBool} is \texttt{True} iff all cells were
+selected.
+
+\subsection{Algorithm}
+
+\begin{algorithm}[h]
+\caption{peeling4Df (4D greedy version)}
+\label{alg:4d}
+\begin{algorithmic}[1]
+\Require 4D vertex coordinates $\mathit{vers}$, face list $\mathit{faces}$,
+         cell list $\mathit{cells}$, starting cell $\mathit{top}$
+\Ensure For each $C_2$: $(v',\; \mathit{order},\; \mathit{success})$
+
+\Function{CellVerts}{$i$}
+  \Return $\bigcup_{f \in \mathit{cells}[i]} \mathit{faces}[f]$
+    \Comment{Vertex index set of cell $i$}
+\EndFunction
+\Statex
+\State $v \gets \mathit{vers} - \bar{\mathit{vers}}$
+  \Comment{$\bar{\mathit{vers}}$: mean of all vertex coords; translate to centroid at origin}
+\State $\hat{c}_1 \gets \overline{v[\textsc{CellVerts}(\mathit{top})]}$
+  \Comment{Centroid of starting cell $C_1$ in the translated frame}
+\State $v \gets \mathrm{Rotate4D}(v,\; \hat{c}_1 \to +\hat{w})$
+  \Comment{4D rotation aligning $\hat{c}_1$ with the $+w$ axis}
+\For{$i = 1$ \textbf{to} $|\mathit{cells}|$}
+  \State $\hat{c}_i \gets \overline{v[\textsc{CellVerts}(i)]}$
+    \Comment{Centroid of cell $i$ after rotation ($\hat{c}_i \in \mathbb{R}^4$)}
+\EndFor
+\For{$i = 1$ \textbf{to} $|\mathit{cells}|$}
+  \State $\mathit{adj}[i] \gets
+    \{j \neq i : \mathit{cells}[i] \cap \mathit{cells}[j] \neq \emptyset\}$
+    \Comment{$\mathit{adj}[i]$: indices of cells sharing at least one face with cell $i$}
+\EndFor
+\Statex
+\For{each $C_2 \in \mathit{adj}[\mathit{top}]$}
+  \State $\mathit{order} \gets [\mathit{top},\; C_2]$
+    \Comment{$\mathit{order}$: selected cell sequence, initialised with $C_1$ and $C_2$}
+  \State $\mathit{nbrs} \gets$ copy of $\mathit{adj}$, with $\mathit{top}$ and $C_2$ removed
+    \Comment{$\mathit{nbrs}[i]$: unselected neighbours of cell $i$}
+  \State $\mathit{last} \gets C_2$
+    \Comment{$\mathit{last}$: most recently selected cell}
+  \While{$\mathit{nbrs}[\mathit{last}] \neq \emptyset$}
+    \State $L \gets \bigl\{j \in \mathit{nbrs}[\mathit{last}] \mid
+             \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+             - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+      \Comment{$L$: left half-space candidates; subscripts $x,y$ denote coordinate components}
+    \If{$L \neq \emptyset$}
+      \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,w}$
+        \Comment{$\hat{c}_{j,w}$: $w$-coordinate of centroid of cell $j$}
+    \Else
+      \State $\mathit{next} \gets \arg\min_{j \in \mathit{nbrs}[\mathit{last}]}\; \hat{c}_{j,w}$
+        \Comment{Fallback: among right-side candidates choose the one with min $w$}
+    \EndIf
+    \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+    \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$
+      \hspace{1em}\textbf{for all} $i$
+    \State $\mathit{last} \gets \mathit{next}$
+  \EndWhile
+  \State \textbf{yield} $\bigl(v,\; \mathit{order},\; |\mathit{order}| = |\mathit{cells}|\bigr)$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Key Differences from the 3D Implementation}
+
+\begin{itemize}
+  \item Cell vertices are retrieved as
+        \texttt{Union @@ faces[[ cells[[i]] ]]},
+        because \texttt{cells[[i]]} stores face indices, not vertex indices.
+  \item Adjacency is defined by sharing $\geq 1$ face (not $\geq 2$ vertices
+        as in 3D), because two adjacent 3D cells share a 2D face.
+  \item The fallback is \textbf{exactly} ``min $w$ among right-side
+        candidates'' (the 3D implementation used the simpler
+        \texttt{neighbors[[lastChosen]][[1]]}).
+  \item The 4D rotation uses \texttt{RotationMatrix[angle, \{u, v\}]}
+        with 4D vectors.
+\end{itemize}
+
+
+% ============================================================
+\section{File Structure and Usage}
+% ============================================================
+
+\subsection{File List}
+
+\begin{table}[h]
+\centering
+\caption{Main files}
+\begin{tabular}{ll}
+\toprule
+File & Description \\
+\midrule
+\texttt{peeling4Df.m}       & Core algorithm (use via \texttt{Get}) \\
+\texttt{run4DPeeling.m}     & Script to run and classify all 6 polytopes \\
+\texttt{4DPeelingAll.nb}    & Notebook combining the above two files \\
+\texttt{\_4DData/f[n].m}    & Data for each regular polytope ($n=5,8,16,24,120,600$) \\
+\texttt{applePeelingV01.pdf}& Paper describing the 3D algorithm \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{How to Run}
+
+\paragraph{Method 1 --- Via Notebook}
+\begin{lstlisting}
+(* Open 4DPeelingAll.nb in Mathematica and choose
+   Evaluation -> Evaluate Notebook *)
+\end{lstlisting}
+
+\paragraph{Method 2 --- Script execution}
+\begin{lstlisting}
+SetDirectory["/path/to/260324Peeling4D"];
+Get["peeling4Df.m"];
+Get["run4DPeeling.m"];
+\end{lstlisting}
+
+\paragraph{Method 3 --- Direct function call}
+\begin{lstlisting}
+(* Load the 5-cell data *)
+{vers, edgs, neis, faces, fneis, cells} =
+    Get["/path/to/_4DData/f5.m"];
+
+(* Run peeling with starting cell 1 *)
+result = peeling4Df[N[vers], faces, cells, 1];
+
+(* result[[k]] = {rotatedVers, order, successBool} for the k-th C2 *)
+result[[1, 3]]   (* True or False *)
+result[[1, 2]]   (* cell selection order *)
+\end{lstlisting}
+
+\subsection{Checking the Classification}
+
+\begin{lstlisting}
+(* Collect results for all (C1, C2) pairs *)
+ans = Table[peeling4Df[N[vers], faces, cells, top],
+            {top, Length[cells]}];
+
+allBools  = Flatten[Map[Last, ans, {2}]];
+trueCount = Count[allBools, True];
+
+classification = Which[
+  Count[allBools, False] == 0, "Perfect",
+  trueCount == 0,              "Impossible",
+  True,                        "Possible"
+];
+\end{lstlisting}
+
+
+% ============================================================
+\section{Computational Results}
+% ============================================================
+
+\subsection{3D Regular Polyhedra}
+\label{ssec:res3dplatonic}
+
+Table~\ref{tab:res3dplatonic} summarises the success rates for the five
+regular polyhedra under the current algorithm (global $c_1$ reference,
+$\varepsilon = 10^{-10}$, no single-candidate bypass).
+RS (Spiral rule) minimises $\det(\mathbf{c}_1,\mathbf{c}_k,\mathbf{c}_j)$
+(most negative = sharpest CW turn; fallback uses Darboux frame $\min\varphi$);
+RZ (Zonal rule) maximises $z$ with $\min\det$ as secondary criterion.
+``w'' = with fallback; ``n'' = no fallback.
+
+\begin{table}[h]
+\centering
+\caption{Success rates for 3D regular polyhedra}
+\label{tab:res3dplatonic}
+\begin{tabular}{llrcccc}
+\toprule
+Polyhedron & $\{p,q\}$ & Pairs & RS(w) & RS(n) & RZ(w) & RZ(n) \\
+\midrule
+Tetrahedron  & $\{3,3\}$ & 12 & 100\% & 100\% & 100\% & 100\% \\
+Cube         & $\{4,3\}$ & 24 & 100\% & 100\% & 100\% & 100\% \\
+Octahedron   & $\{3,4\}$ & 24 & 100\% & 100\% & 100\% & 100\% \\
+Dodecahedron & $\{5,3\}$ & 60 & 100\% & 100\% & 100\% & 100\% \\
+Icosahedron  & $\{3,5\}$ & 60 & 100\% & 100\% & 100\% & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+All five polyhedra achieve 100\% under both rules, with and without
+fallback.
+This all-or-nothing pattern is consistent with the equivariance theorem:
+since regular polyhedra are face-transitive, success of any $(F_1,F_2)$
+pair implies success of all symmetry-related pairs.
+(Under the strict variant $\varepsilon<0$, the no-fallback rates drop to
+0\% for all solids except the Tetrahedron; see the detailed discussion
+in the algorithm section.)
+
+\subsection{3D Archimedean Solids}
+\label{ssec:res3darchimedean}
+
+Table~\ref{tab:res3darchimedean} shows the success rates for the thirteen
+Archimedean solids computed with global $c_1$ reference.
+``w'' uses the fallback branch (\texttt{run\_archi\-medean\_faceup.m});
+``n'' exits immediately when no left candidate exists
+(\texttt{run\_archi\-medean\_nofallback.m}).
+
+\begin{table}[h]
+\centering
+\caption{Success rates (\%) for 3D Archimedean solids.
+  ``w'' = with fallback; ``n'' = no fallback.}
+\label{tab:res3darchimedean}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrcccc}
+\toprule
+& & & \multicolumn{2}{c}{RS\,(\%)} & \multicolumn{2}{c}{RZ\,(\%)} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Polyhedron & v.c. & Pairs & w & n & w & n \\
+\midrule
+Truncated Tetrahedron       & 3.6.6       &  36 & 66.7 & 66.7 & 33.3 & 33.3 \\
+Cuboctahedron               & 3.4.3.4     &  48 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Cube              & 3.8.8       &  72 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Octahedron        & 4.6.6       &  72 & 41.7 & 41.7 & 100  & 100  \\
+Rhombicuboctahedron         & 3.4.4.4     &  96 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Cuboctahedron     & 4.6.8       & 144 &  0.0 &  0.0 & 100  & 100  \\
+Snub Cube                   & 3.3.3.3.4   & 120 & 20.0 &  0.0 & 40.0 & 20.0 \\
+Icosidodecahedron           & 3.5.3.5     & 120 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Dodecahedron      & 3.10.10     & 180 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Icosahedron       & 5.6.6       & 180 &  0.0 &  0.0 & 100  & 100  \\
+Rhombicosidodecahedron      & 3.4.5.4     & 240 &  0.0 &  0.0 &  0.0 &  0.0 \\
+Truncated Icosidodecahedron & 4.6.10      & 360 &  0.0 &  0.0 & 66.7 & 66.7 \\
+Snub Dodecahedron           & 3.3.3.3.5   & 300 &  0.0 &  0.0 &  0.0 &  0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+Key observations:
+\begin{itemize}
+  \item Seven solids (54\%) fail under both rules (0\%).
+  \item \textbf{Three solids achieve 100\% under RZ}:
+        Truncated Octahedron, Truncated Cuboctahedron, and
+        Truncated Icosahedron.
+        The Truncated Icosidodecahedron achieves 66.7\% under RZ
+        (RS = 0\%).
+  \item \textbf{RS outperforms RZ on one solid}:
+        Truncated Tetrahedron (RS = 66.7\% $>$ RZ = 33.3\%).
+  \item \textbf{RZ $>$ RS on four solids}:
+        Truncated Octahedron (100\% vs.\ 41.7\%),
+        Truncated Cuboctahedron (100\% vs.\ 0\%),
+        Truncated Icosahedron (100\% vs.\ 0\%), and
+        Truncated Icosidodecahedron (66.7\% vs.\ 0\%).
+  \item \textbf{RZ results are invariant under the switch from
+        min-$\varphi$ to min-Det} (the two tiebreaks are equivalent).
+        RS results changed significantly (min-Det $\ne$ min-$\varphi$).
+  \item \textbf{The fallback is essential only for the Snub Cube.}
+        Removing it leaves all 12 other solids unchanged (0\% stays 0\%,
+        100\% stays 100\%).
+        For the Snub Cube: RS drops from 20.0\% (24/120) to 0\%,
+        and RZ drops from 40.0\% (48/120) to 20.0\% (24/120).
+\end{itemize}
+
+\paragraph{Equivariance verification.}
+For each solid we checked whether pairs $(F_1, F_2)$ with the same face-type
+combination (polygon size of $F_1$, polygon size of $F_2$) always give the
+same outcome (all succeed or all fail).
+12 of the 13 solids pass this check for both RS and RZ.
+
+The sole exception is the Snub Cube: within the $(3,3)$ face-type group
+the 72 triangle-to-triangle pairs split $24/72$ rather than $0/72$ or $72/72$.
+This is not a numerical inconsistency.
+The Snub Cube has two symmetrically distinct types of triangles under its
+chiral octahedral symmetry group $O$ (order 24):
+\emph{snub triangles} (24 faces, each sharing one edge with a square)
+and \emph{gyrate triangles} (8 faces, sharing no edge with a square).
+Splitting by sub-orbit yields three perfectly uniform groups:
+$\{\text{snub},\text{snub}\}: 24/24$,
+$\{\text{snub},\text{gyrate}\}: 0/24$, and
+$\{\text{gyrate},\text{snub}\}: 0/24$.
+
+\emph{Antipodal-case bug and fix.}
+Investigation of the 4 failures in the $\{4,3\}$ (square--triangle) group
+revealed a bug in \texttt{p3lAlignTopToZ}: when the top-face centroid points
+exactly in the $-z$ direction, the code used coordinate inversion $-\mathbf{v}$,
+which in $\mathbb{R}^3$ has $\det(-I_3)=-1$ (improper rotation) and reverses
+the left half-space condition.
+The fix replaces it with a proper $180^\circ$ rotation
+$(x,y,z)\mapsto(x,-y,-z)$ about the $x$-axis, which has $\det=+1$.
+After the fix, $\{\mathrm{sq},\mathrm{snub}\}$ becomes $24/24$
+and the overall RS/RZ rate rises from 36.7\% to 40.0\%.
+
+\paragraph{Mirror symmetry verification.}
+A reflection $\rho\colon(x,y,z)\mapsto(-x,y,z)$ has $\det(\rho)=-1$, so it
+reverses the sign of the left half-space determinant.
+Running the left-spiral algorithm on the mirror image is therefore equivalent
+to running a right-spiral algorithm on the original polyhedron.
+
+We ran RS and RZ on both the original and the mirror image of all 13
+Archimedean solids.
+\textbf{All 13 solids yield identical success counts for original and mirror image}
+(Table~\ref{tab:mirror}).
+
+\begin{table}[h]
+\centering
+\caption{Success counts: original vs.\ mirror image (all 13 Archimedean solids).}
+\label{tab:mirror}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrcccc}
+\toprule
+Solid & v.c. & Pairs & \multicolumn{2}{c}{RS} & \multicolumn{2}{c}{RZ} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+ & & & Orig & Mirror & Orig & Mirror \\
+\midrule
+Truncated Tetrahedron       & 3.6.6       &  36 & 24 & 24 & 12 & 12 \\
+Cuboctahedron               & 3.4.3.4     &  48 &  0 &  0 &  0 &  0 \\
+Truncated Cube              & 3.8.8       &  72 &  0 &  0 &  0 &  0 \\
+Truncated Octahedron        & 4.6.6       &  72 & 30 & 30 & 72 & 72 \\
+Rhombicuboctahedron         & 3.4.4.4     &  96 &  0 &  0 &  0 &  0 \\
+Truncated Cuboctahedron     & 4.6.8       & 144 &  0 &  0 &144 &144 \\
+Snub Cube$^*$               & 3.3.3.3.4   & 120 & 24 & 24 & 48 & 48 \\
+Icosidodecahedron           & 3.5.3.5     & 120 &  0 &  0 &  0 &  0 \\
+Truncated Dodecahedron      & 3.10.10     & 180 &  0 &  0 &  0 &  0 \\
+Truncated Icosahedron       & 5.6.6       & 180 &  0 &  0 &180 &180 \\
+Rhombicosidodecahedron      & 3.4.5.4     & 240 &  0 &  0 &  0 &  0 \\
+Truncated Icosidodecahedron & 4.6.10      & 360 &  0 &  0 &240 &240 \\
+Snub Dodecahedron$^*$       & 3.3.3.3.5   & 300 &  0 &  0 &  0 &  0 \\
+\bottomrule
+\multicolumn{7}{l}{\small$^*$ Chiral solid.}
+\end{tabular}
+\end{table}
+
+For the 11 amphichiral solids the mirror image is congruent to the original
+under a proper rotation, so the equality of counts follows immediately from
+equivariance.
+
+For the two chiral solids, the Snub Dodecahedron yields 0\% in both cases
+(trivial agreement).
+For the \emph{Snub Cube}, both RS and RZ preserve their success counts
+under mirror reflection (RS: 24/120 each; RZ: 48/120 each),
+but the underlying pairs differ.
+Under RZ, both original and mirror give 48/120 (40.0\%) but
+the successful $(F_1,F_2)$ pairs differ: 24 pairs succeed under both spirals
+($\{\mathrm{snub},\mathrm{snub}\}$), 24 succeed only under the left spiral
+($\{\mathrm{sq},\mathrm{snub}\}$), and 24 succeed only under the right spiral
+($\{\mathrm{gyrate},\mathrm{snub}\}$).
+Under RS, both original and mirror give 24/120 (20.0\%);
+only the $\{\mathrm{snub},\mathrm{snub}\}$ orbit (24/24) succeeds,
+and the same orbit succeeds for both the original and its mirror.
+The orbits $\{\mathrm{sq},\mathrm{snub}\}$ and $\{\mathrm{gyrate},\mathrm{snub}\}$
+are exchanged by the reflection, and their equal sizes (24 pairs each) explain
+why the RZ count is preserved.
+The algorithm is thus sensitive to chirality at the orbit level, correctly
+distinguishing the two enantiomorphs of the Snub Cube even though the total
+count is the same.
+
+\subsection{4D Regular Polytopes: Classification}
+\label{ssec:res4d}
+
+Running \texttt{peeling4Df4} (global $c_1$--$c_2$ reference) under both
+the Zonal rule (RZ: max-$w$ primary, Det tie-break) and the Spiral rule
+(RS: max-Det primary, max-$w$ tie-break)
+over all $(C_1, C_2)$ pairs gives the classification shown in
+Table~\ref{tab:results}.
+
+\begin{table}[h]
+\centering
+\caption{Apple-Peel unfolding of regular 4-polytopes (\texttt{peeling4Df4}, RZ vs.\ RS).
+  ``RZ'' = successful pairs under the Zonal rule; ``RS'' = successful pairs under
+  the Spiral rule. True $=$ Unique for all polytopes; ``Class'' refers to RZ.}
+\label{tab:results}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrrrl}
+\toprule
+Name & $\{p,q,r\}$ & Cells & Adj. & $(C_1,C_2)$ & RZ & RS & Class (RZ) \\
+\midrule
+5-cell (pentachoron)           & $\{3,3,3\}$ &   5 &  4 &    20   &     20 &     20 & \textbf{Perfect}    \\
+8-cell (tesseract)             & $\{4,3,3\}$ &   8 &  6 &    48   &     48 &     48 & \textbf{Perfect}    \\
+16-cell (hexadecachoron)       & $\{3,3,4\}$ &  16 &  4 &    64   &     25 &      0 & \textbf{Possible}   \\
+24-cell (icositetrachoron)     & $\{3,4,3\}$ &  24 &  8 &   192   &    192 &    192 & \textbf{Perfect}    \\
+120-cell (hecatonicosachoron)  & $\{5,3,3\}$ & 120 & 12 & 1{,}440 & 1{,}250 &      0 & \textbf{Possible}   \\
+600-cell (hexacosichoron)      & $\{3,3,5\}$ & 600 &  4 & 2{,}400 &      0 &      0 & \textbf{Impossible} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{RZ vs.\ RS in 4D.}
+RZ substantially outperforms RS.
+RS is Impossible on the 16-cell (0/64) and the 120-cell (0/1\,440),
+while RZ achieves 25/64 (39.1\%) and 1\,250/1\,440 (86.8\%), respectively.
+On the 5-cell, 8-cell, and 24-cell both rules produce identical success counts.
+
+\smallskip\noindent
+\textbf{Notes.}
+The 8-cell is a special case: all cell centroids lie on coordinate axes
+($\pm e_i$), so $\det(c_1,c_2,c_k,c_j)\equiv 0$ and every candidate
+passes the filter at every step, reducing the selection to max-$w$ alone;
+RZ and RS agree trivially.
+The 600-cell is Impossible under both rules.
+All 2\,400 evaluated pairs terminate at one of exactly five step values
+(146, 150, 276, 279, or 284), indicating structural bottlenecks
+tied to the 600-cell's icosahedral symmetry.
+
+\subsection{Comparison with Previous 4D Algorithm (\texttt{peeling4Df})}
+\label{ssec:res4dcomp}
+
+Table~\ref{tab:res4dcomp} compares unique success counts between
+\texttt{peeling4Df} (xy two-component cross product, local reference)
+and \texttt{peeling4Df4} (4D determinant condition, global $c_1$--$c_2$
+reference).
+
+\begin{table}[h]
+\centering
+\caption{Unique success counts: \texttt{peeling4Df} vs.\ \texttt{peeling4Df4} (Det tie-break)}
+\label{tab:res4dcomp}
+\begin{tabular}{llrrl}
+\toprule
+Name & $\{p,q,r\}$ & \texttt{peeling4Df} & \texttt{peeling4Df4} & Change \\
+\midrule
+5-cell   & $\{3,3,3\}$ &   20 &       20 & same \\
+8-cell   & $\{4,3,3\}$ &   48 &       48 & same (degenerate$^\dagger$) \\
+16-cell  & $\{3,3,4\}$ &   26 &       25 & $-1$ \\
+24-cell  & $\{3,4,3\}$ &  119 &      192 & $+73$ (Perfect) \\
+120-cell & $\{5,3,3\}$ &  357 & 1{,}250 & $+893$ \\
+600-cell & $\{3,3,5\}$ & --- (incomplete) &        0 & Impossible \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+$^\dagger$ The 8-cell determinant degenerates to zero; both algorithms
+reduce to max-$w$ selection.
+
+The global reference with geometric tie-break substantially improves
+the 24-cell ($+73$, now Perfect) and 120-cell ($+893$),
+while the 16-cell is essentially unchanged ($-1$).
+The 600-cell, which could not be completed by \texttt{peeling4Df} within
+the allotted time, is confirmed to be Impossible under the global
+condition.
+
+\subsection{Success Rates}
+\label{ssec:successrates}
+
+\begin{table}[h]
+\centering
+\caption{$(C_1, C_2)$ success rates (\texttt{peeling4Df4}, RZ vs.\ RS)}
+\label{tab:successrate}
+\begin{tabular}{lrrl}
+\toprule
+Name & RZ rate & RS rate & Class (RZ) \\
+\midrule
+5-cell   & 100.0\% ($20/20$)     & 100.0\% ($20/20$)   & Perfect    \\
+8-cell   & 100.0\% ($48/48$)     & 100.0\% ($48/48$)   & Perfect    \\
+16-cell  &  39.1\% ($25/64$)     &   0.0\% ($0/64$)    & Possible   \\
+24-cell  & 100.0\% ($192/192$)   & 100.0\% ($192/192$) & Perfect    \\
+120-cell &  86.8\% ($1250/1440$) &   0.0\% ($0/1440$)  & Possible   \\
+600-cell &   0.0\% ($0/2400$)    &   0.0\% ($0/2400$)  & Impossible \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+In 4D, RZ dominates RS.
+RZ achieves Perfect on the 24-cell (100\%) and 86.8\% on the 120-cell,
+while RS is Impossible on both the 16-cell and the 120-cell.
+The 5-cell, 8-cell, and 24-cell show identical success counts for both rules.
+
+
+% ============================================================
+\section{3D Visualisation and Verification of Unfoldings}
+% ============================================================
+
+\subsection{4D $\to$ 3D Unfolding (\texttt{unfold3DExport.m})}
+
+Given a cell selection order, the implementation in
+\texttt{unfold3DExport.m} places each cell (a 3D polyhedron) in 3D space
+sequentially to form a net.
+The procedure is as follows.
+
+\begin{enumerate}[label=\textbf{Step \arabic*.}]
+  \item \textbf{SVD projection}:
+        Project the 4D vertices of each cell onto the best-fitting 3D
+        hyperplane using singular value decomposition, obtaining local
+        3D coordinates that preserve distances.
+
+  \item \textbf{Procrustes alignment}:
+        For each adjacent pair of cells, find the rotation $R$ and
+        translation $\boldsymbol{t}$ (no scaling) that best aligns the
+        shared face vertices in 3D.
+
+  \item \textbf{Reflection correction}:
+        After Procrustes alignment, if the newly placed cell and its
+        predecessor lie on the \emph{same} side of the shared face, reflect
+        the new cell through that face to place it on the ``outside''.
+
+  \item \textbf{STL export}:
+        Triangulate the unfolded cells and export the result as an STL file
+        using \texttt{Graphics3D} + \texttt{Export}.
+\end{enumerate}
+
+\subsection{Overlap Check (Separating Axis Theorem)}
+
+Whether distinct cells overlap in the 3D unfolding is tested for every pair
+using the Separating Axis Theorem (SAT).
+
+\begin{itemize}
+  \item Candidate axes: face normals of each cell and cross products of
+        edge vectors.
+  \item AABB (axis-aligned bounding box) pre-filter for speed.
+  \item Tolerance $\varepsilon = 10^{-6}$: contact along a shared face is
+        not counted as overlap.
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Number of generated STL files (\texttt{STLs/} folder)}
+\label{tab:stlcount}
+\begin{tabular}{lr}
+\toprule
+Polytope & STL count \\
+\midrule
+5-cell   &   20 \\
+8-cell   &   48 \\
+16-cell  &   26 \\
+24-cell  &  119 \\
+120-cell &  357 \\
+600-cell &  --- (incomplete) \\
+\midrule
+Total    &  570 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The STL files include nets that contain overlaps.
+Counting the valid nets (no overlap) is a future task
+(\S\ref{sec:future}).
+
+\subsection{4D Net Visualisation (\texttt{unfold4D.m})}
+\label{ssec:unfold4D}
+
+The script \texttt{unfold4D.m} reads the peeling results stored in
+\texttt{ans4DGlobal.mx} and renders the 4D$\to$3D unfolding of each
+polytope as a \texttt{Graphics3D} object.
+It depends on \texttt{unfold3DExport.m} for the core
+SVD\,+\,Procrustes algorithm (Steps~1--3 above).
+
+\paragraph{Fixed starting cell.}
+By equivariance, all starting cells $C_1$ yield topologically
+equivalent results.
+The script therefore fixes $C_1 = 3$ (\texttt{fixedTop = 3}) and
+enumerates every distinct successful peeling order
+(deduplicated by order, not by $(C_1,C_2)$ pair).
+
+\paragraph{Colour coding.}
+Cells are coloured by position in the peeling order:
+\begin{itemize}
+  \item $C_1$: blue~(RGB $0.20, 0.45, 0.80$)
+  \item middle cells: green~(RGB $0.15, 0.70, 0.40$)
+  \item last cell: red~(RGB $0.90, 0.25, 0.15$)
+\end{itemize}
+Intermediate colours are produced by linear blending (\texttt{Blend}).
+
+\paragraph{5-cell coordinate correction.}
+The stored \texttt{localVers} in \texttt{ans4DGlobal.mx} were computed
+from the original \texttt{f5.m}, which contained an incorrect fifth
+vertex $v_5 \approx (0.191,\ldots)$ instead of the correct
+$v_5 = \tfrac{1-\varphi}{2}(1,1,1,1) \approx (-0.309,\ldots)$.
+The correct value satisfies $|v_k - v_5|^2 = 2$ for all $k=1,\ldots,4$,
+matching the edge length of the regular 5-cell.
+The file \texttt{f5.m} has been corrected (2026-05-08); the function
+\texttt{recomputeLocalVers} recomputes the face-up--rotated coordinates
+from the current vertex data so that the visualisation shows regular
+tetrahedra even before \texttt{ans4DGlobal.mx} is regenerated.
+
+\paragraph{Usage.}
+\begin{verbatim}
+SetDirectory["/path/to/260324Peeling4D"];
+Get["unfold4D.m"]
+\end{verbatim}
+The script prints each polytope's nets sequentially in the notebook output.
+The parameter \texttt{netImageSize} (default 500\,px) controls image size.
+
+
+% ============================================================
+\section{One-Step Backtrack Extension (\texttt{peeling1back.m})}
+% ============================================================
+
+The greedy algorithm fails when no candidate remains (neither left-side nor
+fallback).
+A \textbf{one-step backtrack} extension implemented in
+\texttt{peeling1back.m} addresses this.
+
+\subsection{Algorithm}
+
+After the same preprocessing as the greedy version (centroid shift, rotation,
+centroid computation, adjacency construction), the selection loop proceeds
+as follows.
+
+\begin{algorithm}[h]
+\caption{peeling1back (one-step backtrack, selection loop)}
+\label{alg:1back}
+\begin{algorithmic}[1]
+\Require Cell centroid array $\hat{c}$ (indexed $1\ldots|\mathit{cells}|$, each $\in\mathbb{R}^4$),
+         adjacency list $\mathit{adj}$,
+         starting cell $\mathit{top}$, second cell $C_2$
+\Ensure  $(\mathit{order},\; \mathit{success})$
+\State $\mathit{order} \gets [\mathit{top},\; C_2]$
+\State $\mathit{nbrs} \gets$ copy of $\mathit{adj}$, with $\mathit{top}$ and $C_2$ removed
+\State $\mathit{last} \gets C_2$
+\State $\mathit{justBT} \gets \mathrm{False}$
+  \Comment{$\mathit{justBT}$: True if the previous action was a backtrack}
+\State $\mathit{tried} \gets \{\}$
+  \Comment{$\mathit{tried}[\mathit{pos}]$: set of cells already tried at position $\mathit{pos}$}
+\While{$|\mathit{order}| < |\mathit{cells}|$}
+  \State $\mathit{pos} \gets |\mathit{order}|$
+    \Comment{Current length of the selection sequence}
+  \State $\mathit{cands} \gets \mathit{nbrs}[\mathit{last}]
+           \setminus \mathit{tried}[\mathit{pos}]$
+    \Comment{Untried candidates at the current position}
+  \If{$\mathit{cands} = \emptyset$}
+    \Comment{Dead end}
+    \If{$\mathit{justBT}$ \textbf{or} $|\mathit{order}| \leq 2$}
+      \Break
+        \Comment{Do not backtrack more than one level}
+    \EndIf
+    \State $\mathit{bad} \gets \mathit{order}.\mathrm{last}()$
+      \Comment{The cell that led to the dead end}
+    \State $\mathit{order}.\mathrm{removeLast}()$
+    \State $\mathit{nbrs} \gets$ restored to the state before the last forward step
+    \State $\mathit{tried}[\mathit{pos}-1] \gets
+             \mathit{tried}[\mathit{pos}-1] \cup \{\mathit{bad}\}$
+      \Comment{Mark $\mathit{bad}$ as tried at the previous position}
+    \State $\mathit{justBT} \gets \mathrm{True}$
+  \Else
+    \Comment{Advance}
+    \State $L \gets \bigl\{j \in \mathit{cands} \mid
+               \hat{c}_{\mathit{last},y}\,\hat{c}_{j,x}
+               - \hat{c}_{\mathit{last},x}\,\hat{c}_{j,y} \geq 0\bigr\}$
+    \If{$L \neq \emptyset$}
+      \State $\mathit{next} \gets \arg\max_{j \in L}\; \hat{c}_{j,w}$
+    \Else
+      \State $\mathit{next} \gets \arg\min_{j \in \mathit{cands}}\; \hat{c}_{j,w}$
+    \EndIf
+    \State Save the current state of $\mathit{nbrs}$
+    \State $\mathit{order}.\mathrm{append}(\mathit{next})$
+    \State $\mathit{nbrs}[i] \gets \mathit{nbrs}[i] \setminus \{\mathit{next}\}$
+      \hspace{1em}\textbf{for all} $i$
+    \State $\mathit{last} \gets \mathit{next}$
+    \State $\mathit{justBT} \gets \mathrm{False}$
+  \EndIf
+\EndWhile
+\State \Return $\bigl(\mathit{order},\; |\mathit{order}| = |\mathit{cells}|\bigr)$
+\end{algorithmic}
+\end{algorithm}
+
+This extension may succeed on some $(C_1, C_2)$ pairs where the greedy
+version fails (quantitative comparison is a future task).
+
+
+% ============================================================
+\section{Future Work}
+\label{sec:future}
+% ============================================================
+
+\begin{enumerate}
+  \item \textbf{Complete the 600-cell computation.}
+        The 600-cell is computationally expensive (600 cells;
+        2,400 $(C_1,C_2)$ pairs in total);
+        a complete classification has not yet been obtained.
+        Parallelisation or additional computing resources are needed.
+
+  \item \textbf{Tabulate overlap statistics.}
+        For the 570 generated STL files, count the valid nets
+        (no self-intersection) per polytope and summarise in a table.
+
+  \item \textbf{Compare with the one-step backtrack extension.}
+        Quantify the improvement in success rate achieved by
+        \texttt{peeling1back.m} over the greedy \texttt{peeling4Df}.
+
+  \item \textbf{Compare with Kaino (2019).}
+        Verify whether the unfoldings produced by our algorithm are
+        consistent with Kaino's geometrically constructed nets.
+
+  \item \textbf{Symmetry of left-handed peeling.}
+        Investigate the symmetry and duality between right-handed peeling
+        ($c_y c'_x - c_x c'_y \geq 0$) and left-handed peeling
+        ($c_y c'_x - c_x c'_y \leq 0$).
+
+  \item \textbf{Systematic comparison of selection rules.}
+        Apply Rules~1, 2, and~3 (Definition~\ref{defn:rules}) to small
+        polytopes (5-cell, 8-cell, etc.) and compare success rates.
+        Verification on 3D polyhedra (e.g.\ Archimedean solids) is also
+        informative.
+
+  \item \textbf{Implement the rigorous 4D left condition.}
+        Replace the 2-component left condition
+        $c_{k,y}c'_x - c_{k,x}c'_y \ge 0$ in the current
+        \texttt{peeling4Df.m} with the determinant condition of
+        Definition~\ref{defn:4dleft},
+        $\det(\tilde{\mathbf{c}}_{k-1}, \tilde{\mathbf{c}}_k, \tilde{\mathbf{c}}_j) \ge 0$,
+        and measure the change in success rate
+        (paying attention to the $k=1$ initial condition).
+
+  \item \textbf{Implement and evaluate two-stage selection.}
+        Implement the two-stage strategy of Table~\ref{tab:twostage}
+        (Rule~3 first, fall back to Rule~2) and compare its success rate
+        with the greedy and one-step-backtrack versions.
+\end{enumerate}
+
+
+% ============================================================
+\appendix
+\section{Complete Code for \texttt{peeling4Df}}
+% ============================================================
+
+\begin{lstlisting}
+peeling4Df[origVers_, faces_, cells_, top_] :=
+  Module[
+    {wHat, cc1, localVers, cCenters,
+     neighbors, neighborsInit,
+     order, cansInit, chosenFrom1,
+     lastChosen, newChoice, cans,
+     angle4D, rCans, cellVerts},
+
+    wHat = {0, 0, 0, 1};
+    (* wHat: unit vector along the +w axis (peeling axis) *)
+
+    (* cellVerts[i]: set of vertex indices belonging to cell i *)
+    cellVerts[i_] := Union @@ faces[[ cells[[i]] ]];
+
+    (* Step 1: translate so that the centroid of all vertices is the origin *)
+    localVers = (# - Mean[origVers]) & /@ origVers;
+
+    (* Step 2: centroid of starting cell C1 in the translated frame *)
+    cc1 = Mean[ localVers[[ cellVerts[top] ]] ];
+
+    (* Step 3: rotate so that cc1 points in the +w direction *)
+    localVers = Which[
+      Abs[(cc1/Norm[cc1]).wHat - 1] < 0.0001, localVers,
+      Abs[(cc1/Norm[cc1]).wHat + 1] < 0.0001, -localVers,
+      True,
+        angle4D = ArcCos[Clip[cc1.wHat/Norm[cc1], {-1,1}]];
+        RotationMatrix[angle4D, {cc1/Norm[cc1], wHat}] . # & /@ localVers
+    ];
+
+    (* Step 4: centroids of all cells after rotation *)
+    (* cCenters[[i]]: 4D centroid of cell i *)
+    cCenters = Mean[localVers[[ cellVerts[#] ]]] & /@ Range[Length[cells]];
+
+    (* Step 5: build adjacency list (cells sharing >= 1 face are adjacent) *)
+    (* neighbors[[i]]: list of cell indices adjacent to cell i *)
+    neighbors = Table[
+      Select[Range[Length[cells]],
+        Function[j, j!=i &&
+          Length[Intersection[cells[[i]], cells[[j]]]] >= 1]],
+      {i, Length[cells]}];
+
+    (* Step 6: remove starting cell C1 from all adjacency lists *)
+    neighbors = neighborsInit = Complement[#, {top}] & /@ neighbors;
+
+    (* Step 7: C2 candidates = neighbours of C1 *)
+    cansInit = neighbors[[top]];
+
+    (* Step 8: peel for each C2 candidate *)
+    Table[
+      order = {top}; neighbors = neighborsInit;
+      chosenFrom1 = cansInit[[i]];
+      (* chosenFrom1: the chosen second cell C2 *)
+      AppendTo[order, chosenFrom1];
+      neighbors = Complement[#, {chosenFrom1}] & /@ neighbors;
+      lastChosen = chosenFrom1; newChoice = lastChosen;
+
+      While[
+        Length[Flatten[neighbors]] != 0 &&
+        Length[neighbors[[newChoice]]] != 0,
+
+        (* Left half-space condition: c_y*c'_x - c_x*c'_y >= 0 *)
+        (* cans: left half-space candidates *)
+        cans = Select[neighbors[[lastChosen]],
+          Function[j, With[{c = cCenters[[lastChosen]]},
+            c[[2]]*cCenters[[j]][[1]] -
+            c[[1]]*cCenters[[j]][[2]] >= 0]]];
+
+        (* newChoice: next cell to be selected *)
+        newChoice = Which[
+          Length[cans] > 1,
+            (* select left candidate with largest w-coordinate *)
+            cans[[ First[First[
+              Position[cCenters[[cans,4]], Max[cCenters[[cans,4]]]]
+            ]] ]],
+          Length[cans] == 1, cans[[1]],
+          True,  (* fallback: right-side candidate with smallest w *)
+            With[{rc = neighbors[[lastChosen]]},
+              rc[[ First[First[
+                Position[cCenters[[rc,4]], Min[cCenters[[rc,4]]]]
+              ]] ]]]
+        ];
+
+        lastChosen = newChoice;
+        AppendTo[order, newChoice];
+        neighbors = Complement[#, {newChoice}] & /@ neighbors;
+      ];
+
+      {localVers, order, Length[order] == Length[cells]}
+      , {i, Length[cansInit]}]
+  ]
+\end{lstlisting}
+
+
+\begin{thebibliography}{9}
+
+\bibitem{applePeeling}
+  T.~Yoshino, S.~Chaidee, P.~Sawatdithep,
+  \textit{Apple-Peel Unfolding of Polyhedra},
+  \texttt{applePeelingV01.pdf}.
+
+\bibitem{Kaino2019}
+  K.~Kaino,
+  \textit{Unfolding of Regular Polytopes},
+  Symmetry Congress, Kanazawa (2019),
+  \texttt{Kaino2019\_SymmetryCongressKanazawa.pdf}.
+
+\end{thebibliography}
+
+\end{document}
