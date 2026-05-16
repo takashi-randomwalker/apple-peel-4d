@@ -1,0 +1,140 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{luatexja}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{caption}
+\geometry{margin=25mm}
+
+\definecolor{best}{rgb}{0.85,0.95,0.85}
+\definecolor{zero}{rgb}{0.95,0.93,0.93}
+\definecolor{partial}{rgb}{0.98,0.98,0.88}
+
+\title{アルキメデス多面体における3規則比較\\
+       \large 螺旋展開アルゴリズム R1/R2/R3 の成功率}
+\author{}
+\date{2026年4月4日}
+
+\begin{document}
+\maketitle
+
+\section{概要}
+
+アルキメデス多面体13種に対して，螺旋展開アルゴリズムの3つの面選択規則を適用し，
+全ペア $(C_1, C_2)$ に対する展開成功率を比較した．
+配向は Face-up（最上部の面重心を $+z$ 方向に整列）で固定した．
+
+\bigskip
+\noindent
+各規則の定義：
+\begin{description}
+  \item[R1 (max $\varphi$)] 左候補の中から，前進方向のなす角 $\varphi$ が最大（最も大きく左折）の面を選択．左候補なき場合は $|\varphi|$ 最大の面．
+  \item[R2 (loxodrome)] 左候補の中から $|\varphi|$ が最小（最も直進に近い左折）の面を選択．球面上の菱航線近似．左候補なき場合は $|\varphi|$ 最小の面．
+  \item[R3 (max $z$)] 左候補の中から $z$ 座標（重心の高さ）が最大の面を選択．左候補なき場合は $z$ 最小の面．
+\end{description}
+
+\section{結果表}
+
+\begin{table}[h]
+\centering
+\caption{アルキメデス多面体13種における規則別展開成功率（Face-up配向）}
+\label{tab:archimedean}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+多面体 & 面数 & 総ペア
+  & R1 & R1\% & R2 & R2\% & R3 & R3\% \\
+\midrule
+\rowcolor{partial}
+切頂四面体       &  8 &  36 & 12  & 33.3 &  5 & 13.9 & 11 & 30.6 \\
+\rowcolor{zero}
+立方八面体       & 14 &  48 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+切頂立方体       & 14 &  72 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{best}
+切頂八面体       & 14 &  72 & \textbf{64}  & \textbf{88.9} &  0 &  0.0 & 23 & 31.9 \\
+\rowcolor{zero}
+斜方立方八面体   & 26 &  96 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+大菱形立方八面体 & 26 & 144 &  0  &  0.0 &  3 &  2.1 &  1 &  0.7 \\
+\rowcolor{partial}
+歪み立方体       & 38 & 120 & 18  & 15.0 & \textbf{47} & \textbf{39.2} & 20 & 16.7 \\
+\rowcolor{zero}
+二十・十二面体   & 32 & 120 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+切頂十二面体     & 32 & 180 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{best}
+切頂二十面体     & 32 & 180 & \textbf{154} & \textbf{85.6} &  0 &  0.0 & 26 & 14.4 \\
+\rowcolor{zero}
+斜方二十・十二面体 & 62 & 240 & 0 & 0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+大菱形二十・十二面体 & 62 & 360 & 0 & 0.0 & 0 & 0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+歪み十二面体     & 92 & 300 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+{\footnotesize 行の色：\colorbox{best}{緑} = 高成功率（最良規則 $\geq 80\%$），
+\colorbox{partial}{黄} = 部分的成功，\colorbox{zero}{赤} = 全規則で0\%．}
+
+\section{考察}
+
+\subsection{多数が全規則0\%}
+
+13種中9種（69\%）が全規則で成功率0\%であった．
+これらは四角形面を多く含む多面体（立方八面体，斜方系，大菱形系，歪み十二面体など）に集中している．
+面の種類の混在が螺旋展開の連続性を妨げると考えられる．
+
+\subsection{R1 が有効な多面体}
+
+切頂四面体（33.3\%），切頂八面体（88.9\%），切頂二十面体（85.6\%）において R1 が他規則を大きく上回った．
+これらは正三角形・正六角形・正五角形のみからなる多面体であり，
+面の種類が少なく均質な構造が螺旋展開に適している．
+
+なお，正十二面体（Platonic）では R1 が100\%を達成していたのに対し，
+切頂十二面体（面の種類：正五角形＋正十角形）では0\%となった．
+切頂によって生じる大きな十角形面が，左条件を満たす候補を枯渇させると推測される．
+
+\subsection{歪み立方体における逆転}
+
+歪み立方体（Snub Cube）のみ，R2 (39.2\%) $>$ R1 (15.0\%) という逆転現象が見られた．
+歪み多面体は正四角形と正三角形が非対称に配置され，
+菱航線的な選択（R2）が偶発的に有効となる可能性がある．
+一方，歪み十二面体では全規則0\%であり，この逆転は面数の小さい歪み多面体固有の現象かもしれない．
+
+\subsection{R2 の全般的な低成功率}
+
+切頂八面体・切頂二十面体という R1 高成功率の多面体で R2 が0\%となった．
+これは正十二面体の結果（R2 が常に6面で停止する「6面の壁」現象）と整合し，
+loxodrome 選択則が六角形・五角形主体の構造でも同様の停止問題を引き起こすことを示唆する．
+
+\section{正多面体との比較}
+
+\begin{table}[h]
+\centering
+\caption{正多面体（参考）における規則別展開成功率}
+\label{tab:platonic}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lrrrr}
+\toprule
+多面体 & 面数 & R1\% & R2\% & R3\% \\
+\midrule
+正四面体   &  4 & 100.0 & 100.0 & 100.0 \\
+正六面体   &  6 & 100.0 & 100.0 & 100.0 \\
+正八面体   &  8 & 100.0 & 100.0 & 100.0 \\
+正十二面体 & 12 & 100.0 &   0.0 &  47--53 \\
+正二十面体 & 20 & 100.0 & 100.0 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+正多面体では R1 が全5種で100\%を達成するのに対し，
+アルキメデス多面体では R1 が有効なのは3種に限られ，かつ最高でも88.9\%にとどまる．
+このことは，面の種類の均一性が螺旋展開の成功に決定的な役割を果たすことを示している．
+
+\end{document}

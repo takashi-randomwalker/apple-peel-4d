@@ -1,0 +1,393 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+\geometry{margin=25mm}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\title{A Literature Review on Spiral Unfolding of Polyhedra and Polytopes}
+\author{}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+% -------------------------------------------------------
+\section{Introduction}
+
+The problem of constructing \textbf{nets (unfoldings)} of polyhedra and polytopes is a classical
+question dating back to Albrecht D\"{u}rer in the fifteenth century, and at the same time
+remains an active research topic in computational geometry and combinatorics.
+This review organizes prior work related to Apple-Peel unfolding under the following five themes:
+\begin{enumerate}[nosep]
+  \item The D\"{u}rer problem and fundamental unfolding methods,
+  \item Hamiltonian and Zipper unfoldings,
+  \item Spiral unfolding and Apple-Peel unfolding,
+  \item Band unfolding,
+  \item Unfolding of four-dimensional polytopes.
+\end{enumerate}
+
+% -------------------------------------------------------
+\section{The D\"{u}rer Problem and Fundamental Unfolding Methods}
+
+\subsection{Origins and Formulation}
+
+The origin of polyhedral nets can be traced to the Renaissance artist \textbf{Albrecht D\"{u}rer}
+and his work \textit{Underweysung der Messung} (1525),
+which contains hand-drawn nets of solids such as the cube and the regular dodecahedron,
+and implicitly raises the question of whether cutting along edges always yields a non-overlapping net.
+This question was formulated as a precise mathematical proposition approximately 450 years later
+by \textbf{Shephard (1975)}.
+
+\begin{quotation}\noindent
+  G. C. Shephard,
+  \textit{Convex Polytopes with Convex Nets},
+  Mathematical Proceedings of the Cambridge Philosophical Society,
+  Vol.~78, pp.~389--403 (1975).
+  \url{https://doi.org/10.1017/S0305004100051860}
+\end{quotation}
+
+Shephard posed the conjecture that every convex polyhedron has a non-overlapping net
+obtainable by cutting along edges (still open today),
+and introduced the concept of Hamiltonian unfolding---unfolding along a Hamiltonian edge path.
+
+\subsection{Guaranteed Unfolding Methods}
+
+Two unfolding methods are known that \textbf{guarantee} non-overlap for convex polyhedra.
+
+\begin{quotation}\noindent
+  B. Aronov and J. O'Rourke,
+  \textit{Nonoverlap of the Star Unfolding},
+  Discrete \& Computational Geometry, Vol.~8, No.~3, pp.~219--250 (1992).
+  \url{https://doi.org/10.1007/BF02293047}
+\end{quotation}
+
+The \textbf{star unfolding} cuts along geodesic shortest paths from a source point to every
+vertex, and has been proven to yield a non-overlapping net for any convex polyhedron.
+Together with the source unfolding (cutting along the Voronoi diagram), these constitute
+the two guaranteed unfolding methods for convex polyhedra.
+
+\subsection{Progress via Affine Transformations}
+
+\begin{quotation}\noindent
+  M. Ghomi,
+  \textit{Affine Unfoldings of Convex Polyhedra},
+  Geometry \& Topology, Vol.~18, No.~5, pp.~3055--3090 (2014).
+  arXiv:1305.3231.
+\end{quotation}
+
+Ghomi proved that every convex polyhedron in general position is edge-unfoldable after
+applying an affine transformation (linear stretching).
+This is among the most significant recent advances, showing that there is no combinatorial
+obstruction to the D\"{u}rer problem.
+
+\subsection{Comprehensive Reference}
+
+\begin{quotation}\noindent
+  E. D. Demaine and J. O'Rourke,
+  \textit{Geometric Folding Algorithms: Linkages, Origami, Polyhedra},
+  Cambridge University Press (2007).
+\end{quotation}
+
+The definitive textbook on computational geometry of folding and unfolding.
+It covers all related topics including nets, the D\"{u}rer problem, Cauchy's rigidity theorem,
+and Alexandrov's uniqueness theorem, and lists numerous open problems.
+
+% -------------------------------------------------------
+\section{Hamiltonian Unfolding and Zipper Unfolding}
+
+The line of work closest in spirit to ``spiral unfolding'' is
+\textbf{Hamiltonian unfolding (Zipper unfolding)}.
+
+\begin{quotation}\noindent
+  A. Lubiw, E. D. Demaine et al.,
+  \textit{Zipper Unfoldings of Polyhedral Complexes},
+  Proceedings of CCCG 2010, pp.~219--222.
+\end{quotation}
+
+A \textbf{zipper unfolding} is a net obtained by cutting all faces along a single continuous
+Hamiltonian edge path (the edge-cutting counterpart of Apple-Peel unfolding).
+It has been shown that all Platonic and Archimedean solids admit Hamiltonian (zipper) unfoldings,
+making this the direct conceptual predecessor of Apple-Peel unfolding.
+
+\begin{quotation}\noindent
+  E. D. Demaine, M. L. Demaine and R. Uehara,
+  \textit{Zipper Unfolding of Domes and Prismoids},
+  Proceedings of CCCG 2013.
+\end{quotation}
+
+For dome-shaped polyhedra, the authors exhibit cases where every Hamiltonian unfolding overlaps
+even when the graph is Hamiltonian, while proving that nested prismoids always admit
+Hamiltonian unfoldings.
+
+\begin{quotation}\noindent
+  J. O'Rourke,
+  \textit{Flat Zipper-Unfolding Pairs for Platonic Solids},
+  arXiv:1010.2450; CCCG 2010.
+\end{quotation}
+
+This paper shows that the tetrahedron, cube, octahedron, and icosahedron each possess a
+``zipper pair''---a Hamiltonian edge-path unfolding that refolds into a doubly-covered
+parallelogram. No such construction exists for the dodecahedron.
+
+% -------------------------------------------------------
+\section{Spiral Unfolding and Apple-Peel Unfolding}
+
+\subsection{Spiral Unfolding (O'Rourke, 2015)}
+
+The most direct predecessor of Apple-Peel unfolding is the following paper by O'Rourke.
+
+\begin{quotation}\noindent
+  J. O'Rourke,
+  \textit{Spiral Unfoldings of Convex Polyhedra},
+  arXiv:1509.00321 (2015).
+\end{quotation}
+
+This paper defines a cutting path that covers all faces of a convex polyhedron in a spiral band
+(\textbf{spiral unfolding}) and systematically studies whether the resulting net overlaps.
+It proves that all 13 Platonic and Archimedean solids admit non-overlapping spiral unfoldings,
+taking polyhedra of revolution as the primary class of analysis.
+The paper also shows that spiral unfoldings of general convex polyhedra may overlap.
+The Apple-Peel unfolding in our project can be seen as a generalization that replaces the
+continuous band by a \textbf{discrete greedy selection} of faces.
+
+\subsection{Apple-Peel Unfolding (Yoshino \& Chaidee)}
+
+\begin{quotation}\noindent
+  Y. Yoshino and S. Chaidee,
+  \textit{Apple Peel Unfolding of Archimedean and Catalan Solids},
+  Submitted to Journal of Mathematics and Arts ($\sim$2024).
+\end{quotation}
+
+This paper (under review) constructs Apple-Peel unfoldings for all 13 Archimedean solids
+and their duals (Catalan solids) and investigates the non-overlap condition.
+It is the direct source of the three-dimensional algorithm used in the present project.
+
+\subsection{Prior Work in the Japanese Literature}
+
+\begin{quotation}\noindent
+  Unno et al.,
+  \textit{On the Spiral Pattern of Apple Peeling and Nets of Regular Polyhedra} [in Japanese],
+  \textit{Journal of the Science of Form}, Vol.~27, No.~1, pp.~27--28 (2012).
+\end{quotation}
+
+An early Japanese paper discussing the geometric relationship between the spiral pattern
+arising when peeling an apple and the nets of regular polyhedra.
+It shares the core intuition behind the Apple-Peel concept.
+
+% -------------------------------------------------------
+\section{Band Unfolding}
+
+A related line of research is \textbf{band unfolding}, which studies the unfolding of the
+portion of a polyhedral surface trapped between two parallel planes (a polyhedral band).
+
+\begin{quotation}\noindent
+  G. Aloupis, E. D. Demaine et al.,
+  \textit{Edge-Unfolding Nested Polyhedral Bands},
+  Computational Geometry: Theory and Applications, Vol.~39, No.~1, pp.~30--42 (2008).
+\end{quotation}
+
+A foundational result proving that any nested band---one whose boundary polygon on one side
+is contained in the orthogonal projection of the other---is always edge-unfoldable.
+This provides a theoretical basis for the ``peel one band at a time'' step in spiral unfolding.
+
+\begin{quotation}\noindent
+  M. Radons,
+  \textit{Edge-Unfolding Nested Prismatoids},
+  Computational Geometry: Theory and Applications (2023).
+\end{quotation}
+
+This paper proves that every nested prismatoid (the convex hull of two parallel convex polygons)
+is edge-unfoldable, resolving an open problem left by a counterexample in O'Rourke (2007).
+
+% -------------------------------------------------------
+\section{Unfolding of Four-Dimensional Polytopes}
+
+\subsection{Combinatorial Enumeration}
+
+\begin{quotation}\noindent
+  F. Buekenhout and M. Parker,
+  \textit{The Number of Nets of the Regular Convex Polytopes in Dimension $\leq 4$},
+  Discrete Mathematics, Vol.~186, pp.~69--94 (1998).
+\end{quotation}
+
+A foundational paper classifying and counting all spanning trees of the face-adjacency graph
+(up to symmetry equivalence) for every regular convex polytope in dimension $\leq 4$.
+Most notably: \textbf{the tesseract (hypercube) has exactly 261 distinct nets}
+(a rigorous verification of Turney's 1984 computation).
+
+\subsection{Unfoldability of Regular 4-Polytopes}
+
+\begin{quotation}\noindent
+  S. Devadoss and M. Harvey,
+  \textit{Unfoldings and Nets of Regular Polytopes},
+  Computational Geometry: Theory and Applications (2022).
+  arXiv:2111.01359.
+\end{quotation}
+
+This paper proves that the $n$-cube, $n$-simplex, and 4-orthoplex are ``all-net''
+(every edge unfolding yields a valid, non-overlapping net).
+It also demonstrates counterexamples (overlapping nets) for orthoplexes in dimension $\geq 5$
+and for the 600-cell, making it an important reference for the unfoldability theory
+of the polytopes targeted in our project.
+
+\begin{quotation}\noindent
+  S. Devadoss, M. Harvey and Z. Zhang,
+  \textit{Visualizing and Unfolding Nets of 4-Polytopes},
+  SoCG 2022 (Media Exposition), LIPIcs Vol.~224, Article~67.
+\end{quotation}
+
+A media exposition paper presenting an interactive web tool for visualizing nets of
+4-dimensional polytopes.
+Targeting the 4-simplex, 4-cube, and 4-orthoplex, the tool constructs nets step-by-step
+by drawing spanning trees on the dual graph.
+
+\subsection{Hamiltonian Unfolding in Four Dimensions}
+
+\begin{quotation}\noindent
+  H. A. Akitaya, R. Samanta et al.,
+  \textit{Path-Unfolding the Tesseract},
+  Fall Workshop on Computational Geometry (FWCG 2024).
+\end{quotation}
+
+This paper enumerates all \textbf{path unfoldings} of the tesseract (nets whose dual graph
+is a Hamiltonian path), finding a total of 35,520 such unfoldings.
+It is a direct extension of the Zipper/Hamiltonian unfolding framework from three to four
+dimensions and shares strong conceptual overlap with the four-dimensional Apple-Peel unfolding
+in our project.
+
+\subsection{Hamiltonian Structures on Regular 4-Polytopes}
+
+\begin{quotation}\noindent
+  C. H. S\'{e}quin,
+  \textit{Symmetrical Hamiltonian Manifolds on Regular 3D and 4D Polytopes},
+  Bridges Conference 2005, pp.~463--472.
+\end{quotation}
+
+A study of Hamiltonian structures on the edge graphs of regular polytopes,
+extended from cycles to manifolds.
+Among other results, it shows that the 4-simplex admits a M\"{o}bius-strip-like triangular
+covering.
+This paper is a useful reference for exploring the connection between spiral unfolding and
+Hamiltonian structures in four dimensions.
+
+% -------------------------------------------------------
+\section{Discussion: Academic Positioning of Apple-Peel Unfolding}
+
+In light of the prior work surveyed above, the Apple-Peel unfolding can be positioned as follows.
+
+\begin{table}[h]
+\centering
+\caption{Comparison of Apple-Peel unfolding with prior work}
+\label{tab:comparison}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lp{5.2cm}p{5.8cm}}
+\toprule
+Aspect & Prior work & Apple-Peel unfolding \\
+\midrule
+Cut simplicity
+  & Edge cuts only (Zipper); face cuts also possible (general)
+  & Order of face selection (cut lines not made explicit) \\
+Guarantee of spirality
+  & O'Rourke (2015): guaranteed for Platonic/Archimedean
+  & Spirality achieved by greedy selection (partially guaranteed) \\
+Dependence on symmetry
+  & Band unfolding: requires nested structure
+  & Higher symmetry $\Rightarrow$ higher success rate (demonstrated on Archimedean solids) \\
+Extension to 4D
+  & Devadoss (2022): theory; Akitaya (2024): enumeration
+  & This project: greedy selection + Darboux frame \\
+Algorithm
+  & Tabu search (Zawallich 2024), etc.
+  & Greedy + one-step backtracking \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A particularly important distinction is that Apple-Peel unfolding explicitly defines a
+\textbf{greedy selection rule} for choosing which face to unfold next.
+The formulation of the left-turn condition via the Darboux frame
+(using a determinant criterion introduced in this project) is a novel contribution
+not found in prior spiral unfolding research.
+
+Regarding the \textbf{extension to four dimensions}: whereas Devadoss \& Harvey (2022) discuss
+general unfoldings via spanning trees, our project focuses on the \textbf{selection order}
+that produces a spiral, placing it closer in spirit to the path-unfolding framework
+of Akitaya et al.\ (2024).
+The four-dimensional Apple-Peel unfolding is thus not merely an enumeration of nets,
+but a novel attempt to give geometric meaning to ``spirality'' in four dimensions.
+
+% -------------------------------------------------------
+\section*{References}
+\addcontentsline{toc}{section}{References}
+
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2em]
+  \item A. D\"{u}rer, \textit{Underweysung der Messung}, 1525.
+  \item G. C. Shephard, Convex Polytopes with Convex Nets,
+        \textit{Math.\ Proc.\ Cambridge Philos.\ Soc.}, 78:389--403, 1975.
+  \item B. Aronov and J. O'Rourke, Nonoverlap of the Star Unfolding,
+        \textit{Discrete \& Comput.\ Geom.}, 8(3):219--250, 1992.
+  \item F. Buekenhout and M. Parker, The Number of Nets of the Regular Convex Polytopes
+        in Dimension $\leq 4$,
+        \textit{Discrete Math.}, 186:69--94, 1998.
+  \item T. Biedl, E. D. Demaine et al., Unfolding Some Classes of Orthogonal Polyhedra,
+        \textit{Proc.\ CCCG 1998}.
+  \item M. Bern, E. D. Demaine et al., Ununfoldable Polyhedra with Convex Faces,
+        \textit{Comput.\ Geom.: Theory Appl.}, 2003.
+  \item C. H. S\'{e}quin, Symmetrical Hamiltonian Manifolds on Regular 3D and 4D Polytopes,
+        \textit{Bridges Conference 2005}, pp.~463--472.
+  \item E. D. Demaine and J. O'Rourke, \textit{Geometric Folding Algorithms},
+        Cambridge Univ.\ Press, 2007.
+  \item G. Aloupis, E. D. Demaine et al., Edge-Unfolding Nested Polyhedral Bands,
+        \textit{Comput.\ Geom.: Theory Appl.}, 39(1):30--42, 2008.
+  \item A. Lubiw, E. D. Demaine et al., Zipper Unfoldings of Polyhedral Complexes,
+        \textit{Proc.\ CCCG 2010}, pp.~219--222.
+  \item J. O'Rourke, Flat Zipper-Unfolding Pairs for Platonic Solids,
+        arXiv:1010.2450, 2010.
+  \item Unno et al., On the Spiral Pattern of Apple Peeling and Nets of Regular Polyhedra
+        [in Japanese],
+        \textit{J.\ Science of Form}, 27(1):27--28, 2012.
+  \item E. D. Demaine, M. L. Demaine and R. Uehara, Zipper Unfolding of Domes and Prismoids,
+        \textit{Proc.\ CCCG 2013}.
+  \item M. Ghomi, Affine Unfoldings of Convex Polyhedra,
+        \textit{Geom.\ \& Topology}, 18(5):3055--3090, 2014.
+  \item J. O'Rourke, Spiral Unfoldings of Convex Polyhedra,
+        arXiv:1509.00321, 2015.
+  \item M. Ghomi, D\"{u}rer's Unfolding Problem for Convex Polyhedra,
+        \textit{Notices AMS}, 2018.
+  \item S. Devadoss and M. Harvey, Unfoldings and Nets of Regular Polytopes,
+        \textit{Comput.\ Geom.: Theory Appl.}, 2022. arXiv:2111.01359.
+  \item S. Devadoss, M. Harvey and Z. Zhang, Visualizing and Unfolding Nets of 4-Polytopes,
+        \textit{SoCG 2022 (Media Exposition)}, LIPIcs Vol.~224, Article~67.
+  \item Y. Yoshino and S. Chaidee, Apple Peel Unfolding of Archimedean and Catalan Solids,
+        Submitted to \textit{Journal of Mathematics and Arts}, $\sim$2024.
+  \item M. Radons, Edge-Unfolding Nested Prismatoids,
+        \textit{Comput.\ Geom.: Theory Appl.}, 2023.
+  \item Zawallich, Unfolding Polyhedra via Tabu Search,
+        \textit{The Visual Computer}, 2024.
+  \item H. A. Akitaya, R. Samanta et al., Path-Unfolding the Tesseract,
+        \textit{Fall Workshop on Computational Geometry (FWCG 2024)}.
+\end{enumerate}
+
+\bigskip
+\noindent\small
+Among the references cited in this review, the unpublished/submitted work
+(Yoshino \& Chaidee $\sim$2024) is based on limited available information;
+details should be confirmed with the authors.
+In addition, a Japanese conference presentation by Kaino (2019) on four-dimensional
+unfolding nets (Symmetry Society of Japan, Kanazawa) could not be confirmed in
+international databases and has therefore been omitted from this review.
+
+\end{document}

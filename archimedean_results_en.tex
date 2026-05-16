@@ -1,0 +1,147 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{caption}
+\geometry{margin=25mm}
+
+\definecolor{best}{rgb}{0.85,0.95,0.85}
+\definecolor{zero}{rgb}{0.95,0.93,0.93}
+\definecolor{partial}{rgb}{0.98,0.98,0.88}
+
+\title{Comparison of Three Selection Rules on Archimedean Solids\\
+       \large Success Rates of the Spiral Unfolding Algorithm R1/R2/R3}
+\author{}
+\date{April 4, 2026}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+
+We applied three face-selection rules of the spiral unfolding algorithm to all 13 Archimedean solids
+and compared the unfolding success rates over all pairs $(C_1, C_2)$.
+The orientation was fixed to Face-up (the topmost face centroid aligned with the $+z$ direction).
+
+\bigskip
+\noindent
+Definition of each rule:
+\begin{description}
+  \item[R1 (max $\varphi$)] Among the left candidates, select the face with the largest angle $\varphi$ from the forward direction (sharpest left turn). If no left candidate exists, select the face with the largest $|\varphi|$.
+  \item[R2 (loxodrome)] Among the left candidates, select the face with the smallest $|\varphi|$ (closest to straight ahead). This approximates a loxodrome on the sphere. If no left candidate exists, select the face with the smallest $|\varphi|$.
+  \item[R3 (max $z$)] Among the left candidates, select the face whose centroid has the highest $z$-coordinate. If no left candidate exists, select the face with the lowest $z$.
+\end{description}
+
+\section{Results}
+
+\begin{table}[h]
+\centering
+\caption{Unfolding success rates by rule for the 13 Archimedean solids (Face-up orientation)}
+\label{tab:archimedean}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Polyhedron & Faces & Pairs
+  & R1 & R1\% & R2 & R2\% & R3 & R3\% \\
+\midrule
+\rowcolor{partial}
+Truncated Tetrahedron       &  8 &  36 & 12  & 33.3 &  5 & 13.9 & 11 & 30.6 \\
+\rowcolor{zero}
+Cuboctahedron               & 14 &  48 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+Truncated Cube              & 14 &  72 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{best}
+Truncated Octahedron        & 14 &  72 & \textbf{64}  & \textbf{88.9} &  0 &  0.0 & 23 & 31.9 \\
+\rowcolor{zero}
+Rhombicuboctahedron         & 26 &  96 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+Truncated Cuboctahedron     & 26 & 144 &  0  &  0.0 &  3 &  2.1 &  1 &  0.7 \\
+\rowcolor{partial}
+Snub Cube                   & 38 & 120 & 18  & 15.0 & \textbf{47} & \textbf{39.2} & 20 & 16.7 \\
+\rowcolor{zero}
+Icosidodecahedron           & 32 & 120 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+Truncated Dodecahedron      & 32 & 180 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{best}
+Truncated Icosahedron       & 32 & 180 & \textbf{154} & \textbf{85.6} &  0 &  0.0 & 26 & 14.4 \\
+\rowcolor{zero}
+Rhombicosidodecahedron      & 62 & 240 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+Truncated Icosidodecahedron & 62 & 360 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\rowcolor{zero}
+Snub Dodecahedron           & 92 & 300 &  0  &  0.0 &  0 &  0.0 &  0 &  0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+{\footnotesize Row colors: \colorbox{best}{green} = high success rate (best rule $\geq 80\%$),
+\colorbox{partial}{yellow} = partial success, \colorbox{zero}{red} = 0\% for all rules.}
+
+\section{Discussion}
+
+\subsection{Majority of Solids Yield 0\% for All Rules}
+
+Nine of the 13 solids (69\%) achieved a success rate of 0\% for all rules.
+These are concentrated among polyhedra containing many square faces
+(Cuboctahedron, rhombic families, Truncated Cuboctahedron, Snub Dodecahedron, etc.).
+The mixture of face types is thought to disrupt the continuity of the spiral unfolding.
+
+\subsection{Solids Where R1 Is Effective}
+
+R1 substantially outperformed the other rules for the Truncated Tetrahedron (33.3\%),
+Truncated Octahedron (88.9\%), and Truncated Icosahedron (85.6\%).
+These polyhedra consist exclusively of regular triangles, hexagons, or pentagons,
+and their homogeneous face structure appears well-suited to spiral unfolding.
+
+Notably, R1 achieved 100\% on the regular Dodecahedron (Platonic),
+whereas it dropped to 0\% on the Truncated Dodecahedron (faces: regular pentagons and decagons).
+The large decagonal faces introduced by truncation are conjectured to exhaust the pool of
+faces satisfying the left-turn condition.
+
+\subsection{Reversal in the Snub Cube}
+
+The Snub Cube was the only solid where R2 (39.2\%) $>$ R1 (15.0\%).
+The asymmetric arrangement of squares and triangles in snub polyhedra may incidentally
+favor loxodrome-style selection (R2).
+However, the Snub Dodecahedron yielded 0\% for all rules,
+suggesting that this reversal may be specific to snub polyhedra with a smaller face count.
+
+\subsection{Generally Low Success Rate of R2}
+
+R2 yielded 0\% for the Truncated Octahedron and Truncated Icosahedron,
+the very solids where R1 performs best.
+This is consistent with the behavior on the regular Dodecahedron
+(where R2 always halts at 6 faces---the ``6-face wall'' phenomenon),
+suggesting that the loxodrome selection rule triggers a similar stalling problem
+even in structures dominated by hexagons and pentagons.
+
+\section{Comparison with Platonic Solids}
+
+\begin{table}[h]
+\centering
+\caption{Unfolding success rates by rule for the Platonic solids (reference)}
+\label{tab:platonic}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lrrrr}
+\toprule
+Polyhedron & Faces & R1\% & R2\% & R3\% \\
+\midrule
+Tetrahedron   &  4 & 100.0 & 100.0 & 100.0 \\
+Cube          &  6 & 100.0 & 100.0 & 100.0 \\
+Octahedron    &  8 & 100.0 & 100.0 & 100.0 \\
+Dodecahedron  & 12 & 100.0 &   0.0 &  47--53 \\
+Icosahedron   & 20 & 100.0 & 100.0 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+While R1 achieves 100\% on all five Platonic solids,
+it is effective for only 3 of the 13 Archimedean solids and peaks at 88.9\%.
+This indicates that uniformity of face types plays a decisive role
+in the success of spiral unfolding.
+
+\end{document}

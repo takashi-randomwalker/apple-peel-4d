@@ -1,0 +1,80 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{macros}
+
+\title{Variations of Apple-Peel Unfoldings}
+\author{Takashi Yoshino}
+\date{04/04/2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+"Apple-peel unfolding" is the procedure to obtain unfolded expansions of polyhedra. This article describes the variation in its definitions and compares the unfolded patterns. 
+\end{abstract}
+
+\section{Introduction}
+This is a sample introduction.
+
+\section{Three Definitions and Algorithms}
+Peeling apples is intuitive. Some tried to peel 
+
+
+
+
+A loxodrome (also called a rhumb line) is a curve on a sphere that crosses
+  every meridian (line of longitude) at the same angle.
+
+  On a globe: if you sail from one point to another while keeping your compass
+  bearing constant — say, always heading 45° northeast — the path you trace is
+  a loxodrome. It spirals around toward the pole rather than taking the
+  shortest path (which would be a great circle).
+
+  Key properties:
+  - On a Mercator map projection, a loxodrome appears as a straight line — this
+   is exactly why Mercator projection was invented for navigation
+  - It is NOT the shortest path between two points (that would be a great
+  circle / geodesic)
+  - It spirals infinitely around the poles without ever reaching them (except
+  when heading due north/south)
+
+
+ Why the name "R2 (loxodrome)" here:
+
+  In this peeling algorithm, the face centroids lie approximately on a sphere.
+  Rule R2 selects the candidate with the smallest angular deviation from the
+  forward direction — meaning it tries to continue as straight as possible at
+  each step. This mimics the behavior of a loxodrome: maintaining a nearly
+  constant bearing while spiraling around the sphere.
+
+  In contrast:
+  - R1 (max φ) takes the sharpest left turn — like a tight spiral
+  - R2 (loxodrome) takes the gentlest left turn — like a gradual rhumb-line
+  spiral
+  - R3 (max z) climbs toward the top as fast as possible — like following a
+  meridian upward
+
+  The name reflects the geometric intuition, not an exact correspondence.
+
+
+
+\section{Main Results}
+
+\begin{theorem}
+Let $M$ be a compact manifold. Then something interesting happens.
+\end{theorem}
+
+\begin{proof}
+This is a placeholder proof.
+\end{proof}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
