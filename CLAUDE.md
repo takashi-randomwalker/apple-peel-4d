@@ -271,13 +271,13 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 - ~~Abstract に Perfect/Possible/Impossible 分類が貢献の一部であることを明記~~ → **完了**：「A principal contribution is a three-way classification...」の文と「equivariance argument showing that face-transitive solids are confined to the 0/100% dichotomy」の補足を追加
 - ~~Conclusion の Future Work をより具体的に~~ → **完了**：3 項目（two-stage, valid-net 特徴付け, random convex polyhedra）を 4 項目に拡張・具体化。新規追加：(1) hybrid rule の λ-parametrisation，(2) Darboux torsion / per-cell handedness による valid net 予測，(3) S²/S³ ランダム凸包での scaling 解析，(4) 600-cell の rigorous structural lemma（DCG レベル向け）
 - ~~Section 5 重複整理~~ → **完了**：旧 5.2 (5-Cell) と 5.3 (16-Cell) を統合し「5-Cell and 16-Cell: rule agreement and partial coverage」（約 12 行）に圧縮。Section 4 / Table 4dglobal への参照に置換。5.1 (Cross-Dim Summary) と 5.4 (120-Cell) は独自内容のため保持。32 ページ維持
-- **Acknowledgements ORCID / COI 宣言** → 未対応（本人情報待ち）
+- ~~Acknowledgements ORCID / COI 宣言~~ → **完了**：Acknowledgements 末尾に `\paragraph{ORCID.}` で T. Yoshino: `0000-0003-1756-0162` を追加。標準 COI 宣言（"no known competing financial interests..."）も追加。S. Chaidee の ORCID は未取得（次回本人に確認予定）
 
 ### 推奨フロー
 
-**現状（2026-05-17）**：Opus 4.7 レビューの 5 主要点 + Minor 改善 3 件すべて完了。
+**現状（2026-05-17）**：Opus 4.7 レビューの 5 主要点 + Minor 改善 4 件すべて完了。
 → **CGTA 投稿可能な状態**（DCG 狙いなら 600-cell の更に厳密な structural lemma も検討）。
-arXiv 投稿はいつでも可能。ORCID/COI は誌指定で必要なら追加。
+arXiv 投稿はいつでも可能。S. Chaidee の ORCID が判明次第，Acknowledgements に追記。
 
 ### 投稿候補ジャーナル
 
