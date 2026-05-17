@@ -273,11 +273,33 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 - ~~Section 5 重複整理~~ → **完了**：旧 5.2 (5-Cell) と 5.3 (16-Cell) を統合し「5-Cell and 16-Cell: rule agreement and partial coverage」（約 12 行）に圧縮。Section 4 / Table 4dglobal への参照に置換。5.1 (Cross-Dim Summary) と 5.4 (120-Cell) は独自内容のため保持。32 ページ維持
 - ~~Acknowledgements ORCID / COI 宣言~~ → **完了**：Acknowledgements 末尾に `\paragraph{ORCID.}` で T. Yoshino: `0000-0003-1756-0162` を追加。標準 COI 宣言（"no known competing financial interests..."）も追加。S. Chaidee の ORCID は未取得（次回本人に確認予定）
 
+### Sonnet 4.6 セカンドオピニオン対応（2026-05-17 セッション最終）
+
+独立に走らせた Sonnet 4.6 レビューが新規 9 点を指摘 → 全て対応:
+
+| 指摘 | 対応 |
+|------|------|
+| MW1: 3D Prop の RZ proof で `A(+z)=+z` 未トレース | 3 ステップ chain（+z → c_{F_1} → c_{σF_1} → +z）を proof に追加 |
+| MW2: 600-cell 段落で Prop 3.1 が 5-step pattern を「説明する」と書いた overreach | "empirically" 表現に修正．orbit サイズ（742/825/404/323/106）と termination-step counts の対応を事実として記述．構造的導出は未達と明示 |
+| MW3: 4D 等変性が一文 remark | `Proposition 4.1 [SO(4)-invariance]` + Proof + `Remark 4.1 [Partial equivariance and the role of the xy-plane]` を新設．label `prop:equivariance4d`，`rem:partialequivar4d` |
+| MW4: 文献 entry 不完全 | Akitaya2024（著者 Samanta + Akitaya，FWCG24 URL），Devadoss2022（vol 111, article 101977, 2023, DOI），Kaino2019（11th Symmetry Congress Kanazawa の proc であることを追加） |
+| MW5: k≥3 Det=0 fallback 動機なし | xy-area が「+w の orthogonal complement での azimuthal turn 指標」であること，4-点が共平面のとき volume form score が discriminate 不可になること，face-index tiebreak の非等変性を避けるための置換であることを 1 段落で説明 |
+| MI3: Figure 5 caption の 16-cell uniqueness | 5/8/24-cell に加えて 16-cell も 20 successful pairs すべてが congruent であることを明示 |
+| MI4: 「many square faces」claim が誤り | 7 つの 0% 解の真の共通項は **hexagonal faces 無し**（squares ではない）に修正．Icosidodecahedron 等が反例であることに対処 |
+| MI6: 3D RS = min vs 4D RS = max の符号反転説明 | 「filter が admit する半空間の最も extreme value を選ぶ」共通原理として書き直し |
+| MI8: §5.3 (120-cell) 冒頭が §4.2 と重複 | 冒頭 2 段落を 1 短段落に圧縮，Table 4dglobal への参照に置換．band structure / geo-diversity / self-intersection / face-centroid-up は §5.3 独自内容として保持 |
+
+ページ数: 32 → 34（MW3 の Prop+Proof+Remark 追加で +1，MW5 の fallback motivation で +1）。
+
+### Kaino2019 ページ番号要確認
+
+書誌調査エージェントが「あなたの draft = 142-145 vs arXiv:2604.16204 = 25-30」の **conflict** を検出．現在 142-145 を維持しているが，原本（congress proceedings の物理コピー）で確認推奨．
+
 ### 推奨フロー
 
-**現状（2026-05-17）**：Opus 4.7 レビューの 5 主要点 + Minor 改善 4 件すべて完了。
-→ **CGTA 投稿可能な状態**（DCG 狙いなら 600-cell の更に厳密な structural lemma も検討）。
-arXiv 投稿はいつでも可能。S. Chaidee の ORCID が判明次第，Acknowledgements に追記。
+**現状（2026-05-17）**：Opus 4.7 レビュー 5 点 + Minor 4 件 + Sonnet 4.6 追加レビュー 9 点 = **全 18 点**を完了．
+→ **CGTA submittable**（DCG 狙いなら 600-cell の rigorous structural lemma + Kaino ページ番号確認）．
+arXiv 投稿はいつでも可能．S. Chaidee の ORCID が判明次第追記．
 
 ### 投稿候補ジャーナル
 
