@@ -260,15 +260,16 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 
 ### 査読で指摘されうる主要点（Opus 4.7 レビュー）
 
-1. **等変性結果が「Remark」止まり** → `Proposition` + `Proof` に格上げ
-2. **600-cell の "icosahedral bottleneck" が経験則止まり** → 各停止ステップで Det 条件が全候補を排除する具体例または隣接グラフ構造的補題
-3. **コード/データ可用性ステートメントの欠如** → GitHub URL 確定後に追加
-4. **参考文献が 9 件と寡少** → Schlickenrieder, Pak, Bern et al., Coxeter, Towle 等を検討
-5. **「なぜこの 2 規則か」の動機付けが弱い** → 他の plausible rule との比較を 1 段落追加
+1. ~~等変性結果が「Remark」止まり~~ → **完了（2026-05-17）**：Remark 3.1 を `Proposition 3.1 [Equivariance and the 0/100% dichotomy]` + `Proof` に格上げし，実装詳細は残余 Remark 3.1（label `rem:symmetry3d` 維持）に整理。4 箇所のクロス参照を更新。`prop:equivariance` を新ラベルとして導入
+2. **600-cell の "icosahedral bottleneck" が経験則止まり** → 各停止ステップで Det 条件が全候補を排除する具体例または隣接グラフ構造的補題（未対応）
+3. ~~コード/データ可用性ステートメントの欠如~~ → **完了（2026-05-17）**：`paper_draft.tex` の Acknowledgements 直後に `\section*{Code and data availability}` を追加；GitHub: <https://github.com/takashi-randomwalker/apple-peel-4d>
+4. **参考文献が 10 件と寡少** → Schlickenrieder, Pak, Bern et al., Coxeter, Towle 等を検討（未対応）
+5. **「なぜこの 2 規則か」の動機付けが弱い** → 他の plausible rule との比較を 1 段落追加（未対応）
 
 ### 推奨フロー
 
-arXiv に先に置いて DOI を確保 → 並行して CGTA 向けに 1, 3 を最低限対応してから submit。
+**現状（2026-05-17）**：CGTA 投稿前の必須対応（1, 3）は完了。
+→ **arXiv 投稿可能な状態**。残り（2, 4, 5）は revision で対応してもよい中位の改善項目。
 
 ### 投稿候補ジャーナル
 
