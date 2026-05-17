@@ -266,11 +266,18 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 4. ~~参考文献が 10 件と寡少~~ → **完了（2026-05-17）**：4 件追加して 14 件に（`Pak2010` book draft, `Bern2003` Comput. Geom. 24 51-62, `Schlickenrieder1997` TU Berlin Diplomarbeit, `Coxeter1973` Dover 3rd ed.）。Towle は権威ある同名参照が存在しないためスキップ（Devadoss2022 が代替として既出）
 5. ~~「なぜこの 2 規則か」の動機付けが弱い~~ → **完了（2026-05-17）**：Section 2.2 規則定義の直前に 1 段落追加。nearest neighbour / min angular deviation / smallest dihedral angle といった local rule が等変性を破る点を Proposition 3.1 に紐づけて説明し，global +z 軸と c_1 参照を使う rule の中で max azimuthal turn (RS) と max axial conservation (RZ) が 2 つの自然な端点であることを動機として記述
 
+### Minor 改善項目（2026-05-17 セッション後半）
+
+- ~~Abstract に Perfect/Possible/Impossible 分類が貢献の一部であることを明記~~ → **完了**：「A principal contribution is a three-way classification...」の文と「equivariance argument showing that face-transitive solids are confined to the 0/100% dichotomy」の補足を追加
+- ~~Conclusion の Future Work をより具体的に~~ → **完了**：3 項目（two-stage, valid-net 特徴付け, random convex polyhedra）を 4 項目に拡張・具体化。新規追加：(1) hybrid rule の λ-parametrisation，(2) Darboux torsion / per-cell handedness による valid net 予測，(3) S²/S³ ランダム凸包での scaling 解析，(4) 600-cell の rigorous structural lemma（DCG レベル向け）
+- ~~Section 5 重複整理~~ → **完了**：旧 5.2 (5-Cell) と 5.3 (16-Cell) を統合し「5-Cell and 16-Cell: rule agreement and partial coverage」（約 12 行）に圧縮。Section 4 / Table 4dglobal への参照に置換。5.1 (Cross-Dim Summary) と 5.4 (120-Cell) は独自内容のため保持。32 ページ維持
+- **Acknowledgements ORCID / COI 宣言** → 未対応（本人情報待ち）
+
 ### 推奨フロー
 
-**現状（2026-05-17）**：Opus 4.7 レビューの 5 主要点すべて完了。
+**現状（2026-05-17）**：Opus 4.7 レビューの 5 主要点 + Minor 改善 3 件すべて完了。
 → **CGTA 投稿可能な状態**（DCG 狙いなら 600-cell の更に厳密な structural lemma も検討）。
-arXiv 投稿はいつでも可能。
+arXiv 投稿はいつでも可能。ORCID/COI は誌指定で必要なら追加。
 
 ### 投稿候補ジャーナル
 
