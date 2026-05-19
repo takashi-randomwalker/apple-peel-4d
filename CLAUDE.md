@@ -291,15 +291,30 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 
 ページ数: 32 → 34（MW3 の Prop+Proof+Remark 追加で +1，MW5 の fallback motivation で +1）。
 
-### Kaino2019 ページ番号要確認
+### Kaino2019 ページ番号
 
-書誌調査エージェントが「あなたの draft = 142-145 vs arXiv:2604.16204 = 25-30」の **conflict** を検出．現在 142-145 を維持しているが，原本（congress proceedings の物理コピー）で確認推奨．
+書誌調査エージェントが「あなたの draft = 142-145 vs arXiv:2604.16204 = 25-30」の conflict を検出したが，**著者本人が 142-145 を確認済み**（2026-05-19）．
+
+### 2026-05-19 追加修正（Opus 4.7 第2回精査）
+
+| 修正 | 内容 |
+|------|------|
+| Section 4.1 cell-centroid-up | 「face に整合しない・w 軸周りの残留自由度がある」を明記；3D face-up との比較（SO(2) 残留は不変）；(C1,C2) ペアが参照フレームを暗黙に固定する点を説明 |
+| Section 6.1 Discussion | first-neighbor shell 段落を新設：全正多胞体で隣接セルの w が等値（対称性安定化部分群）→ max-w は識別不能 → geo-score が決定；4D Det が c1=(0,0,0,w1) の下で -w1·det_xyz に還元；120-cell の "universal inner core" を説明 |
+| Table 7 本文言及 | Figure 4d-nets の後に Table summary への参照を自然な文脈で追加 |
+| クロスリファレンス修正 | Section 5.1・Conclusion の `sec:4d` → `sec:discussion`（600-cell worked example の実際の位置） |
+| US 綴り統一 | neighbour→neighbor（7箇所），realisation→realization（8箇所），analysed/summarised/characterising/minimising/maximising → 米英対応 |
+| Section 4.3 | 「cells are large」→ 曲率蓄積による自己交差の正確な説明に修正 |
+| Section 5.2 | "Across all 12 orderings" → "For a fixed starting cell" |
+| "second band" 残留 | "second band onwards" → "once the algorithm leaves the first-neighbor shell (at k=14, ...)" |
+| compare_3d4d_band1.m | 120-cell first-neighbor shell 検証スクリプト新規作成・実行 |
+
+ページ数：34 → 35（first-neighbor shell 段落追加）．
 
 ### 推奨フロー
 
-**現状（2026-05-17）**：Opus 4.7 レビュー 5 点 + Minor 4 件 + Sonnet 4.6 追加レビュー 9 点 = **全 18 点**を完了．
-→ **CGTA submittable**（DCG 狙いなら 600-cell の rigorous structural lemma + Kaino ページ番号確認）．
-arXiv 投稿はいつでも可能．S. Chaidee の ORCID が判明次第追記．
+**現状（2026-05-19）**：Opus 4.7 第1回 5 点 + Minor 4 件 + Sonnet 4.6 追加 9 点 + Opus 4.7 第2回 9 点 = **全 27 点**を完了．Kaino ページ番号確認済み．DCG は狙わない方針．
+→ **CGTA submittable**．arXiv 投稿はいつでも可能．S. Chaidee の ORCID が判明次第追記．
 
 ### 投稿候補ジャーナル
 
