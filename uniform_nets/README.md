@@ -123,6 +123,36 @@ degree. The separating-axis test was checked to agree with a volume-based
 intersection test — same verdicts and the same number of intersecting pairs —
 on all 1,893 roots of the 30 polytopes of the $A_4$, $B_4$ and $F_4$ families.
 
-Full results over all 24,487 roots, not just the roots exported here, are in
-`wythoff_bfs_allroots.mx`, `h4_bfs_allroots.mx`, `special_bfs_allroots.mx` and
-`prisms_bfs_allroots.mx`.
+## allroots.csv
+
+`manifest.csv` describes only the 67 nets exported here. `allroots.csv` has the
+full result set behind Section 4 of the paper: **one row per root cell of every
+polytope, 24,487 rows**, of which 21,584 are valid and 2,903 self-intersect.
+
+| column | meaning |
+|---|---|
+| `coxeter_symbol`, `name`, `family`, `cells` | as in `manifest.csv` |
+| `root` | the root cell, from 1 to `cells` |
+| `verdict` | `valid` or `self-intersecting` |
+| `intersecting_pairs` | pairs of cells whose interiors overlap |
+| `intersection_test` | `volume` or `sat`, see below |
+
+Only three polytopes have a row that is not `valid`:
+
+```
+x3o4o3x      0 / 240  valid    runcinated 24-cell
+x5o3x3x     47 / 2640 valid    runcitruncated 600-cell
+x5x3o3x   2570 / 2640 valid    runcitruncated 120-cell
+```
+
+`intersection_test` records which of the two tests produced the row. The
+volume test measures the volume of the intersection of two cells; the
+separating-axis test is the fast equivalent used for the larger families. They
+were checked to agree on the 1,893 rows where both were run, on the verdict and
+on `intersecting_pairs`, and again on a sample of the root-dependent cases.
+The column is kept so that the provenance of every row is explicit.
+
+The underlying Mathematica results, including the bounding-box candidate counts
+that the CSV omits, are in `wythoff_bfs_allroots.mx`, `h4_bfs_allroots.mx`,
+`special_bfs_allroots.mx` and `prisms_bfs_allroots.mx`. Those are not in the
+repository — regenerate them with the run scripts, or use `allroots.csv`.
