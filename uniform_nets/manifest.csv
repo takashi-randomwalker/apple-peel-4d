@@ -1,0 +1,68 @@
+"file","coxeter_symbol","name","family","cells","root","verdict","intersecting_pairs","net_vertices","net_faces","stl_triangles"
+"o3o3o3x_root1","o3o3o3x","t_{3}{3,3,3}","Wythoffian",5,1,"valid",0,8,20,20
+"o3o3x3o_root1","o3o3x3o","t_{2}{3,3,3}","Wythoffian",10,1,"valid",0,23,60,60
+"o3o3x3x_root1","o3o3x3x","t_{2,3}{3,3,3}","Wythoffian",10,1,"valid",0,41,60,120
+"o3x3o3x_root1","o3x3o3x","t_{1,3}{3,3,3}","Wythoffian",20,1,"valid",0,83,160,220
+"o3x3x3o_root1","o3x3x3o","t_{1,2}{3,3,3}","Wythoffian",10,1,"valid",0,78,80,200
+"o3x3x3x_root1","o3x3x3x","t_{1,2,3}{3,3,3}","Wythoffian",20,1,"valid",0,146,160,400
+"x3o3o3x_root1","x3o3o3x","t_{0,3}{3,3,3}","Wythoffian",30,1,"valid",0,63,140,200
+"x3o3x3x_root1","x3o3x3x","t_{0,2,3}{3,3,3}","Wythoffian",30,1,"valid",0,177,240,480
+"x3x3x3x_root1","x3x3x3x","t_{0,1,2,3}{3,3,3}","Wythoffian",30,1,"valid",0,330,300,840
+"o4o3o3x_root1","o4o3o3x","t_{3}{4,3,3}","Wythoffian",16,1,"valid",0,19,64,64
+"o4o3x3o_root1","o4o3x3o","t_{2}{4,3,3}","Wythoffian",24,1,"valid",0,75,192,192
+"o4o3x3x_root1","o4o3x3x","t_{2,3}{4,3,3}","Wythoffian",24,1,"valid",0,141,192,384
+"o4x3o3o_root1","o4x3o3o","t_{1}{4,3,3}","Wythoffian",24,1,"valid",0,87,176,224
+"o4x3o3x_root1","o4x3o3x","t_{1,3}{4,3,3}","Wythoffian",48,1,"valid",0,315,480,768
+"o4x3x3o_root1","o4x3x3o","t_{1,2}{4,3,3}","Wythoffian",24,1,"valid",0,276,240,672
+"o4x3x3x_root1","o4x3x3x","t_{1,2,3}{4,3,3}","Wythoffian",48,1,"valid",0,534,480,1344
+"x4o3o3o_root1","x4o3o3o","t_{0}{4,3,3}","Wythoffian",8,1,"valid",0,36,48,96
+"x4o3o3x_root1","x4o3o3x","t_{0,3}{4,3,3}","Wythoffian",80,1,"valid",0,226,416,704
+"x4o3x3o_root1","x4o3x3o","t_{0,2}{4,3,3}","Wythoffian",56,1,"valid",0,284,496,736
+"x4o3x3x_root1","x4o3x3x","t_{0,2,3}{4,3,3}","Wythoffian",80,1,"valid",0,639,736,1600
+"x4x3o3o_root1","x4x3o3o","t_{0,1}{4,3,3}","Wythoffian",24,1,"valid",0,167,176,416
+"x4x3o3x_root1","x4x3o3x","t_{0,1,3}{4,3,3}","Wythoffian",80,1,"valid",0,633,736,1600
+"x4x3x3o_root1","x4x3x3o","t_{0,1,2}{4,3,3}","Wythoffian",56,1,"valid",0,511,496,1312
+"x4x3x3x_root1","x4x3x3x","t_{0,1,2,3}{4,3,3}","Wythoffian",80,1,"valid",0,1122,928,2752
+"o3x4o3x_root1","o3x4o3x","t_{1,3}{3,4,3}","Wythoffian",144,1,"valid",0,891,1440,2304
+"o3x4x3o_root1","o3x4x3o","t_{1,2}{3,4,3}","Wythoffian",48,1,"valid",0,891,672,2112
+"o3x4x3x_root1","o3x4x3x","t_{1,2,3}{3,4,3}","Wythoffian",144,1,"valid",0,1590,1440,4032
+"x3o4o3x_root1","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,1,"self-intersecting",5,654,1344,1920
+"x3o4x3x_root1","x3o4x3x","t_{0,2,3}{3,4,3}","Wythoffian",240,1,"valid",0,1886,2208,4800
+"x3x4x3x_root1","x3x4x3x","t_{0,1,2,3}{3,4,3}","Wythoffian",240,1,"valid",0,3330,2784,8256
+"o5o3o3x_root1","o5o3o3x","t_{3}{5,3,3}","Wythoffian",600,1,"valid",0,603,2400,2400
+"o5o3x3o_root1","o5o3x3o","t_{2}{5,3,3}","Wythoffian",720,1,"valid",0,2883,7200,7200
+"o5o3x3x_root1","o5o3x3x","t_{2,3}{5,3,3}","Wythoffian",720,1,"valid",0,6027,7200,14400
+"o5x3o3o_root1","o5x3o3o","t_{1}{5,3,3}","Wythoffian",720,1,"valid",0,3611,6240,9120
+"o5x3o3x_root1","o5x3o3x","t_{1,3}{5,3,3}","Wythoffian",1440,1,"valid",0,12579,17280,30240
+"o5x3x3o_root1","o5x3x3o","t_{1,2}{5,3,3}","Wythoffian",720,1,"valid",0,10288,8640,25920
+"o5x3x3x_root1","o5x3x3x","t_{1,2,3}{5,3,3}","Wythoffian",1440,1,"valid",0,21222,17280,51840
+"x5o3o3o_root1","x5o3o3o","t_{0}{5,3,3}","Wythoffian",120,1,"valid",0,1805,1440,4320
+"x5o3o3x_root1","x5o3o3x","t_{0,3}{5,3,3}","Wythoffian",2640,1,"valid",0,8523,14880,27840
+"x5o3x3o_root1","x5o3x3o","t_{0,2}{5,3,3}","Wythoffian",1920,1,"valid",0,10837,18240,28320
+"x5o3x3x_root1","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,1,"valid",0,25321,26880,61440
+"x5x3o3o_root1","x5x3o3o","t_{0,1}{5,3,3}","Wythoffian",720,1,"valid",0,6631,6240,16320
+"x5x3o3x_root1","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,1,"valid",0,24549,26880,61440
+"x5x3x3o_root1","x5x3x3o","t_{0,1,2}{5,3,3}","Wythoffian",1920,1,"valid",0,19260,18240,49920
+"x5x3x3x_root1","x5x3x3x","t_{0,1,2,3}{5,3,3}","Wythoffian",2640,1,"valid",0,42850,34080,104640
+"s3s4o3o_root1","s3s4o3o","snub 24-cell","diminished 600-cell",144,1,"valid",0,339,960,960
+"gap_root1","gap","grand antiprism","diminished 600-cell",320,1,"valid",0,423,1440,1520
+"Tetrahedron_prism_root1","Tetrahedron_prism","Tetrahedron prism","prism",6,1,"valid",0,17,28,40
+"Octahedron_prism_root1","Octahedron_prism","Octahedron prism","prism",10,1,"valid",0,33,56,80
+"Dodecahedron_prism_root1","Dodecahedron_prism","Dodecahedron prism","prism",14,1,"valid",0,95,108,264
+"Icosahedron_prism_root1","Icosahedron_prism","Icosahedron prism","prism",22,1,"valid",0,81,140,200
+"TruncatedTetrahedron_prism_root1","TruncatedTetrahedron_prism","TruncatedTetrahedron prism","prism",10,1,"valid",0,57,68,152
+"Cuboctahedron_prism_root1","Cuboctahedron_prism","Cuboctahedron prism","prism",16,1,"valid",0,68,104,176
+"TruncatedCube_prism_root1","TruncatedCube_prism","TruncatedCube prism","prism",16,1,"valid",0,112,128,320
+"TruncatedOctahedron_prism_root1","TruncatedOctahedron_prism","TruncatedOctahedron prism","prism",16,1,"valid",0,116,128,320
+"Rhombicuboctahedron_prism_root1","Rhombicuboctahedron_prism","Rhombicuboctahedron prism","prism",28,1,"valid",0,140,200,368
+"TruncatedCuboctahedron_prism_root1","TruncatedCuboctahedron_prism","TruncatedCuboctahedron prism","prism",28,1,"valid",0,236,248,656
+"SnubCube_prism_root1","SnubCube_prism","SnubCube prism","prism",40,1,"valid",0,165,272,416
+"Icosidodecahedron_prism_root1","Icosidodecahedron_prism","Icosidodecahedron prism","prism",34,1,"valid",0,175,248,464
+"TruncatedDodecahedron_prism_root1","TruncatedDodecahedron_prism","TruncatedDodecahedron prism","prism",34,1,"valid",0,290,308,824
+"TruncatedIcosahedron_prism_root1","TruncatedIcosahedron_prism","TruncatedIcosahedron prism","prism",34,1,"valid",0,295,308,824
+"Rhombicosidodecahedron_prism_root1","Rhombicosidodecahedron_prism","Rhombicosidodecahedron prism","prism",64,1,"valid",0,357,488,944
+"TruncatedIcosidodecahedron_prism_root1","TruncatedIcosidodecahedron_prism","TruncatedIcosidodecahedron prism","prism",64,1,"valid",0,590,608,1664
+"SnubDodecahedron_prism_root1","SnubDodecahedron_prism","SnubDodecahedron prism","prism",94,1,"valid",0,417,668,1064
+"x3o4o3x_root47","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,47,"self-intersecting",3,649,1344,1920
+"x5o3x3x_root14","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,14,"self-intersecting",1,25321,26880,61440
+"x5x3o3x_root748","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,748,"self-intersecting",1,24544,26880,61440
