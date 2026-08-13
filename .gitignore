@@ -16,6 +16,15 @@ STLs_120cell_faceup/
 # STLs_v4/ は公開対象（有効な 3D nets, 280 枚）—*.stl の例外
 !STLs_v4/
 !STLs_v4/*.stl
+# face_rotation_nets/ は公開対象（BFS nets, 全6胞体）
+!face_rotation_nets/
+!face_rotation_nets/*.stl
+# uniform_nets/ は公開対象（凸一様64種の BFS nets, 67 ケース）—*.stl の例外
+!uniform_nets/
+!uniform_nets/stl/
+!uniform_nets/stl/*.stl
+!uniform_nets/off/
+!uniform_nets/off/*.off
 
 # ============================================================
 # LaTeX コンパイル生成物
