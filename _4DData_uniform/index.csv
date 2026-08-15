@@ -1,0 +1,65 @@
+"file","coxeter_symbol","name","family","vertices","edges","faces","cells","mean_cell_degree","size_MB"
+"o3o3o3x.m","o3o3o3x","5-cell","Wythoffian",5,10,10,5,4,0.001
+"o3o3x3o.m","o3o3x3o","t_{2}{3,3,3}","Wythoffian",10,30,30,10,6,0.002
+"o3o3x3x.m","o3o3x3x","t_{2,3}{3,3,3}","Wythoffian",20,40,30,10,6,0.003
+"o3x3o3x.m","o3x3o3x","t_{1,3}{3,3,3}","Wythoffian",30,90,80,20,8,0.005
+"o3x3x3o.m","o3x3x3o","t_{1,2}{3,3,3}","Wythoffian",30,60,40,10,8,0.004
+"o3x3x3x.m","o3x3x3x","t_{1,2,3}{3,3,3}","Wythoffian",60,120,80,20,8,0.008
+"x3o3o3x.m","x3o3o3x","t_{0,3}{3,3,3}","Wythoffian",20,60,70,30,4.67,0.004
+"x3o3x3x.m","x3o3x3x","t_{0,2,3}{3,3,3}","Wythoffian",60,150,120,30,8,0.009000000000000001
+"x3x3x3x.m","x3x3x3x","t_{0,1,2,3}{3,3,3}","Wythoffian",120,240,150,30,10,0.016
+"o4o3o3x.m","o4o3o3x","16-cell","Wythoffian",8,24,32,16,4,0.001
+"o4o3x3o.m","o4o3x3o","t_{2}{4,3,3}","Wythoffian",24,96,96,24,8,0.005
+"o4o3x3x.m","o4o3x3x","t_{2,3}{4,3,3}","Wythoffian",48,120,96,24,8,0.007
+"o4x3o3o.m","o4x3o3o","t_{1}{4,3,3}","Wythoffian",32,96,88,24,7.33,0.006
+"o4x3o3x.m","o4x3o3x","t_{1,3}{4,3,3}","Wythoffian",96,288,240,48,10,0.017
+"o4x3x3o.m","o4x3x3o","t_{1,2}{4,3,3}","Wythoffian",96,192,120,24,10,0.013000000000000001
+"o4x3x3x.m","o4x3x3x","t_{1,2,3}{4,3,3}","Wythoffian",192,384,240,48,10,0.027
+"x4o3o3o.m","x4o3o3o","tesseract","Wythoffian",16,32,24,8,6,0.001
+"x4o3o3x.m","x4o3o3x","t_{0,3}{4,3,3}","Wythoffian",64,192,208,80,5.2,0.011
+"x4o3x3o.m","x4o3x3o","t_{0,2}{4,3,3}","Wythoffian",96,288,248,56,8.86,0.016
+"x4o3x3x.m","x4o3x3x","t_{0,2,3}{4,3,3}","Wythoffian",192,480,368,80,9.200000000000001,0.029
+"x4x3o3o.m","x4x3o3o","t_{0,1}{4,3,3}","Wythoffian",64,128,88,24,7.33,0.008
+"x4x3o3x.m","x4x3o3x","t_{0,1,3}{4,3,3}","Wythoffian",192,480,368,80,9.200000000000001,0.032
+"x4x3x3o.m","x4x3x3o","t_{0,1,2}{4,3,3}","Wythoffian",192,384,248,56,8.86,0.027
+"x4x3x3x.m","x4x3x3x","t_{0,1,2,3}{4,3,3}","Wythoffian",384,768,464,80,11.6,0.054
+"o3x4o3x.m","o3x4o3x","t_{1,3}{3,4,3}","Wythoffian",288,864,720,144,10,0.056
+"o3x4x3o.m","o3x4x3o","t_{1,2}{3,4,3}","Wythoffian",288,576,336,48,14,0.042
+"o3x4x3x.m","o3x4x3x","t_{1,2,3}{3,4,3}","Wythoffian",576,1152,720,144,10,0.08700000000000001
+"x3o4o3x.m","x3o4o3x","runcinated 24-cell","Wythoffian",144,576,672,240,5.6000000000000005,0.04
+"x3o4x3x.m","x3o4x3x","t_{0,2,3}{3,4,3}","Wythoffian",576,1440,1104,240,9.200000000000001,0.10300000000000001
+"x3x4x3x.m","x3x4x3x","t_{0,1,2,3}{3,4,3}","Wythoffian",1152,2304,1392,240,11.6,0.177
+"o5o3o3x.m","o5o3o3x","600-cell","Wythoffian",120,720,1200,600,4,0.058
+"o5o3x3o.m","o5o3x3o","t_{2}{5,3,3}","Wythoffian",720,3600,3600,720,10,0.231
+"o5o3x3x.m","o5o3x3x","t_{2,3}{5,3,3}","Wythoffian",1440,4320,3600,720,10,0.319
+"o5x3o3o.m","o5x3o3o","t_{1}{5,3,3}","Wythoffian",1200,3600,3120,720,8.67,0.263
+"o5x3o3x.m","o5x3o3x","t_{1,3}{5,3,3}","Wythoffian",3600,10800,8640,1440,12,0.8140000000000001
+"o5x3x3o.m","o5x3x3o","t_{1,2}{5,3,3}","Wythoffian",3600,7200,4320,720,12,0.595
+"o5x3x3x.m","o5x3x3x","t_{1,2,3}{5,3,3}","Wythoffian",7200,14400,8640,1440,12,1.212
+"x5o3o3o.m","x5o3o3o","120-cell","Wythoffian",600,1200,720,120,12,0.09
+"x5o3o3x.m","x5o3o3x","t_{0,3}{5,3,3}","Wythoffian",2400,7200,7440,2640,5.64,0.632
+"x5o3x3o.m","x5o3x3o","t_{0,2}{5,3,3}","Wythoffian",3600,10800,9120,1920,9.5,0.837
+"x5o3x3x.m","x5o3x3x","runcitruncated 600-cell","Wythoffian",7200,18000,13440,2640,10.18,1.494
+"x5x3o3o.m","x5x3o3o","t_{0,1}{5,3,3}","Wythoffian",2400,4800,3120,720,8.67,0.403
+"x5x3o3x.m","x5x3o3x","runcitruncated 120-cell","Wythoffian",7200,18000,13440,2640,10.18,1.495
+"x5x3x3o.m","x5x3x3o","t_{0,1,2}{5,3,3}","Wythoffian",7200,14400,9120,1920,9.5,1.247
+"x5x3x3x.m","x5x3x3x","t_{0,1,2,3}{5,3,3}","Wythoffian",14400,28800,17040,2640,12.91,2.531
+"s3s4o3o.m","s3s4o3o","snub 24-cell","diminished 600-cell",96,432,480,144,6.67,0.025
+"gap.m","gap","grand antiprism","diminished 600-cell",100,500,720,320,4.5,0.035
+"Tetrahedron_prism.m","Tetrahedron_prism","Tetrahedron_prism","prism",8,16,14,6,4.67,0.001
+"Octahedron_prism.m","Octahedron_prism","Octahedron_prism","prism",12,30,28,10,5.6000000000000005,0.001
+"Dodecahedron_prism.m","Dodecahedron_prism","Dodecahedron_prism","prism",40,80,54,14,7.71,0.005
+"Icosahedron_prism.m","Icosahedron_prism","Icosahedron_prism","prism",24,72,70,22,6.36,0.004
+"TruncatedTetrahedron_prism.m","TruncatedTetrahedron_prism","TruncatedTetrahedron_prism","prism",24,48,34,10,6.8,0.003
+"Cuboctahedron_prism.m","Cuboctahedron_prism","Cuboctahedron_prism","prism",24,60,52,16,6.5,0.003
+"TruncatedCube_prism.m","TruncatedCube_prism","TruncatedCube_prism","prism",48,96,64,16,8,0.006
+"TruncatedOctahedron_prism.m","TruncatedOctahedron_prism","TruncatedOctahedron_prism","prism",48,96,64,16,8,0.005
+"Rhombicuboctahedron_prism.m","Rhombicuboctahedron_prism","Rhombicuboctahedron_prism","prism",48,120,100,28,7.140000000000001,0.006
+"TruncatedCuboctahedron_prism.m","TruncatedCuboctahedron_prism","TruncatedCuboctahedron_prism","prism",96,192,124,28,8.86,0.012
+"SnubCube_prism.m","SnubCube_prism","SnubCube_prism","prism",48,144,136,40,6.8,0.009000000000000001
+"Icosidodecahedron_prism.m","Icosidodecahedron_prism","Icosidodecahedron_prism","prism",60,150,124,34,7.29,0.009000000000000001
+"TruncatedDodecahedron_prism.m","TruncatedDodecahedron_prism","TruncatedDodecahedron_prism","prism",120,240,154,34,9.06,0.016
+"TruncatedIcosahedron_prism.m","TruncatedIcosahedron_prism","TruncatedIcosahedron_prism","prism",120,240,154,34,9.06,0.016
+"Rhombicosidodecahedron_prism.m","Rhombicosidodecahedron_prism","Rhombicosidodecahedron_prism","prism",120,300,244,64,7.62,0.018000000000000002
+"TruncatedIcosidodecahedron_prism.m","TruncatedIcosidodecahedron_prism","TruncatedIcosidodecahedron_prism","prism",240,480,304,64,9.5,0.031
+"SnubDodecahedron_prism.m","SnubDodecahedron_prism","SnubDodecahedron_prism","prism",120,360,334,94,7.11,0.023

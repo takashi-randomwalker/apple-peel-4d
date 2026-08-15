@@ -10,6 +10,11 @@ parent's 3D hyperplane. The result is a set of polyhedra in 3-space.
 Nets of the six *regular* 4-polytopes are in [`../face_rotation_nets/`](../face_rotation_nets/).
 This directory covers the uniform case.
 
+The polytopes these nets were unfolded from — vertex coordinates and the full
+face lattice, one file per polytope — are in
+[`../_4DData_uniform/`](../_4DData_uniform/). Start there if you want to run
+the unfolding yourself rather than look at its output.
+
 ## Contents
 
 ```
