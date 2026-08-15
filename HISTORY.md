@@ -404,6 +404,12 @@ k=14 以降で分岐。
 | 2026-05-14 | 120胞体 RZ nets 幾何学的多様性解析；自己交差構造解析（帯間 71.4% / 帯内 28.6%）；帯境界代替エントリー検証（代替なし）；`paper_draft.tex` 全体レビュー・投稿準備 |
 | 2026-05-15 | Discussion 末尾に「Relation to the Companion Implementation」追加；`summary.tex` に対応節追加；コンパニオン論文との実装差異整理 |
 | 2026-05-16 | 論文タイトル変更，Introduction 平文化，Section 3.3/3.4/3.5 順序入れ替え，Discussion 副節整理；git 初期化・初期コミット；LICENSE（MIT）・README.md 作成；`STLs_v4/` を git に追加；`paper_draft.tex` は git 追跡から除外（arXiv 公開後に追加予定） |
+| 2026-06-09 | Face-rotation BFS ネットの全6正凸4-多胞体検証（773/773 有効）；RegionMember バグ発見・修正；arXiv ドラフト `face_rotation_net_paper.tex` 作成・校正 |
+| 2026-06-11 | 3D ランダム多面体実験：Delaunay vs Voronoi 比較（N=30），N スケーリング（N=20–200），Thomson 緩和実験；主結論「成功率は面推移性（対称性）が決定的，幾何的均一性は無関係」 |
+| 2026-08-11 | Stella4D 調査（4D ネット表示ソフト，重なり判定は非対応）；`face_rotation_net_paper.tex` に `\bibitem{Webb2026}` と §2.1 の言及を追加；§4 に凸一様64種への拡張を Open Problem として追記（`\bibitem{ConwayGuy1965}`） |
+| 2026-08-12 | `uniform4D_wythoff.m` 作成（A₄/B₄/F₄ → H₄）；A₄/B₄/F₄ 30種を全根計算（29種 ALL VALID・x3o4o3x のみ 0/240）；`uniform4D_special.m`（snub 24-cell・grand antiprism）；ridge 検出を O(C²) → 放物型軌道に書き換えて H₄ 到達 |
+| 2026-08-13 | `bfs_sat.m` で SAT 移植（19.8→1.5 秒/根）；H₄ 全21,600根計算 → **二分法が反証される**（MIXED 2種）；`uniform4D_prisms.m` で角柱17種；凸一様64種・24,487根が確定；論文を §4 独立節に改稿・タイトル変更・Figure 2 追加；`uniform_nets/` に STL/OFF 67件と `allroots.csv` を公開 |
+| 2026-08-15 | `_4DData_uniform/` に64種の組合せデータを公開（5要素形式）；リポジトリのサイズ実測と方針整理 |
 
 ### 検討済・対象外
 
@@ -420,12 +426,83 @@ k=14 以降で分岐。
 
 | 優先度 | タスク |
 |:------:|--------|
-| 高 | GitHub リポジトリ作成 → `git remote add origin` → `git push` |
-| 高 | arXiv にドラフト公開（意図的に延期中，2026-05-16） |
-| 高 | 査読対応：等変性を Remark → Proposition + Proof（CGTA 投稿前） |
-| 高 | Code availability statement を `paper_draft.tex` に追加 |
-| 中 | 参考文献の追加：Schlickenrieder, Pak, Bern et al. など |
+| 高 | MIXED 2種（x5o3x3x, x5x3o3x）が**なぜ根に依存するか**の構造分析（2026-08-15 時点で最大の謎） |
+| 高 | JCDCG³ 2026 発表内容と改稿後論文の整合（方針：`And more results...` の形で部分的に新情報） |
+| 中 | S. Chaidee の ORCID 取得・両論文に追記 |
+| 中 | 3つの結果（全根 valid / 根依存 / 全根 invalid）を分ける不変量の探索 |
 | 低 | Kaino (2019) との内容面の比較（未実施） |
+
+**2026-08-15 に完了扱いへ移した項目**
+
+| 旧タスク | 現状 |
+|---------|------|
+| GitHub リポジトリ作成 → push | 完了。<https://github.com/takashi-randomwalker/apple-peel-4d> |
+| arXiv に apple-peel ドラフト公開 | 完了。**arXiv:2605.30373** |
+| arXiv に face-rotation BFS ドラフト公開 | 投稿済み **submit/7751072**（2026-06-25，cs.CG）。**on hold のまま**。help@ に2回問い合わせ済みだが動かず。JCDCG³ 採択済みのため本筋の損失はないと判断し放置 |
+
+---
+
+## Face-rotation BFS ネット（2026-06-09 セッション）
+
+### 動機
+
+Apple-peel とは独立に，BFS spanning tree + 共有面周り回転という単純な展開法を全6正凸4-多胞体に適用した。Devadoss & Harvey (2022) が 5/8/16-cell で証明した "all spanning trees valid" の open cases（24/120/600-cell）を BFS の範囲で解決することが目的。
+
+### 調査・計算の経緯
+
+1. **120-cell のみ確認**（セッション前半）：`face_rotation_net_120cell.m` で 120/120 有効を確認。BFS layer 0–9 構造も可視化。
+2. **600-cell**：`face_rotation_net_600cell.m` を新規作成 → 初回結果 0/600（後でバグ判明）。
+3. **5/8/16/24-cell**：`face_rotation_net_small4D.m` を新規作成 → 5/5，8/8 有効，16/16 と 24/24 は 0（後でバグ判明）。
+4. **D&H との不整合発見**：D&H が 16-cell "all spanning trees valid" と証明しているのに 0/16 は矛盾 → 詳細調査へ。
+5. **バグ発見**（`check_16cell_detail.m`）：
+   - RegionMember 判定：62 ペアで "hit"
+   - 境界距離検査（Test B）：0 ペア → 全ヒットが境界接触
+   - 体積基準（Test C, `RegionMeasure > eps`）：0 ペア
+   - **結論**：`RegionMember` は閉領域判定のため境界接触（共有辺・頂点）を誤って重複と扱う
+6. **修正版**（`face_rotation_net_all4D_v2.m`）：`trueIntersectQ` を `RegionMeasure[RegionIntersection] > 10^-8` で実装 → 全6胞体 ALL VALID（773/773）。
+
+### バグ影響のまとめ
+
+| 多胞体 | RegionMember（誤） | RegionMeasure（正） |
+|--------|:-----------------:|:-------------------:|
+| 5-cell   |  5/5  |  5/5 |
+| 8-cell   |  8/8  |  8/8 |
+| 16-cell  | **0/16** | 16/16 |
+| 24-cell  | **0/24** | 24/24 |
+| 120-cell | 120/120 | 120/120 |
+| 600-cell | **0/600** | 600/600 |
+
+16-cell と 24-cell（正八面体セル，接触多い）および 600-cell（正四面体 600 個，非常に多くの境界接触）が影響を受けた。5-cell・8-cell・120-cell は結果不変。
+
+### 作成スクリプト
+
+| ファイル | 内容 |
+|----------|------|
+| `face_rotation_net_120cell.m` | 120-cell BFS ネット可視化（TemperatureMap 色付け） |
+| `face_rotation_net_600cell.m` | 600-cell 専用 2 フェーズ検証（bbox proxy + 全テスト） |
+| `face_rotation_net_small4D.m` | 5/8/16/24-cell 汎用検証 |
+| `check_16cell_detail.m` | RegionMember vs 体積基準 比較調査 |
+| `face_rotation_net_all4D_v2.m` | 全6胞体 体積基準統合版（**現行推奨**） |
+| `face_rotation_net_viewer.nb` | BFS アニメーション付き可視化 Notebook |
+| `face_rotation_net_paper.tex` | arXiv ドラフト論文（5 ページ） |
+
+### 論文の内容
+
+タイトル："Face-Rotation BFS Nets of the Six Regular Convex 4-Polytopes"
+
+- Theorem 1（Main）：全6正凸4-多胞体の任意の根から生成した face-rotation BFS ネットは有効
+- Algorithm 1（UnfoldTransform）：4D アフィン変換の疑似コード
+- 重要な方法論注記：体積基準 vs RegionMember の違い（Definition + Remark）
+- Apple-peel 対比表（120-cell: ordering 1440/1440 成功 → net 0/1440，BFS 120/120；600-cell: ordering 0/2400，BFS 600/600）
+- Open problems：(1) 理論的証明，(2) 全スパニングツリーへの拡張，(3) 非正則 4-多胞体
+
+### 参考文献（face-rotation 論文）
+
+- Devadoss & Harvey (2022): CGTA, vol 111, article 101977, 2023; arXiv:2111.01359
+- Coxeter (1973): Regular Polytopes, Dover
+- Shephard (1975): Dürer conjecture
+- Turney (1984): Journal of Recreational Mathematics, 17(1):1–16（超立方体 261 ネット）
+- Yoshino & Chaidee (2026): arXiv:2605.30373（companion apple-peel paper，2026-06-01 公開済み）
 
 ---
 
@@ -481,3 +558,148 @@ k=14 以降で分岐。
 | Perfect/Possible/Impossible 定義を前出し | Section 3 冒頭 |
 | Discussion 新節「Spiral vs. Zonal Strategy in Four Dimensions」 | 4D で RS が劣化する構造的理由 |
 | Kaino (2019) との比較追記 | `\bibitem{Kaino2019}` 追加；各セクション（Dodecahedron, 5-cell, 120-cell, 600-cell）に対比文 |
+
+---
+
+## 3D ランダム多面体実験（2026-06-11 セッション）
+
+### 動機
+
+4D 正多胞体の Delaunay 類（16-cell/600-cell = Possible/Impossible）と Voronoi 類（8-cell/120-cell = Perfect）の差が 3D でも再現するか確認。さらに，反発型確率過程（Thomson 問題）で点の分布を均一化した際の成功率変化を調査。
+
+### 実験 A：Delaunay vs Voronoi 比較（N=30，20 試行）
+
+```mathematica
+pts = Table[sphericalRandom[], {N}];
+m   = ConvexHullMesh[pts];      (* Delaunay：全三角形，3-正則 *)
+p   = DualPolyhedron[m];        (* Voronoi 双対：混合多角形，平均次数≈6-12/N *)
+```
+
+| 条件 | RS | RZ |
+|------|---:|---:|
+| Delaunay（|F|≈2N-4=56） | ~0% | ~1% |
+| Voronoi 双対（|F|=N=30） | ~0% | ~30% |
+
+- Voronoi 双対の面次数例（N=30 シード 42）：4〜8，平均 5.6，SD≈1.2
+
+### 実験 B：N スケーリング（Del/Vor × RS/RZ）
+
+`run_random_scaling.m` による結果（nTrials = 30/20/10/5/3）：
+
+| N | Del RS | Del RZ | Vor RS | Vor RZ |
+|--:|-------:|-------:|-------:|-------:|
+| 20 | ~0% | ~1% | ~0% | ~51% |
+| 30 | ~0% | ~1% | ~0% | ~22% |
+| 50 | ~0% | ~0% | ~0% | ~9% |
+| 100 | ~0% | ~0% | ~0% | ~0.1% |
+| 200 | ~0% | ~0% | ~0% | ~0% |
+
+Voronoi RZ のみ N<50 で有意な成功率を示し，N が増えるにつれて単調に 0% へ収束。
+
+### 実験 C：Thomson 緩和（N=30，ステップ数可変）
+
+`run_repulsive_comparison.m`：Coulomb 斥力の勾配降下で球面上の点を均一化。
+
+**実験1（N=30，10 trials/level）：**
+
+| steps | VorRZ | E_C | SD(deg) |
+|------:|------:|----:|--------:|
+| 0 | 27.9% | 445.6 | 1.21 |
+| 10 | 30.6% | 438.5 | 1.22 |
+| 50 | 26.2% | 442.4 | 1.16 |
+| 200 | 25.5% | 613.1 | 1.28 |
+| 500 | 21.0% | 508.0 | 1.27 |
+| 2000 | 27.0% | 453.8 | 1.24 |
+
+E_C が非単調なのは実験設計上の問題（各 steps レベルで異なる乱数初期点，10 試行では分散大）。
+
+**実験2（N={20,30,50}，random vs Thomson steps=2000，各 10 試行）：**
+
+| N | random | Thomson |
+|--:|-------:|--------:|
+| 20 | 44.7% | 43.9% |
+| 30 | 32.6% | 22.1% |
+| 50 | 5.9% | 6.5% |
+
+差はいずれも統計誤差（σ≈5–10%）の範囲内。
+
+### 主結論
+
+1. **面推移性（対称性）が支配的因子**：Thomson 均一化（点の等間隔化）は成功率を改善しない。正多胞体が Perfect なのは点配置の均一さではなく，面推移群による等変性（0% or 100% 二択）が理由。
+2. **スケールが支配的**：N が大きくなるほど成功率は 0% へ収束。面が六角形に近づいても効果なし。
+3. **4D との対比**：Delaunay（3-正則）≈ 16-cell，Voronoi（6-正則）≈ 8-cell という対応が 3D でも成立。
+4. **論文 Future Work への含意**：「S² ランダム凸包での scaling 解析」の実証的基盤として位置付けられる。
+
+---
+
+## 凸一様4-多胞体への拡張（2026-08-11〜15 セッション）
+
+### 発端
+
+Stella4D（4D 多胞体の 3D ネットを表示できる唯一の主要ソフト）の調査から始まった。マニュアル §15.8 に「in 4D ... intersections between cells are ignored」とあり，**重なり判定は射程外**＝論文の貢献は先取りされていないと確認。引用を追加した際に，§4 Open Problems の「非正則への拡張」を漠然とした一文から**凸一様多胞体64種**という具体的な目標に書き換えた。それが実際にやってみる流れになった。
+
+### 経緯と，覆った2つの見立て
+
+**第1段階（A₄/B₄/F₄ 30種・1,893根）**：29種が全根 valid，runcinated 24-cell (x3o4o3x) のみ全240根 invalid。**MIXED がゼロ**だった。これを「二分法が正則性を超えて現れる」＝最大の発見として記録した。apple-peel 論文の Proposition 3.1（面推移的な立体は 0% か 100%）と同型の現象に見えたため。
+
+**第2段階（H₄ 15種を root 1 のみ）**：15/15 が VALID。全根は 2640セル級で15時間かかると見積もり，「30種すべてで全か無かだったので root 1 は強い指標」と述べた。
+
+**第3段階（H₄ 全21,600根）**：**両方の見立てが誤りだった。**
+
+- **二分法は反証された**。x5o3x3x が 47/2640，x5x3o3x が 2570/2640 で MIXED
+- **root 1 は指標にならない**。x5o3x3x は root 1 で VALID だったが，実際には 2640根中47根しか valid でない。root 1 がたまたま当たりだった
+
+x5x3o3x の失敗根は重なりペアが1個ちょうどだったため，SAT の eps（10⁻⁶）が判定を決めている可能性を疑い，`verify_mixed_h4.m` で裏を取った。失敗根5個・成功根3個 × 2多胞体の16根で **SAT と RegionMeasure が判定・重なり数とも完全一致**，eps を 10⁻⁴〜10⁻¹⁰ に振っても重なり数は不変。数値誤差ではなく本物の交差だった。
+
+**教訓**：30種・2,357根という規模でも，そこから外挿した性質（二分法）と近道（root 1 で代表させる）は両方とも外れた。全数計算を実際にやるまでは仮説として扱うべきだった。
+
+### SAT 移植：ボトルネックは予想と違った
+
+H₄ 全根を可能にするため `RegionMeasure[RegionIntersection[...]]` を分離軸判定に置き換えた（`unfold3DExport.m` の実装を移植）。**ところが SAT 化だけでは 19.8 → 10.7 秒/根にしかならず，プロファイルすると SAT 判定自体の所要は 0.04 秒＝実質ゼロだった。**
+
+| 段階 | x5x3x3x（2640セル）1根あたり |
+|------|---:|
+| RegionMeasure 版 | 19.8 s |
+| SAT 化のみ | 10.7 s |
+| faceUp / 展開変換の行列積化，BFS visited の Association 化 | 8.5 s |
+| 候補ペア抽出を密行列 → 重心の半径検索に置換 | **1.5 s** |
+
+SAT 化で露出した3つのボトルネックを潰して初めて13倍に届いた。とくに候補ペア抽出は C×C の bbox 密行列比較（2640セルで700万要素×18回）が全体の7割を占めていた。「2セルが交わるには重心間距離が R_i + R_j 以下」という条件で `Nearest` の半径検索に置き換えた。
+
+**検証**：`validate_sat.m` で30種1,893根を再計算し，valid 数だけでなく**根ごとの重なりペア数の列**まで一致することを要求。30/30 MATCH。総計 773 → 85 秒（9.1倍）。
+
+### セル次数は答えではなかった
+
+当初，x3o4o3x が唯一の例外である理由を「最小セル次数5，かつ次数5のセルが8割」に求めかけた。600胞体（次数4）が apple-peel で impossible だったことと方向性が一致していたため。しかし
+
+- snub 24-cell・grand antiprism は**最小次数4なのに全根 valid**
+- 角柱は蓋セルが**次数92**に達するが全根 valid，一方 MIXED の x5x3o3x も次数32のセルを持つ
+
+で，低次数も高次数も答えではないと判明した。**3つの結果を分ける不変量は未発見。**
+
+### 生成器の設計
+
+| ファイル | 手法 |
+|----------|------|
+| `uniform4D_wythoff.m` | Coxeter 図 → Gram 行列 → Cholesky で鏡法線；群は反射の閉包；種点は「リング付き鏡から距離1，なしは0」（鏡 i が生む辺長は 2b_i なので等距離＝等辺長）；d-面は階数 d の放物型部分群の軌道 |
+| `uniform4D_special.m` | snub 24-cell と grand antiprism を**600胞体からの diminishing** として構成。除いた頂点の隣接頂点のうち生き残った分が新セル（前者は12個＝二十面体，後者は10個＝五角反柱） |
+| `uniform4D_prisms.m` | 角柱は組合せ的に直接構成（凸包計算不要）。オイラーは P の標数2から自動的に0 |
+
+**検証は文献値に依存させなかった**。B₄/F₄/H₄ の V/E/F/C を記憶で書き下すのは誤りの元なので，V = \|W\|/\|W_unringed\|，C = Σ \|W\|/\|W_Jᵢ\|，χ = 0，全 facet 超平面が支持面，各 ridge がちょうど2セル，頂点次数の一様性，を群論とオイラーから自前で予測して照合した。48/48 通過。
+
+### 副産物：`_4DData/f*.m` の形式についての発見
+
+- **第3要素は「各頂点の隣接頂点リスト」**であって「セルの頂点リスト」ではない。f5.m では頂点数5・次数4がセル数5・4頂点と偶然一致するため誤読しやすい（実際に一度誤読した）
+- **f8.m の第2要素は32本の辺を両方向で64件**列挙している（f5/f16/f24 は1回ずつ）。誰も読まないので実害なし
+- **`face_rotation_net_all4D_v2.m` は `raw[[1]], raw[[4]], raw[[6]]` の3つしか読まない**。第3・第5要素（頂点隣接・面隣接）はリポジトリ内のどこからも参照されていない。一方**ネットに必要なセル隣接は形式に含まれておらず**，毎回 `cellsF` から再計算されている
+
+この発見が `_4DData_uniform/` の5要素形式（未使用の2つを削り，セル隣接を足す）につながった。
+
+### 命名の落とし穴
+
+**x5o3x3x と x5x3o3x を一度取り違えた**（論文の草稿で 47 と 2570 を逆に書いた）。セル構成で判別すること。
+
+- x5o3x3x = $t_{0,2,3}\{5,3,3\}$ = runcitruncated **600-cell**：120 truncated icosahedra + 720 pentagonal prisms + 1200 hexagonal prisms + 600 cuboctahedra
+- x5x3o3x = $t_{0,1,3}\{5,3,3\}$ = runcitruncated **120-cell**：120 truncated dodecahedra + 720 decagonal prisms + 1200 triangular prisms + 600 cuboctahedra
+
+45種すべてに英語名を付けるのは転記ミスの元なので，公開データの name 列は**リング配置から機械生成した Schläfli t 記法**にした。
