@@ -72,21 +72,52 @@ cellPolys[unf3D_, i_] := Module[{loc},
   loc = AssociationThread[satCellIdx[[i]] -> Range[Length[satCellIdx[[i]]]]];
   Polygon[unf3D[[i]][[Lookup[loc, facesP[[#]]]]]] & /@ cellsP[[i]]];
 
-(* the two members of an intersecting pair get different colours, so the
-   interpenetration is legible; everything else is faint context *)
-hotA = RGBColor[0.82, 0.12, 0.12, 0.92];
-hotB = RGBColor[0.13, 0.35, 0.75, 0.92];
+(* The two members of an intersecting pair get different colours, so the
+   interpenetration is legible; everything else is faint context.
 
-render[unf3D_, hits_, context_, opts___] := Module[{hotSet},
+   Two styles.  "black" matches Figure 1 (260612AllFaceRotation.pdf),
+   which is white-on-black, so the context cells have to be light rather
+   than dark; the highlight colours are brightened to survive the dark
+   ground.  "white" is the same figure for a white page. *)
+style["white"] = <|
+  "bg" -> White,
+  "ctxFace" -> GrayLevel[0.85, 0.05], "ctxEdge" -> GrayLevel[0.55, 0.35],
+  "hotEdge" -> GrayLevel[0.1],
+  "hotA" -> RGBColor[0.82, 0.12, 0.12, 0.92],
+  "hotB" -> RGBColor[0.13, 0.35, 0.75, 0.92]|>;
+(* "black" is measured off Figure 1: the background there is
+   GrayLevel[0.13], not pure black, the cells are opaque light gray, and
+   no edges are drawn -- faces are separated by shading alone.  We keep
+   the no-edge treatment and the background, and trade full opacity for
+   0.25 because this figure has to show cells buried inside the net.
+   Drawn edges were tried and rejected: they accumulate into a
+   wireframe and lose Figure 1's shaded look. *)
+style["black"] = <|
+  "bg" -> GrayLevel[0.13],
+  "ctxGray" -> 0.92, "ctxEdge" -> None, "hotEdge" -> None,
+  "hotA" -> RGBColor[1.00, 0.28, 0.24, 0.95],
+  "hotB" -> RGBColor[0.35, 0.62, 1.00, 0.95]|>;
+
+(* Context opacity is per panel, not per style: it has to fall as the
+   number of overlapping cells rises.  0.25 suits panel (b), a close-up
+   of 36 cells; at panel (a)'s 240 cells the same value saturates the
+   lower half into a single white mass, and 0.13 restores it. *)
+opacityFor = <|"a" -> 0.13, "b" -> 0.25|>;
+
+render[unf3D_, hits_, context_, sty_, op_, opts___] :=
+ Module[{hotSet, s = style[sty]},
   hotSet = Union @@ hits;
   Graphics3D[{
-    EdgeForm[{Thickness[0.0008], GrayLevel[0.55, 0.35]}],
-    FaceForm[GrayLevel[0.85, 0.05]],
+    If[s["ctxEdge"] === None, EdgeForm[None],
+     EdgeForm[{Thickness[0.0008], s["ctxEdge"]}]],
+    FaceForm[If[sty === "black", GrayLevel[s["ctxGray"], op], s["ctxFace"]]],
     Table[cellPolys[unf3D, i], {i, Complement[context, hotSet]}],
-    EdgeForm[{Thickness[0.0035], GrayLevel[0.1]}],
-    Table[{FaceForm[hotA], cellPolys[unf3D, p[[1]]],
-           FaceForm[hotB], cellPolys[unf3D, p[[2]]]}, {p, hits}]},
-   Boxed -> False, Lighting -> "Neutral", ImageSize -> 520, opts]];
+    If[s["hotEdge"] === None, EdgeForm[None],
+     EdgeForm[{Thickness[0.0035], s["hotEdge"]}]],
+    Table[{FaceForm[s["hotA"]], cellPolys[unf3D, p[[1]]],
+           FaceForm[s["hotB"]], cellPolys[unf3D, p[[2]]]}, {p, hits}]},
+   Boxed -> False, Lighting -> "Neutral", ImageSize -> 520,
+   Background -> s["bg"], opts]];
 
 (* ---- panel (a): runcinated 24-cell, best root ------------------- *)
 rec24 = SelectFirst[w4BFSAll, #["sym"] === "x3o4o3x" &];
@@ -96,9 +127,9 @@ Print["panel (a): x3o4o3x  root ", best24[[1]], "  overlaps ", best24[[3]],
 setup["x3o4o3x"];
 {u24, h24} = netAtRoot[best24[[1]]];
 Print["  intersecting pairs: ", h24];
-Export[baseDir <> "fig_uniform_a.png",
-  render[u24, h24, Range[nCP], ViewPoint -> {2.2, -2.4, 1.6}],
-  ImageResolution -> 300];
+Do[Export[baseDir <> "fig_uniform_a" <> If[sty === "black", "_black", ""] <> ".png",
+   render[u24, h24, Range[nCP], sty, opacityFor["a"], ViewPoint -> {2.2, -2.4, 1.6}],
+   ImageResolution -> 300], {sty, {"white", "black"}}];
 
 (* ---- panel (b): runcitruncated 120-cell, a failing root --------- *)
 recRT = SelectFirst[h4All, #["sym"] === "x5x3o3x" &];
@@ -122,10 +153,10 @@ Module[{hot, ctr, cellR, rad, near, rng},
   Print["  median cell radius ", Round[cellR, 0.01],
         "   context radius ", Round[rad, 0.01],
         "   cells drawn: ", Length[near]];
-  Export[baseDir <> "fig_uniform_b.png",
-   render[uRT, hRT, near,
-    PlotRange -> Table[{ctr[[k]] - rng, ctr[[k]] + rng}, {k, 3}],
-    ViewPoint -> {1.8, -2.6, 1.4}],
-   ImageResolution -> 300]];
+  Do[Export[baseDir <> "fig_uniform_b" <> If[sty === "black", "_black", ""] <> ".png",
+    render[uRT, hRT, near, sty, opacityFor["b"],
+     PlotRange -> Table[{ctr[[k]] - rng, ctr[[k]] + rng}, {k, 3}],
+     ViewPoint -> {1.8, -2.6, 1.4}],
+    ImageResolution -> 300], {sty, {"white", "black"}}]];
 
 Print["\nwrote fig_uniform_a.png and fig_uniform_b.png"];
