@@ -140,23 +140,36 @@ setup["x5x3o3x"];
 {uRT, hRT} = netAtRoot[badRT[[1]]];
 Print["  intersecting pair: ", hRT];
 
-(* close-up: the offending pair plus the cells around it.  The radius is
-   set from the actual cell size rather than guessed. *)
-Module[{hot, ctr, cellR, rad, near, rng},
+(* Close-up: the offending pair plus the cells around it.  Cells are
+   picked by centroid distance, which keeps the neighborhood connected,
+   and the view range is left Automatic.
+
+   An explicit PlotRange was tried first and was wrong: a net is
+   irregular, so a cube centered on the pair always slices whatever
+   crosses its faces, and the cells appeared cut off.  Fixing it by
+   keeping only the cells that fit entirely inside the box is worse
+   still -- the neighborhood loses cells from its middle and reads as
+   floating debris rather than as part of a net.  Widening the box to
+   contain every picked cell wastes most of the frame, because one
+   outlying cell sets the scale.  With no PlotRange the view simply
+   fits what is drawn: nothing is clipped and no margin is wasted. *)
+Module[{hot, ctr, cellR, near},
   hot = Union @@ hRT;
   ctr = Mean[Join @@ uRT[[hot]]];
   cellR = Median[Table[Max[Norm[# - Mean[uRT[[i]]]] & /@ uRT[[i]]],
                        {i, nCP}]];
-  rad = 5 cellR;
-  near = Select[Range[nCP], Norm[Mean[uRT[[#]]] - ctr] < rad &];
-  rng = 3.2 cellR;
+  near = Select[Range[nCP], Norm[Mean[uRT[[#]]] - ctr] < 3 cellR &];
   Print["  median cell radius ", Round[cellR, 0.01],
-        "   context radius ", Round[rad, 0.01],
         "   cells drawn: ", Length[near]];
   Do[Export[baseDir <> "fig_uniform_b" <> If[sty === "black", "_black", ""] <> ".png",
     render[uRT, hRT, near, sty, opacityFor["b"],
-     PlotRange -> Table[{ctr[[k]] - rng, ctr[[k]] + rng}, {k, 3}],
      ViewPoint -> {1.8, -2.6, 1.4}],
     ImageResolution -> 300], {sty, {"white", "black"}}]];
+
+(* Panel (b) comes out about 17% taller than panel (a), so the two sit
+   slightly unevenly side by side.  This is not padding and cannot be
+   cropped away: the apparently empty band at the bottom of (b) holds
+   translucent cells that are faint but present.  Measured with a
+   content mask, both renders are already tight. *)
 
 Print["\nwrote fig_uniform_a.png and fig_uniform_b.png"];
