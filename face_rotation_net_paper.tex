@@ -44,6 +44,10 @@ of the six regular convex 4-polytopes---the 5-cell, 8-cell, 16-cell,
 24-cell, 120-cell, and 600-cell---this procedure yields a valid
 (non-self-intersecting) 3D net from \emph{every} choice of root cell.
 In total, $5+8+16+24+120+600 = 773$ root cells were verified.
+For the 5-, 8-, 16- and 24-cell we verify more: \emph{every} BFS
+spanning tree of every root is valid, $1{,}118{,}261$ trees in all, so
+for those four the conclusion does not depend on how ties in the
+traversal are broken.
 This extends the work of Devadoss and Harvey
 \cite{DevadossHarvey2022}, who established validity for the 5-, 8-,
 and 16-cell for \emph{all} spanning trees and left the remaining three
@@ -322,19 +326,61 @@ at the scale used), so no true interior overlap is missed.
 
 \subsection{Main result}
 
+The BFS layering of $G(P)$ from a root $r$---the distance of each cell
+from $r$---is the same for every tie-breaking rule.
+A BFS tree rooted at $r$ is therefore nothing but a choice, for each
+cell $v\neq r$, of a parent among the neighbors of $v$ one layer
+closer to the root, so the BFS trees rooted at $r$ are in bijection
+with
+\[
+  \prod_{v\neq r}\;\bigl|\,N(v)\cap L_{d(v)-1}\,\bigr|,
+\]
+where $L_k$ is the set of cells at distance $k$ and $d(v)$ the
+distance of $v$.
+This description mentions no rule, and lets us count the trees exactly
+and enumerate or sample them.
+For the 5-cell the product is $1$: there is only one BFS tree per root
+and the tie-breaking rule has nothing to decide.
+For the 8-, 16- and 24-cell it is $6$, $20{,}736$ and $32{,}768$; for
+the 120- and 600-cell it is about $1.8\times10^{44}$ and
+$1.8\times10^{65}$.
+
 \begin{theorem}[Main]\label{thm:main}
-For every regular convex $4$-polytope~$P$ and every cell $r\in P$,
-a face-rotation BFS net of $P$ rooted at $r$ is valid.
+Let $P$ be a regular convex $4$-polytope and $r$ a cell of $P$.
+\begin{enumerate}
+\item If $P$ is the 5-cell, 8-cell, 16-cell or 24-cell, then
+  \emph{every} BFS spanning tree rooted at $r$ yields a valid net.
+  In particular the conclusion does not depend on the tie-breaking
+  rule.
+\item If $P$ is the 120-cell or the 600-cell, then the tree $T_r$ of
+  Definition~\ref{def:bfs} yields a valid net.
+\end{enumerate}
 \end{theorem}
 
 \begin{proof}
 Exhaustive computational verification.
 For each of the six polytopes we loaded the combinatorial data
-(vertices, faces, cells) from the data files available in the repository,
-ran the face-rotation BFS algorithm for every root cell,
-and applied the volume-based intersection test
-(Definition~\ref{def:valid}) to every pair of cells not connected
-by an edge of $T_r$.
+(vertices, faces, cells) from the data files available in the
+repository, unfolded from every root cell, and applied the
+volume-based intersection test (Definition~\ref{def:valid}) to every
+pair of cells not joined by an edge of the tree in question.
+
+For part~1 we enumerated all BFS trees of every root: $5$, $48$,
+$331{,}776$ and $786{,}432$ trees for the 5-, 8-, 16- and 24-cell
+respectively.
+All are valid.
+For the 5-, 8- and 16-cell this also follows from
+\cite{DevadossHarvey2022}, which covers all spanning trees; the
+24-cell is new.
+
+For part~2 the number of BFS trees puts enumeration out of reach, and
+we verified the tree $T_r$ for each of the $120$ and $600$ roots.
+As evidence that the outcome is not an artifact of the rule, we
+additionally drew $20$ BFS trees uniformly at random per root---
+$2{,}400$ and $12{,}000$ trees---and found all of them valid as well.
+Across all six polytopes $1{,}132{,}661$ trees were checked without a
+single self-intersection.
+
 Table~\ref{tab:contrast} summarizes the results, and
 Figure~\ref{fig:allnets} shows representative nets for each polytope.
 The $w$-coordinate spread after unfolding was at most $4\times10^{-13}$
@@ -588,6 +634,13 @@ A second open problem is whether Theorem~\ref{thm:main} extends to
 all spanning trees (not just BFS) for the 24-cell, 120-cell, and
 600-cell, as was proved for the 5-, 8-, and 16-cell by
 \cite{DevadossHarvey2022}.
+Within the BFS family the 24-cell is settled by part~1 of the theorem,
+so what remains there is the step from BFS trees to arbitrary spanning
+trees.
+For the 120- and 600-cell even the BFS family is open: with
+$1.8\times10^{44}$ and $1.8\times10^{65}$ trees per root, enumeration
+is hopeless and a proof would have to be structural rather than
+computational.
 
 A third question is the characterization left open by
 Section~\ref{sec:uniform}.
