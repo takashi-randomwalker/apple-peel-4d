@@ -178,12 +178,17 @@ studied here---is therefore outside the scope of such tools.
 Let $G(P)$ be the cell-adjacency graph of a 4-polytope $P$ and let
 $r$ be a root cell.
 The \emph{BFS spanning tree} of $G(P)$ rooted at $r$ is the spanning
-tree $T$ obtained by breadth-first traversal from $r$: cells are
+tree $T_r$ obtained by breadth-first traversal from $r$: cells are
 discovered layer by layer, and each newly encountered cell is connected
 to the cell from which it was first reached.
 When multiple neighbors of the current frontier are simultaneously
 eligible, their relative order is determined by a fixed
-\emph{tie-breaking rule}; different rules may yield different trees.
+\emph{tie-breaking rule}.
+We fix one such rule throughout, so that $T_r$ depends on $r$ alone;
+different rules may yield different trees, which matters in
+Section~\ref{sec:uniform}.
+Note that the graph $G(P)$ itself does not depend on the root: the
+root selects a spanning tree of it.
 \end{definition}
 
 % =========================================
@@ -272,20 +277,20 @@ cells as overlapping when they share only a face, edge, or vertex
 in the net.
 This is particularly acute for pointed cells such as tetrahedra and
 octahedra, which frequently share edges and vertices with
-cells not connected by a tree edge.
+cells not connected by an edge of $T_r$.
 
 We use the following \emph{volume-based} test, which detects only
 interior overlaps.
 
 \begin{remark}
-Two cells not connected by an edge of $T$ may share a face, edge,
+Two cells not connected by an edge of $T_r$ may share a face, edge,
 or vertex in the unfolded net without overlapping in their interiors.
 A correct validity test must detect only \emph{interior} overlaps.
 \end{remark}
 
 \begin{definition}[Valid net]\label{def:valid}
 A net is \emph{valid} if for every pair of cells $(i,j)$ not
-connected by an edge of $T$,
+connected by an edge of $T_r$,
 \[
   \mathrm{Vol}_3\!\bigl(\mathrm{conv}(c_i)\cap\mathrm{conv}(c_j)\bigr)
   \;\le\; \eps_{\mathrm{vol}}
@@ -329,7 +334,7 @@ For each of the six polytopes we loaded the combinatorial data
 ran the face-rotation BFS algorithm for every root cell,
 and applied the volume-based intersection test
 (Definition~\ref{def:valid}) to every pair of cells not connected
-by a tree edge.
+by an edge of $T_r$.
 Table~\ref{tab:contrast} summarizes the results, and
 Figure~\ref{fig:allnets} shows representative nets for each polytope.
 The $w$-coordinate spread after unfolding was at most $4\times10^{-13}$
