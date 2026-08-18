@@ -179,21 +179,44 @@ Whether an unfolding is free of self-intersection---the question
 studied here---is therefore outside the scope of such tools.
 
 \begin{definition}[BFS spanning tree]\label{def:bfs}
-Let $G(P)$ be the cell-adjacency graph of a 4-polytope $P$ and let
-$r$ be a root cell.
-The \emph{BFS spanning tree} of $G(P)$ rooted at $r$ is the spanning
-tree $T_r$ obtained by breadth-first traversal from $r$: cells are
-discovered layer by layer, and each newly encountered cell is connected
-to the cell from which it was first reached.
-When multiple neighbors of the current frontier are simultaneously
-eligible, their relative order is determined by a fixed
-\emph{tie-breaking rule}.
-We fix one such rule throughout, so that $T_r$ depends on $r$ alone;
-different rules may yield different trees, which matters in
-Section~\ref{sec:uniform}.
-Note that the graph $G(P)$ itself does not depend on the root: the
-root selects a spanning tree of it.
+Let $G(P)$ be the cell-adjacency graph of a 4-polytope $P$, let $r$ be
+a root cell, and write $L_k$ for the set of cells at distance $k$ from
+$r$ in $G(P)$.
+A \emph{BFS spanning tree} rooted at $r$ is a spanning tree in which
+the parent of each cell $v\neq r$ is one of its neighbors in
+$L_{d(v)-1}$, where $d(v)$ is the distance from $r$ to $v$.
+The layers $L_k$ are determined by $P$ and $r$ alone; a BFS tree is
+exactly a choice of such a parent for each cell, and different choices
+give different trees.
+Note also that $G(P)$ itself does not depend on the root: the root
+selects a tree in it.
 \end{definition}
+
+\begin{remark}[The tree we compute]\label{rem:rule}
+Selecting the parents requires a rule, and unless stated otherwise the
+tree we compute, written $\mathcal{T}_r$, is the one produced by the textbook
+BFS loop: cells are held in a FIFO queue, the queue is initialized with
+$r$, and each time a cell is dequeued its neighbors are scanned in
+increasing cell index, every neighbor not yet seen being marked, given
+the dequeued cell as its parent, and appended to the queue.
+The parent of $v$ is thus whichever of its candidates entered the queue
+first.
+
+We spell this out because the rule is less innocent than it looks.
+The only arbitrary ingredient is the index order in which neighbors are
+scanned, but the queue order that decides parentage is derived from it
+recursively: cells at distance $d-1$ are dequeued in the order their
+own parents were, so the induced order is lexicographic along the
+discovery path rather than by index.
+It is therefore not the same as taking the smallest-indexed candidate.
+On the two polytopes of Section~\ref{sec:uniform} for which the choice
+turns out to matter, the two rules disagree on $55\%$ and $25\%$ of the
+cells that have more than one candidate.
+Neither rule has any geometric content.
+For the polytopes of part~1 of Theorem~\ref{thm:main} none of this
+matters, since \emph{every} BFS tree is valid there; where it matters
+is Section~\ref{sec:uniform}.
+\end{remark}
 
 % =========================================
 \subsection{Face-Rotation BFS Algorithm}\label{sec:algorithm}
@@ -281,20 +304,20 @@ cells as overlapping when they share only a face, edge, or vertex
 in the net.
 This is particularly acute for pointed cells such as tetrahedra and
 octahedra, which frequently share edges and vertices with
-cells not connected by an edge of $T_r$.
+cells not connected by an edge of $\mathcal{T}_r$.
 
 We use the following \emph{volume-based} test, which detects only
 interior overlaps.
 
 \begin{remark}
-Two cells not connected by an edge of $T_r$ may share a face, edge,
+Two cells not connected by an edge of $\mathcal{T}_r$ may share a face, edge,
 or vertex in the unfolded net without overlapping in their interiors.
 A correct validity test must detect only \emph{interior} overlaps.
 \end{remark}
 
 \begin{definition}[Valid net]\label{def:valid}
 A net is \emph{valid} if for every pair of cells $(i,j)$ not
-connected by an edge of $T_r$,
+connected by an edge of $\mathcal{T}_r$,
 \[
   \mathrm{Vol}_3\!\bigl(\mathrm{conv}(c_i)\cap\mathrm{conv}(c_j)\bigr)
   \;\le\; \eps_{\mathrm{vol}}
@@ -326,21 +349,16 @@ at the scale used), so no true interior overlap is missed.
 
 \subsection{Main result}
 
-The BFS layering of $G(P)$ from a root $r$---the distance of each cell
-from $r$---is the same for every tie-breaking rule.
-A BFS tree rooted at $r$ is therefore nothing but a choice, for each
-cell $v\neq r$, of a parent among the neighbors of $v$ one layer
-closer to the root, so the BFS trees rooted at $r$ are in bijection
-with
+By Definition~\ref{def:bfs} the BFS trees rooted at $r$ are in
+bijection with the parent choices, so there are exactly
 \[
-  \prod_{v\neq r}\;\bigl|\,N(v)\cap L_{d(v)-1}\,\bigr|,
+  \prod_{v\neq r}\;\bigl|\,N(v)\cap L_{d(v)-1}\,\bigr|
 \]
-where $L_k$ is the set of cells at distance $k$ and $d(v)$ the
-distance of $v$.
-This description mentions no rule, and lets us count the trees exactly
-and enumerate or sample them.
+of them.
+This count mentions no rule, and lets us enumerate or sample the trees
+without reference to one.
 For the 5-cell the product is $1$: there is only one BFS tree per root
-and the tie-breaking rule has nothing to decide.
+and a tie-breaking rule has nothing to decide.
 For the 8-, 16- and 24-cell it is $6$, $20{,}736$ and $32{,}768$; for
 the 120- and 600-cell it is about $1.8\times10^{44}$ and
 $1.8\times10^{65}$.
@@ -352,8 +370,8 @@ Let $P$ be a regular convex $4$-polytope and $r$ a cell of $P$.
   \emph{every} BFS spanning tree rooted at $r$ yields a valid net.
   In particular the conclusion does not depend on the tie-breaking
   rule.
-\item If $P$ is the 120-cell or the 600-cell, then the tree $T_r$ of
-  Definition~\ref{def:bfs} yields a valid net.
+\item If $P$ is the 120-cell or the 600-cell, then the tree $\mathcal{T}_r$ of
+  Remark~\ref{rem:rule} yields a valid net.
 \end{enumerate}
 \end{theorem}
 
@@ -374,7 +392,7 @@ For the 5-, 8- and 16-cell this also follows from
 24-cell is new.
 
 For part~2 the number of BFS trees puts enumeration out of reach, and
-we verified the tree $T_r$ for each of the $120$ and $600$ roots.
+we verified the tree $\mathcal{T}_r$ for each of the $120$ and $600$ roots.
 As evidence that the outcome is not an artifact of the rule, we
 additionally drew $20$ BFS trees uniformly at random per root---
 $2{,}400$ and $12{,}000$ trees---and found all of them valid as well.
