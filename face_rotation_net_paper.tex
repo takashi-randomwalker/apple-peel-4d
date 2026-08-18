@@ -188,9 +188,79 @@ $L_{d(v)-1}$, where $d(v)$ is the distance from $r$ to $v$.
 The layers $L_k$ are determined by $P$ and $r$ alone; a BFS tree is
 exactly a choice of such a parent for each cell, and different choices
 give different trees.
+Equivalently, a spanning tree rooted at $r$ is a BFS tree if and only
+if every path in it from $r$ is a shortest path in $G(P)$.
+We use the name for this family of trees, not for any one traversal:
+the definition above mentions no order in which cells are visited.
 Note also that $G(P)$ itself does not depend on the root: the root
 selects a tree in it.
 \end{definition}
+
+\begin{lemma}[What a traversal can reach]\label{lem:reach}
+A BFS tree rooted at $r$ is produced by some breadth-first traversal if
+and only if there is a total order $\prec$ on the cells with
+\[
+  p(v)\;=\;\min\nolimits_{\prec}\bigl(N(v)\cap L_{d(v)-1}\bigr)
+  \qquad\text{for every } v\neq r ,
+\]
+and such an order exists if and only if the digraph with an edge
+$p(v)\to q$ for every other candidate $q$ of every $v$ is acyclic.
+\end{lemma}
+
+\begin{proof}
+A traversal handles the cells of a layer in the order it dequeues them,
+and $v$ is claimed by the first of its candidates to be dequeued; that
+dequeue order is a total order, which gives one direction.
+Conversely, given $\prec$, process the layers in turn and each layer in
+increasing $\prec$: then $v$ is claimed by its $\prec$-least candidate.
+The order must satisfy $p(v)\prec q$ for every candidate $q\neq p(v)$
+of every $v$, and a total order meeting a set of such constraints
+exists exactly when they have no cycle.
+Since all candidates of $v$ lie in $L_{d(v)-1}$, the digraph splits by
+layer.
+\end{proof}
+
+\begin{remark}[The family is larger than what a traversal reaches]
+\label{rem:family}
+Lemma~\ref{lem:reach} makes the gap between the two readings of ``BFS
+tree'' measurable, and it is wide.
+Table~\ref{tab:reach} counts, for the polytopes of part~1 of
+Theorem~\ref{thm:main}, how many of the trees allowed by
+Definition~\ref{def:bfs} a traversal can reach.
+The counts are the same from every root, as cell-transitivity requires.
+
+\begin{table}[ht]
+\centering
+\caption{BFS trees per root, and how many of them a breadth-first
+  traversal can produce.}
+\label{tab:reach}
+\begin{tabular}{lrrr}
+\toprule
+Polytope & BFS trees & Reachable & \\
+\midrule
+5-cell  & $1$      & $1$     & $100\%$\\
+8-cell  & $6$      & $6$     & $100\%$\\
+16-cell & $20{,}736$ & $4{,}896$ & $23.6\%$\\
+24-cell & $32{,}768$ & $2{,}592$ & $7.9\%$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The obstruction is not the obvious one.
+If two cells of a layer share two candidates, no traversal can give
+them different parents from that pair; but the 16-cell has no such
+pair from any root and still leaves three quarters of its trees
+unreachable, because the constraints can close a cycle without any two
+cells sharing two candidates---$v_1$ taking $a$ over $b$, $v_2$ taking
+$b$ over $c$ and $v_3$ taking $c$ over $a$ is already impossible.
+
+We take Definition~\ref{def:bfs} as the definition, so part~1 of
+Theorem~\ref{thm:main} is correspondingly stronger.
+For the 24-cell it verifies $786{,}432$ trees of which only $62{,}208$
+are reachable by any traversal: the other $724{,}224$ are trees no
+implementation of breadth-first search will ever hand you.
+\end{remark}
 
 \begin{remark}[The tree we compute]\label{rem:rule}
 Selecting the parents requires a rule, and unless stated otherwise the
@@ -212,6 +282,10 @@ It is therefore not the same as taking the smallest-indexed candidate.
 On the two polytopes of Section~\ref{sec:uniform} for which the choice
 turns out to matter, the two rules disagree on $55\%$ and $25\%$ of the
 cells that have more than one candidate.
+Note also that a traversal is not even able to reach every tree
+Definition~\ref{def:bfs} allows, by Remark~\ref{rem:family}; the trees
+enumerated for part~1 of Theorem~\ref{thm:main} are chosen directly
+from the definition, not run through a traversal.
 Neither rule has any geometric content.
 For the polytopes of part~1 of Theorem~\ref{thm:main} none of this
 matters, since \emph{every} BFS tree is valid there; where it matters
