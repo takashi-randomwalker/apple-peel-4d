@@ -62,6 +62,9 @@ uniform 4-polytopes, the outcome comes to depend on which spanning tree
 is taken, in a way it never does in the regular case: the grand
 antiprism, for one, is valid from all $320$ of its roots under one rule
 for choosing the tree and from none of them under another.
+The runcinated 24-cell is sharper still: no index-based rule we tried
+yields a valid net from any of its $240$ roots, and yet a tree chosen
+equivariantly yields one from every root.
 \end{abstract}
 
 % =========================================
@@ -516,6 +519,18 @@ The new content of Theorem~\ref{thm:main} is therefore the 24-cell,
 120-cell, and 600-cell.
 \end{remark}
 
+\begin{remark}[The 8-cell has only one net]
+For the 8-cell the theorem admits a shorter proof, and the net is a
+familiar one.
+Two cells of the 8-cell are adjacent unless they are opposite, so the
+layers from any root are $1+6+1$: the root, its six neighbors, and the
+opposite cell, whose parent may be any of the six.
+The unfolding places the root at the origin, its six neighbors on the
+six faces of that cube, and the last cube beyond one of them.
+That is Dal\'{\i}'s cross, and the six trees give it in the six
+possible orientations, so all $48$ nets of the 8-cell are congruent.
+\end{remark}
+
 \begin{remark}[On the number of verifications]\label{rem:equivariance}
 Each regular convex $4$-polytope has a symmetry group acting
 transitively on cells.
@@ -648,6 +663,9 @@ Sixty-one of the 64 yield a valid net from every root.
 The runcinated 24-cell $t_{0,3}\{3,4,3\}$ yields one from no root: all
 240 of its unfoldings self-intersect, in between 3 and 23 pairs of
 cells.
+This last is a statement about $\mathcal{T}_r$ and not about the
+polytope; a tree chosen equivariantly does give it a valid net from
+every root, as we show at the end of this section.
 The remaining two are \emph{root-dependent}: the runcitruncated
 600-cell $t_{0,2,3}\{5,3,3\}$ succeeds from 47 of its $2{,}640$ roots
 and the runcitruncated 120-cell $t_{0,1,3}\{5,3,3\}$ from $2{,}570$
@@ -758,6 +776,33 @@ What distinguishes the regular case is not that some tree works but
 that the choice does not matter, and it is exactly that insensitivity
 which the uniform polytopes lack.
 
+\paragraph{A net where no rule of Table~\ref{tab:rules} finds one.}
+Every rule considered so far is index-based, and none of them is
+equivariant under the symmetry group.
+Asking instead for a tree that \emph{is} equivariant changes the
+verdict on the runcinated 24-cell.
+Its cell-adjacency graph has automorphism group of order $2{,}304$ ---
+the extended group $[3,4,3]$, the diagram $x3o4o3x$ being palindromic
+--- acting with two orbits of cells, of sizes $48$ and $192$.
+Fix a root $r$ and let $H$ be a subgroup of its stabilizer.
+Because the unfolding is equivariant, a BFS tree invariant under $H$
+produces a net invariant under $H$; such a tree exists exactly when
+every cell has a candidate parent fixed by its stabilizer in $H$, and
+for a root in either orbit the largest such $H$ has order $3$.
+Sampling $600$ of these invariant trees at a root of each orbit gave
+$70$ and $83$ valid nets respectively.
+The symmetry group is transitive on each orbit and carries valid nets
+to valid nets, so the runcinated 24-cell has a valid face-rotation BFS
+net from \emph{every} one of its $240$ root cells.
+
+The control is what makes this meaningful: $600$ unconstrained random
+BFS trees at each of the same two roots produced no valid net at all.
+The gain comes from the symmetry, not merely from abandoning the index
+rules.
+The runcinated 24-cell is therefore not a polytope without a net, but
+a polytope whose nets no index-based rule finds --- the sharpest form
+of the conclusion of the previous paragraph.
+
 \paragraph{Caveats.}
 For the polytopes with more than a few hundred cells the intersection
 test was carried out with a separating-axis implementation rather than
@@ -795,15 +840,41 @@ computational.
 
 A third question is the characterization left open by
 Section~\ref{sec:uniform}.
-What distinguishes the 61 uniform 4-polytopes that unfold from every
-root, from the two that unfold from some roots only, and from the
-runcinated 24-cell, which unfolds from none?
-As noted there, cell degree does not decide it, and we have no
-candidate invariant that does.
-A related question is how far the counts for the two root-dependent
-cases depend on the tie-breaking rule: whether some rule makes them
-valid from every root, or whether root-dependence survives every
-choice.
+Under a fixed rule the 64 uniform 4-polytopes split three ways, and
+what we can offer is a list of quantities that do \emph{not} decide the
+split.
+Cell degree does not, in either direction.
+Neither does the angular defect around an edge---$2\pi$ less the sum of
+the dihedral angles that the cells meeting the edge contribute
+there---although it is a tempting candidate.
+A defect of zero would mean that those cells tile $\mathbb{R}^3$
+face-to-face around the edge, so the defect measures how far the
+polytope stands from a Euclidean honeycomb, and convexity forces it to
+be positive.
+For a regular polytope it is a single number, and it orders the six
+exactly by how hard they have proved to be: $148.4^\circ$, $90^\circ$,
+$77.9^\circ$, $31.6^\circ$, $10.3^\circ$ and $7.4^\circ$ for the 5-,
+8-, 16-, 24-, 120- and 600-cell.
+Among the uniform polytopes it fails in both directions.
+The omnitruncated 120-cell has the same minimum defect, $0.736^\circ$,
+as the root-dependent runcitruncated 120-cell, and is valid from every
+root; the runcinated 24-cell sits at $10.5^\circ$, above many polytopes
+that are valid from every root.
+Weighting the defect by the depth or by the size of the polytope does
+not repair this, and it costs the one clean signal the raw defect had:
+the six regular polytopes no longer come out in order.
+Whether the split is captured by any local quantity at all, rather than
+by some global property of how the unfolding folds back on itself, we
+do not know.
+
+A related question is how far the counts depend on the tie-breaking
+rule.
+Section~\ref{sec:uniform} shows that they depend on it a great deal,
+and that the dependence is not monotone in any obvious way: the
+runcinated 24-cell is valid from no root under three index rules and
+from every root under an equivariant one.
+Whether root-dependence survives every choice of rule for the two
+remaining cases is open.
 
 Finally, extensions to higher dimensions are open as well.
 
