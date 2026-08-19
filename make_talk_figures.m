@@ -64,6 +64,10 @@ renderNet[unf_, root_, file_, size_] := Module[{dp, mx},
                       RGBColor[0.80, 0.22, 0.16]}, dp[[i]]/mx]],
       cellPolys[unf, i]}, {i, nCP}],
     Boxed -> False, Lighting -> "Neutral", ImageSize -> size,
+    (* GrayLevel[0.13], not pure black: this is the measured background
+       of Figure 1 (260612AllFaceRotation.pdf).  The talk mixes the two
+       pictures on adjacent slides, so they have to agree. *)
+    Background -> GrayLevel[0.13],
     ViewPoint -> {2.4, -2.2, 1.5}],
    ImageResolution -> 200];
   {file, FileByteCount[baseDir <> file]/1024.^2, mx}];

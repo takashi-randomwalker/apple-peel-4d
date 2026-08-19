@@ -12,25 +12,58 @@
 % that the answer does not carry to the uniform case -- a corollary of
 % slide 8 rather than a separate topic.
 %
-% Theme is deliberately plain; pick a real one later.
+% Slide 4 poses the tie-breaking problem and slide 8 answers it.  The
+% question is planted early on purpose: it is the referees' question,
+% and hearing it before the theorem stops the theorem from sounding
+% like a claim about one arbitrary implementation.  Slide 4 must not
+% give any of the answer away -- it ends on "we come back to this".
+%
+% Metropolis carries the frame numbering and suppresses the navigation
+% symbols itself, so none of that is set by hand below.  The one thing
+% it is chosen for is filled blocks: under the old dove colours the
+% alertblock on slide 8 had no visible frame at all.
+%
+% Every frame carries a \note with its target time.  The notes are not
+% typeset unless one of the two \setbeameroption lines is uncommented.
+%
+% Two log messages are expected and harmless.  Metropolis asks for
+% XeLaTeX or LuaLaTeX because it wants the Fira OTFs; FiraSans below
+% supplies the same faces to pdflatex, so the request can be ignored.
+% The title frame reports an overfull \vbox: metropolis builds its title
+% page in a minipage of height \paperheight, which cannot fit inside a
+% frame by construction.  Nothing is clipped -- compare the output.
 % =====================================================================
 \documentclass[aspectratio=169,11pt]{beamer}
 
-\usetheme{default}
-\usecolortheme{dove}
-\setbeamertemplate{navigation symbols}{}
-\setbeamertemplate{footline}[frame number]
-\setbeamertemplate{itemize items}[circle]
-\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\usetheme[progressbar=frametitle,numbering=fraction,block=fill]{metropolis}
+\usepackage[sfdefault]{FiraSans}   % Fira under pdflatex, as metropolis intends
+\usepackage{newtxsf}               % sans-serif maths to match
+\usepackage{appendixnumberbeamer}  % backup slides stay out of the page count
+
+\setbeamerfont{title}{size=\large,series=\bfseries}
 \setbeamercolor{alerted text}{fg=red!70!black}
+\setbeamercolor{block title alerted}{fg=white,bg=red!70!black}
+\setbeamercolor{block body alerted}{bg=red!8}
+\setbeamersize{text margin left=6mm,text margin right=6mm}
+
+% --- speaker notes ---------------------------------------------------
+% Uncomment exactly one line to build a version with the notes.
+%\usepackage{pgfpages}
+%\setbeameroption{show notes on second screen=right} % presenting, 2 screens
+%\setbeameroption{show only notes}                   % notes alone, to print
+% ---------------------------------------------------------------------
 
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
+\usepackage{tikz}                  % the layer diagram on slide 4
 
 \newcommand{\RR}{\mathbb{R}}
 
-\title{Face-Rotation BFS Nets of the\\Six Regular Convex 4-Polytopes}
+% The short title is what the speaker-note pages show; without it the
+% line break in the full title closes up into "of theSix".
+\title[Face-Rotation BFS Nets of the Six Regular Convex 4-Polytopes]%
+      {Face-Rotation BFS Nets of the\\Six Regular Convex 4-Polytopes}
 \author{Takashi Yoshino}
 \institute{Toyo University, Japan\\\texttt{tyoshino@toyo.jp}}
 \date{JCDCG\textsuperscript{3} 2026}
@@ -38,8 +71,12 @@
 \begin{document}
 
 % ---------------------------------------------------------------- 1
-\begin{frame}
+\begin{frame}[plain]
   \titlepage
+  \note{\textbf{0:20 \quad (cumulative 0:20)}\\
+    Name, affiliation, and one sentence: this is about nets of
+    4-dimensional polytopes, and the talk closes three cases that were
+    left open.}
 \end{frame}
 
 % ---------------------------------------------------------------- 2
@@ -66,10 +103,21 @@
     \end{column}
     \begin{column}{0.4\textwidth}
       \centering
-      \includegraphics[width=\textwidth]{face_rotation_net_5cell.png}\\
-      {\scriptsize A net of the 5-cell}
+      \includegraphics[width=0.97\textwidth]{face_rotation_net_8cell.png}\\
+      {\scriptsize A net of the 8-cell: Dal\'{\i}'s cross}
     \end{column}
   \end{columns}
+  \note{\textbf{1:20 \quad (cumulative 1:40)}\\
+    Cut open, lay flat, no overlap. In 3D this is D\"urer; in 4D the
+    pieces are solids and the net is a 3D object you can print. Use the
+    picture: the 8-cell is the tesseract, and the net our algorithm
+    returns is exactly Dal\'{\i}'s cross --- one of Turney's 261. Worth
+    saying that this is forced, not luck: cells of the 8-cell are
+    adjacent unless opposite, so the BFS layers from any root are
+    $1+6+1$, and every one of the 6 trees per root gives this same
+    cross. Devadoss--Harvey settled the three small ones for
+    \emph{every} spanning tree. Land on the last line: three polytopes
+    left open --- that is where this talk starts.}
 \end{frame}
 
 % ---------------------------------------------------------------- 3
@@ -90,9 +138,82 @@
   \medskip
 
   The result is a net iff no two cells share interior volume.
+  \note{\textbf{1:20 \quad (cumulative 3:00)}\\
+    Slowest slide of the talk --- the audience has to picture the
+    rotation. Emphasise that the rotation is forced: the shared polygon
+    is the hinge. Step 3 is a check, not an assumption --- the cells
+    really do land in one hyperplane. Do \emph{not} dwell on step 2
+    here; the next slide is about exactly what it leaves open.}
 \end{frame}
 
 % ---------------------------------------------------------------- 4
+\begin{frame}{Step 2 hides a choice}
+  \begin{columns}[T]
+    \begin{column}{0.57\textwidth}
+      \small
+      The layers are forced: $L_d$ is the set of cells at distance $d$
+      from $r$, and no rule can change that.
+      \smallskip
+
+      The \alert{parent} is not. A cell in $L_d$ may touch several
+      cells of $L_{d-1}$, and BFS takes whichever one the
+      implementation happens to reach first.
+      \smallskip
+
+      \begin{alertblock}{A geometric rule need not help}
+        For the 5-, 8-, 16- and 24-cell the symmetries fixing $r$ and
+        $v$ permute the candidates transitively, so \alert{every}
+        equivariant score --- height along $w$, turning angle, the
+        volume form --- ties on all of them.
+      \end{alertblock}
+      \smallskip
+
+      Ours breaks the tie by cell index, which is not equivariant
+      either. \alert{We come back to this.}
+    \end{column}
+    \begin{column}{0.39\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.95,
+          cell/.style={circle,draw,inner sep=1.7pt,fill=white},
+          every node/.style={font=\scriptsize}]
+        \node at (-1.5,1.9) {$L_0$};
+        \node at (-1.5,1.0) {$L_1$};
+        \node at (-1.5,0.0) {$L_2$};
+        \node[cell,label={[label distance=-2pt]above:$r$}] (r) at (0.6,1.9) {};
+        \node[cell] (a) at (-0.6,1.0) {};
+        \node[cell] (b) at (0.6,1.0) {};
+        \node[cell] (c) at (1.8,1.0) {};
+        \node[cell,label={[label distance=-2pt]below:$v$}] (v) at (1.2,0.0) {};
+        \draw (r)--(a); \draw (r)--(b); \draw (r)--(c);
+        \draw[dashed,thick,red!70!black] (b)--(v);
+        \draw[dashed,thick,red!70!black] (c)--(v);
+        \node[red!70!black,font=\normalsize] at (2.35,0.5) {?};
+      \end{tikzpicture}
+
+      \smallskip
+      {\scriptsize Two admissible parents for $v$}
+    \end{column}
+  \end{columns}
+  \note{\textbf{0:50 \quad (cumulative 3:50)}\\
+    Short slide, but it is the one the referees will care about. Two
+    beats only. One: BFS fixes the layers, not the parents. Two: a
+    cleverer geometric rule does not repair it --- for those four the
+    candidates are genuinely interchangeable under the symmetry group,
+    so any equivariant score ties. Checked over every cell that has
+    more than one candidate parent --- 1, 11 and 7 cells for the 8-,
+    16- and 24-cell, all single orbits; the 5-cell has none at all.
+    \\[2pt]
+    \textbf{If pressed:} this is stated for those four because it
+    \emph{fails} for the 120-cell --- there 50 of the 71 such cells have
+    candidates in two or more orbits, so an equivariant rule could
+    discriminate. We have not looked for one. Do not volunteer this;
+    the paper claims nothing stronger.
+    \\[2pt]
+    Close with ``we come back to this'' and move on --- the answer is
+    slide 8.}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
 \begin{frame}{The validity test, and a trap}
   A net is valid if for every pair of cells not joined by a tree edge,
   \[
@@ -112,31 +233,47 @@
     \]
     Measuring \emph{volume} ignores contact of measure zero.
   \end{alertblock}
-\end{frame}
-
-% ---------------------------------------------------------------- 5
-\begin{frame}{Main result}
-  \begin{block}{Theorem}
-    For every regular convex 4-polytope and \alert{every} root cell,
-    the face-rotation BFS net is valid.
-  \end{block}
-  \medskip
-
-  \centering
-  \includegraphics[width=0.62\textwidth]{260612AllFaceRotation.pdf}
-
-  \raggedright\smallskip
-  {\small $5+8+16+24+120+600=773$ roots, all verified.
-  New beyond Devadoss--Harvey: the 24-, 120- and 600-cell.}
+  \note{\textbf{1:20 \quad (cumulative 5:10)}\\
+    Tell it as something that actually happened: the first run reported
+    total failure for three polytopes. Cells that meet along an edge are
+    not overlapping. The fix is one line of code, but without it the
+    main theorem reads the other way round.}
 \end{frame}
 
 % ---------------------------------------------------------------- 6
+\begin{frame}{Main result}
+  \begin{columns}[T]
+    \begin{column}{0.42\textwidth}
+      \begin{block}{Theorem}
+        For every regular convex 4-polytope and \alert{every} root
+        cell, the face-rotation BFS net is valid.
+      \end{block}
+      \medskip
+
+      {\small $5+8+16+24+120+600=773$ roots, all verified.
+      \medskip
+
+      New beyond Devadoss--Harvey: the 24-, 120- and 600-cell.}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{260612AllFaceRotation.pdf}
+    \end{column}
+  \end{columns}
+  \note{\textbf{1:40 \quad (cumulative 6:50)}\\
+    State the theorem, then let the picture sit. Six polytopes, one net
+    each, all from root cell 1. Say the number out loud: 773 roots, no
+    exceptions, no near misses --- the overlap count is exactly zero
+    every time. The three new ones are the three D--H left open.}
+\end{frame}
+
+% ---------------------------------------------------------------- 7
 \begin{frame}{Contrast: the apple-peel algorithm}
   A different family of spanning trees --- a greedy spiral/zonal
   ordering (Yoshino--Chaidee).
-  \medskip
 
   \centering
+  {\small
   \begin{tabular}{lccc}
     \toprule
     & BFS & \multicolumn{2}{c}{apple-peel (RZ)}\\
@@ -146,60 +283,79 @@
     120-cell & all roots & $1440/1440$ & \alert{$0/1440$}\\
     600-cell & all roots & \alert{$0/2400$} & ---\\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 
-  \raggedright\bigskip
+  \raggedright\smallskip
   The 120-cell has an ordering for every start and \alert{never} a net;
   the 600-cell has no ordering at all.
-  \medskip
 
-  \begin{block}{}
+  \begin{block}{Consequence}
     Having a valid \emph{ordering} and having a valid \emph{net} are
     independent properties.
   \end{block}
-\end{frame}
-
-% ---------------------------------------------------------------- 7
-\begin{frame}{And more: the tie-breaking question}
-  The abstract left this open:
-  \begin{quote}\small
-    ``Whether validity extends to all BFS tie-breakings \dots\ remains
-    open.''
-  \end{quote}
-  \medskip
-
-  BFS layers do not depend on the rule, so a BFS tree is just a choice
-  of parent, one layer up, for each cell --- and the trees can be
-  counted and enumerated with no rule at all.
-  \medskip
-
-  \centering
-  \begin{tabular}{lrr}
-    \toprule
-    & trees per root & checked\\
-    \midrule
-    5-cell   & $1$          & all\\
-    8-cell   & $6$          & all\\
-    16-cell  & $20{,}736$   & all\\
-    24-cell  & $32{,}768$   & all\\
-    \midrule
-    120-cell & ${\sim}1.8\times10^{44}$ & 20 random / root\\
-    600-cell & ${\sim}1.8\times10^{65}$ & 20 random / root\\
-    \bottomrule
-  \end{tabular}
-
-  \raggedright\medskip
-  \alert{$1{,}132{,}661$ trees, no self-intersection.}
-  For the first four the rule is irrelevant --- including the 24-cell,
-  one of the open cases.
+  \note{\textbf{1:30 \quad (cumulative 8:20)}\\
+    The companion algorithm peels the polytope like an apple, one cell
+    at a time. Read the two rows as a pair of opposite failures: the
+    120-cell always finds an order and the order is never a net; the
+    600-cell never finds an order at all. Conclusion in the block ---
+    ordering and net are independent. Do not get drawn into how the
+    apple-peel rule works; the point is only the contrast.}
 \end{frame}
 
 % ---------------------------------------------------------------- 8
+\begin{frame}{And more: the tie-breaking question}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      The abstract left this open:
+      \begin{quote}\small
+        ``Whether validity extends to all BFS tie-breakings \dots\
+        remains open.''
+      \end{quote}
+      \medskip
+
+      BFS layers do not depend on the rule, so a BFS tree is just a
+      choice of parent, one layer up, for each cell --- and the trees
+      can be counted and enumerated with no rule at all.
+    \end{column}
+    \begin{column}{0.47\textwidth}
+      \centering
+      {\small
+      \begin{tabular}{lrr}
+        \toprule
+        & trees / root & checked\\
+        \midrule
+        5-cell   & $1$          & all\\
+        8-cell   & $6$          & all\\
+        16-cell  & $20{,}736$   & all\\
+        24-cell  & $32{,}768$   & all\\
+        \midrule
+        120-cell & ${\sim}1.8\times10^{44}$ & 20 random\\
+        600-cell & ${\sim}1.8\times10^{65}$ & 20 random\\
+        \bottomrule
+      \end{tabular}}
+    \end{column}
+  \end{columns}
+  \medskip
+
+  \alert{$1{,}132{,}661$ trees, no self-intersection.}
+  For the first four the rule is irrelevant --- including the 24-cell,
+  one of the open cases.
+  \note{\textbf{1:40 \quad (cumulative 10:00)}\\
+    Quote the abstract first --- this answers the question the abstract
+    asked, it is not a side remark. The idea: BFS layers are determined
+    by distance from the root, so a BFS tree is nothing but one parent
+    per cell chosen from the layer above. That makes the family
+    countable without ever naming a rule. Four polytopes exhausted, two
+    sampled. If asked why only 20 per root: $10^{44}$.}
+\end{frame}
+
+% ---------------------------------------------------------------- 9
 \begin{frame}{$\triangle$ Warning: this does not extend}
   \begin{columns}[T]
     \begin{column}{0.55\textwidth}
+      \small
       Beyond the regular case the rule stops being harmless.
-      \medskip
+      \smallskip
 
       \begin{alertblock}{Grand antiprism, 320 cells}
         \centering
@@ -208,29 +364,36 @@
           rule B & valid from \alert{no} root\\
         \end{tabular}
       \end{alertblock}
-      \medskip
+      \smallskip
 
       Same polytope, same roots, same family of BFS trees.
       Only the choice of parent differs.
-      \medskip
+      \smallskip
 
       Among the 64 convex uniform 4-polytopes this is not isolated:
       others swing from $1.8\%$ to $99.8\%$ of their roots.
     \end{column}
     \begin{column}{0.42\textwidth}
       \centering
-      \includegraphics[width=\textwidth]{talk_gap.png}\\
+      \includegraphics[width=0.72\textwidth]{talk_gap.png}\\
       {\scriptsize Grand antiprism, one valid net}
     \end{column}
   \end{columns}
-  \medskip
+  \smallskip
 
   \centering
-  \textbf{What regularity buys is not that some tree works,
+  \textbf{\small What regularity buys is not that some tree works,
   but that the choice does not matter.}
+  \note{\textbf{1:40 \quad (cumulative 11:40)}\\
+    The warning is the corollary of the previous slide, so say ``and
+    this is exactly what fails once you leave the regular case''.
+    Grand antiprism is the cleanest instance: all 320 or none,
+    decided by nothing but which parent you pick. Then the closing
+    sentence --- say it slowly, it is the line to remember.
+    Backup B2 has the full rule comparison if it is questioned.}
 \end{frame}
 
-% ---------------------------------------------------------------- 9
+% ---------------------------------------------------------------- 10
 \begin{frame}{Open problems}
   \begin{itemize}
     \item Why? A proof that does not enumerate.
@@ -246,6 +409,9 @@
   \centering
   \small Code, data and nets:
   \texttt{github.com/takashi-randomwalker/apple-peel-4d}
+  \note{\textbf{0:40 \quad (cumulative 12:20)}\\
+    Do not read all four. Say the first and the last, point at the URL,
+    stop. Leaves roughly three minutes for questions.}
 \end{frame}
 
 % ================================================================
@@ -279,6 +445,7 @@
 % ---------------------------------------------------------------- B2
 \begin{frame}{Backup: which rules were compared}
   \centering
+  {\small
   \begin{tabular}{lrrr}
     \toprule
     & queue & max-index & min-index\\
@@ -289,13 +456,13 @@
     \midrule
     Grand antiprism         & $320/320$   & $320/320$   & \alert{$0/320$}\\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 
-  \raggedright\bigskip
+  \raggedright\medskip
   ``queue'' is the textbook BFS loop, neighbours scanned in index
   order. ``min/max-index'' choose, for each cell, the smallest or
   largest indexed candidate parent.
-  \medskip
+  \smallskip
 
   Uniformly random trees are harsher still: of the 61 uniform
   polytopes valid from every root under the queue rule, 13 fail within
