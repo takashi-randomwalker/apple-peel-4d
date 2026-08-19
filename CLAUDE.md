@@ -13,9 +13,41 @@
 
 ---
 
+## ディレクトリ構成（2026-08-19 に整理）
+
+トップレベルは342ファイルまで膨れていたので話題ごとに分けた。**現在トップレベルにあるのは論文（`.tex`/`.md`）と図（`.pdf`/`.png`）だけ**で90ファイル。
+
+```
+src/       スクリプト85本を8つに分類
+  peel3d/    13  3D apple-peel（本体・実行・可視化）
+  peel4d/    30  4D apple-peel（本体・実行・展開・分析）
+  bfsnet/     8  face-rotation BFS ネット（bfs_sat.m を含む）
+  uniform/   14  Wythoff 生成・一様多胞体の実行とエクスポート
+  symmetry/   9  対称性の上限・扇形ネット・曲率（2026-08-19 の仕事）
+  tiebreak/   6  タイブレーク規則の調査
+  random/     3  ランダム多面体
+  figures/    2  論文・発表用の図の生成
+data/      *.mx 34件（計算結果。.gitignore 対象なので git には入らない）
+notebooks/ *.nb 13件
+attic/     oneoff/ 35（使い捨ての check_*/test_*/gen_*/debug_*）
+           outputs/ 19（loose STL・progress ログ）
+           figsrc/ 12（図の Illustrator/EPS 原本）
+           misc/ 18（.docx・.mov・スクショ・投稿zip 等）
+_4DData/  _4DData_uniform/         多胞体の組合せデータ（**移動していない**）
+uniform_nets/  STLs_v4/  face_rotation_nets/   公開用ネット（**移動していない**）
+```
+
+**移動しなかったものの理由**：`_4DData/` 系は参照が多く公開データでもある。`uniform_nets/` 等は **`.gitignore` に `!uniform_nets/stl/*.stl` のようなパス依存の例外規則があり，動かすと STL が除外されてしまう**。論文と図をトップレベルに残したのは，JoCG 投稿直前に `\includegraphics` のパスを触るリスクを避けるため（投稿後に `papers/` へ移す予定）。
+
+**スクリプト間の参照は `baseDir <> "src/<topic>/<name>"` の形に書き換え済み**（50箇所）。`.mx` の参照も `data/` 付きに書き換え済み（46箇所）。`baseDir` はプロジェクトルートのままなので，`baseDir` の定義自体は変更していない。
+
+> 移動後の検証：全42箇所の参照先が実在することを確認し，`src/symmetry/symmetry_ceiling.wls` を新しい場所から実走して移動前と同一の結果（24/8/1/6）を確認。`face_rotation_net_paper.tex` と `jcdcg3_slides.tex` も 12ページでビルド通過。
+
+---
+
 ## アルゴリズム（現行版）
 
-### 3次元版（`peeling3DLoxo.m`）
+### 3次元版（`src/peel3d/peeling3DLoxo.m`）
 
 #### 前処理
 - **Face-up 回転**：`p3lAlignTopToZ[vers, faces, top]` で開始面 F1 の重心を +z 軸に揃える
@@ -47,9 +79,9 @@
 Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`，`p3lAngleFromForward` で φ 計算（RS フォールバックのみ使用）。
 
 #### フォールバックなし版
-`run_platonic_updated.m` の `p3lPeelPairNoFB2`：ステップ 4 でフォールバック使わず即終了（右条件は適用）。
+`src/peel3d/run_platonic_updated.m` の `p3lPeelPairNoFB2`：ステップ 4 でフォールバック使わず即終了（右条件は適用）。
 
-### 4次元版（`peeling4Df4.m`，現行・推奨）
+### 4次元版（`src/peel4d/peeling4Df4.m`，現行・推奨）
 
 - **剥き軸**：w 軸（Face-up 配向）
 - **左条件**：`Det[{c_1, c_2, c_k, c_j}] >= -eps`（4次元体積形式，**c1–c2 平面グローバル参照**）
@@ -70,9 +102,9 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 
 **k≥3 Det=0 フォールバック**：8胞体（セル重心がすべて ±e_i）と 120胞体南極付近で頻発するリスト順依存を解消し，120胞体を Perfect に押し上げた重要修正。
 
-> **旧版 `peeling4Df.m` / `peeling4Df3.m`** は左条件が異なる（xy 2成分 / xyz ローカル参照）。現役は `peeling4Df4.m` のみ。論文からも旧版の議論は削除済み。
+> **旧版 `src/peel4d/peeling4Df.m` / `src/peel4d/peeling4Df3.m`** は左条件が異なる（xy 2成分 / xyz ローカル参照）。現役は `src/peel4d/peeling4Df4.m` のみ。論文からも旧版の議論は削除済み。
 
-#### 1段バックトラック（`peeling4Df4_1back.m`）
+#### 1段バックトラック（`src/peel4d/peeling4Df4_1back.m`）
 
 詰まったとき1ステップ戻って別候補を試す拡張（justBT フラグで連続バックトラック禁止）。全6胞体で **グリーディ版と完全に同一結果**（改善なし，2026-05-11）。
 
@@ -84,46 +116,46 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 
 | ファイル | 役割 |
 |----------|------|
-| `peeling4Df4.m` | 4D本体（c1–c2 平面グローバル参照 + RZ/RS） |
-| `peeling4Df4_1back.m` | 1段バックトラック版（グリーディと同値） |
-| `run4DGlobal_update.m` | 5/8/16/24胞体の v4 計算（k≥3 Det=0 fix 適用） |
-| `run4DGlobal_120cell.m` | 120胞体の v4 計算 |
-| `run4DGlobal_nofallback.m` | RZ/RS × with/without fallback 比較 |
-| `run4DGlobal_RSRZ.m` | RS vs RZ 比較 |
-| `run4DBacktrack.m` | 1段バックトラック計算 |
-| `run4DExportSTLv4.m` | v4 から valid net を STLs_v4/ に出力 |
+| `src/peel4d/peeling4Df4.m` | 4D本体（c1–c2 平面グローバル参照 + RZ/RS） |
+| `src/peel4d/peeling4Df4_1back.m` | 1段バックトラック版（グリーディと同値） |
+| `src/peel4d/run4DGlobal_update.m` | 5/8/16/24胞体の v4 計算（k≥3 Det=0 fix 適用） |
+| `src/peel4d/run4DGlobal_120cell.m` | 120胞体の v4 計算 |
+| `src/peel4d/run4DGlobal_nofallback.m` | RZ/RS × with/without fallback 比較 |
+| `src/peel4d/run4DGlobal_RSRZ.m` | RS vs RZ 比較 |
+| `src/peel4d/run4DBacktrack.m` | 1段バックトラック計算 |
+| `src/peel4d/run4DExportSTLv4.m` | v4 から valid net を STLs_v4/ に出力 |
 
 ### 3D 本体・実行スクリプト
 
 | ファイル | 役割 |
 |----------|------|
-| `peeling3DLoxo.m` | 3D本体（RS/RZ + R2） |
-| `run_platonic_updated.m` | 正多面体 5種計算（fallback 有無） |
-| `run_platonic_strict.m` | 厳密条件（eps<0）計算 |
-| `run_archimedean_faceup.m` | アルキメデス 13種（fallback あり） |
-| `run_archimedean_nofallback.m` | アルキメデス 13種（fallback なし） |
+| `src/peel3d/peeling3DLoxo.m` | 3D本体（RS/RZ + R2） |
+| `src/peel3d/run_platonic_updated.m` | 正多面体 5種計算（fallback 有無） |
+| `src/peel3d/run_platonic_strict.m` | 厳密条件（eps<0）計算 |
+| `src/peel3d/run_archimedean_faceup.m` | アルキメデス 13種（fallback あり） |
+| `src/peel3d/run_archimedean_nofallback.m` | アルキメデス 13種（fallback なし） |
 
 ### 可視化・展開・STL 出力
 
 | ファイル | 役割 |
 |----------|------|
-| `unfold3DExport.m` | SVD射影・Procrustes整列・SAT判定・STL出力 |
-| `unfold4D.m` | 4D展開図の3D可視化（`ans4DGlobal_v4.mx` + `unfold3DExport.m`） |
-| `visualize_platonic_nets_v2.m` | 正多面体展開図描画 |
-| `visualize_archimedean_nets.m` | アルキメデス多面体展開図描画 |
+| `src/peel4d/unfold3DExport.m` | SVD射影・Procrustes整列・SAT判定・STL出力 |
+| `src/peel4d/unfold4D.m` | 4D展開図の3D可視化（`data/ans4DGlobal_v4.mx` + `src/peel4d/unfold3DExport.m`） |
+| `src/peel3d/visualize_platonic_nets_v2.m` | 正多面体展開図描画 |
+| `src/peel3d/visualize_archimedean_nets.m` | アルキメデス多面体展開図描画 |
 | `gen_120cell_faceup_nets.m` | 120胞体 cell-up vs face-up 比較（v4 fix 適用） |
 
 ### データファイル（現役）
 
 | ファイル | 内容 |
 |----------|------|
-| `ans4DGlobal_v4.mx` | **現行最新**：4D 全6胞体の計算結果（v4） |
-| `ans4DGlobal_nofb.mx` | フォールバックなし比較（サマリのみ） |
-| `ans4DGlobal1back.mx` | 1段バックトラック結果 |
-| `dataPlatonic.mx` | 正多面体 × R1/R2/R3 × fallback 有無 |
-| `dataPlatonic_strict.mx` | 正多面体 × RS/RZ × fallback 有無（eps<0） |
-| `archimedean_faceup_results.mx` | アルキメデス（fallback あり，Det ベース） |
-| `archimedean_nofallback_results.mx` | アルキメデス（fallback なし，Det ベース） |
+| `data/ans4DGlobal_v4.mx` | **現行最新**：4D 全6胞体の計算結果（v4） |
+| `data/ans4DGlobal_nofb.mx` | フォールバックなし比較（サマリのみ） |
+| `data/ans4DGlobal1back.mx` | 1段バックトラック結果 |
+| `data/dataPlatonic.mx` | 正多面体 × R1/R2/R3 × fallback 有無 |
+| `data/dataPlatonic_strict.mx` | 正多面体 × RS/RZ × fallback 有無（eps<0） |
+| `data/archimedean_faceup_results.mx` | アルキメデス（fallback あり，Det ベース） |
+| `data/archimedean_nofallback_results.mx` | アルキメデス（fallback なし，Det ベース） |
 | `_4DData/f5.m` 〜 `f600.m` | 正多胞体データ（頂点・面・セル） |
 | `STLs_v4/` | 280枚の valid net STL（重なりなし保証） |
 
@@ -139,15 +171,15 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 | `commentsOpus260516.md` | Opus 4.7 レビューコメント |
 | `HISTORY.md` | 計算ログ・廃止実装・セッション履歴 |
 
-> 旧版（`peeling4Df.m`, `peeling4Df3.m`, `peeling1back.m`, `ans4DGlobal.mx`, `ans4DGlobal_v2.mx`, `ans4DGlobal_v3.mx`, `STLs/`, `STLs_v3/` など）は `HISTORY.md` 参照。
+> 旧版（`src/peel4d/peeling4Df.m`, `src/peel4d/peeling4Df3.m`, `peeling1back.m`, `data/ans4DGlobal.mx`, `data/ans4DGlobal_v2.mx`, `data/ans4DGlobal_v3.mx`, `STLs/`, `STLs_v3/` など）は `HISTORY.md` 参照。
 
 ---
 
 ## 計算結果（最新確定）
 
-### 4D：`peeling4Df4.m`（v4，k≥3 Det=0 fix，2026-05-12）
+### 4D：`src/peel4d/peeling4Df4.m`（v4，k≥3 Det=0 fix，2026-05-12）
 
-結果：`ans4DGlobal_v4.mx`
+結果：`data/ans4DGlobal_v4.mx`
 
 | 多胞体 | (C1,C2)総数 | True | Unique | 分類 |
 |--------|:-----------:|-----:|-------:|------|
@@ -170,7 +202,7 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 - 120胞体：全 order に自己交差あり（Perfect な ordering でも valid net は生成しない）
 - 600胞体：ordering 自体が 0
 
-### フォールバックなし比較（`peeling4Df4.m` noFB）
+### フォールバックなし比較（`src/peel4d/peeling4Df4.m` noFB）
 
 | 多胞体 | RZ(w) | RZ(n) | RS(w) | RS(n) |
 |--------|------:|------:|------:|------:|
@@ -182,14 +214,14 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 - フォールバックが有効な唯一の組み合わせは **120胞体 × RZ**（462ペア=32%がフォールバック経由）
 - 4次元では RZ が RS を大幅に上回る（RS は 16胞体・120胞体で Impossible）
 
-### 3D 正多面体（`dataPlatonic.mx`，2026-05-06）
+### 3D 正多面体（`data/dataPlatonic.mx`，2026-05-06）
 
 全結果が 0% か 100%（面推移性による等変性理論と一致）。
 - with fallback：全 5 種・全規則で 100%
 - no fallback：Tetrahedron のみ全規則で 100%；他は R2 のみ 0%（他規則は 100%）
 - 厳密条件（eps<0）：Tetrahedron のみ no-fallback で 100%，他は 0%
 
-### 3D アルキメデス（`archimedean_faceup_results.mx`，2026-05-12 Det ベース）
+### 3D アルキメデス（`data/archimedean_faceup_results.mx`，2026-05-12 Det ベース）
 
 | 多面体 | F | RS(w) | RZ(w) | 備考 |
 |--------|:-:|------:|------:|------|
@@ -216,9 +248,9 @@ Darboux フレーム：`p3lDarbouxFrame[cPrev, cCurr]` → `{nHat, fHat, lHat}`�
 
 | ファイル | 内容 |
 |----------|------|
-| `run_random_polyhedra.m` | N=30 の Delaunay vs Voronoi 詳細比較（1 インスタンス + 20 試行） |
-| `run_random_scaling.m` | N = {20,30,50,100,200} × 4 条件のスケーリング実験 |
-| `run_repulsive_comparison.m` | Thomson Coulomb 緩和による均一分布の効果実験（N=30） |
+| `src/random/run_random_polyhedra.m` | N=30 の Delaunay vs Voronoi 詳細比較（1 インスタンス + 20 試行） |
+| `src/random/run_random_scaling.m` | N = {20,30,50,100,200} × 4 条件のスケーリング実験 |
+| `src/random/run_repulsive_comparison.m` | Thomson Coulomb 緩和による均一分布の効果実験（N=30） |
 
 ### Delaunay vs Voronoi 比較（N=30，20 試行平均）
 
@@ -288,7 +320,7 @@ BFS spanning tree を根セルから構築し，各子セルを親との共有�
 2. **BFS 展開**：辺 (親, 子) ごとに `unfoldTFP` で 4D アフィン変換を累積
 3. **射影**：w 座標を捨て，残りの xyz が 3D ネット
 
-### 計算結果（`face_rotation_net_all4D_v2.m`，2026-06-09）
+### 計算結果（`src/bfsnet/face_rotation_net_all4D_v2.m`，2026-06-09）
 
 | 多胞体 | セル数 | 根の数 | Valid | 結果 |
 |--------|:------:|:------:|------:|------|
@@ -324,11 +356,11 @@ BFS spanning tree を根セルから構築し，各子セルを親との共有�
 
 | ファイル | 内容 |
 |----------|------|
-| `face_rotation_net_all4D_v2.m` | 全6胞体の BFS ネット検証（体積基準，**現行推奨**） |
-| `face_rotation_net_small4D.m` | 5/8/16/24-cell 検証（v1，RegionMember 版，歴史的参考） |
-| `face_rotation_net_600cell.m` | 600-cell 専用検証スクリプト |
+| `src/bfsnet/face_rotation_net_all4D_v2.m` | 全6胞体の BFS ネット検証（体積基準，**現行推奨**） |
+| `src/bfsnet/face_rotation_net_small4D.m` | 5/8/16/24-cell 検証（v1，RegionMember 版，歴史的参考） |
+| `src/bfsnet/face_rotation_net_600cell.m` | 600-cell 専用検証スクリプト |
 | `check_16cell_detail.m` | バグ調査：RegionMember vs 体積基準の比較 |
-| `face_rotation_net_120cell.m` | 120-cell BFS ネット可視化（net PNG 出力） |
+| `src/bfsnet/face_rotation_net_120cell.m` | 120-cell BFS ネット可視化（net PNG 出力） |
 | `face_rotation_net_viewer.nb` | BFS アニメーション付き可視化 Notebook |
 
 ### 論文
@@ -388,7 +420,7 @@ BFS spanning tree を根セルから構築し，各子セルを親との共有�
 | Figure 1 caption | "rooted at cell~1" を削除（index 情報は不要） |
 | 単著対応 | "The authors declare" → "The author declares" |
 | ダングリング ref 修正 | `\label{sec:intersect}` 削除 + 該当 `\ref` 参照削除 |
-| Open Problems 段落削除 | 「apple-peel 自己交差は distant layer」記述は実測（隣接帯間が主体，`analyze_120cell_overlap_bands.m` 由来）と矛盾するため段落ごと削除 |
+| Open Problems 段落削除 | 「apple-peel 自己交差は distant layer」記述は実測（隣接帯間が主体，`src/peel4d/analyze_120cell_overlap_bands.m` 由来）と矛盾するため段落ごと削除 |
 | §2 タイトル | "Theory" → "Preliminaries"（§2.2 が手順記述のため "Theory" は不適切） |
 | Figure 参照追加 | Proof 内に `Figure~\ref{fig:allnets}` 参照を追加（孤立図の解消） |
 | 変数 $V$ 改名 | Step 2 の visited set $V$ → $\mathrm{Vis}$（vertex set $V$ との衝突解消） |
@@ -506,14 +538,14 @@ face-rotation BFS ネットの検証を，正多胞体6種から**凸一様多�
 
 | ファイル | 役割 |
 |----------|------|
-| `uniform4D_wythoff.m` | **生成器**：Coxeter 図から一様4-多胞体の頂点・辺・面・セルを生成（A₄/B₄/F₄，33種） |
-| `run_wythoff_bfs.m` | 生成データを BFS チェッカに流す（Phase A：正多胞体を全根／Phase B：全種を root 1） |
-| `run_wythoff_bfs_allroots.m` | **全30種 × 全根**（1893根）の確定計算。結果を `wythoff_bfs_allroots.mx` に保存 |
+| `src/uniform/uniform4D_wythoff.m` | **生成器**：Coxeter 図から一様4-多胞体の頂点・辺・面・セルを生成（A₄/B₄/F₄，33種） |
+| `src/uniform/run_wythoff_bfs.m` | 生成データを BFS チェッカに流す（Phase A：正多胞体を全根／Phase B：全種を root 1） |
+| `src/uniform/run_wythoff_bfs_allroots.m` | **全30種 × 全根**（1893根）の確定計算。結果を `data/wythoff_bfs_allroots.mx` に保存 |
 | `check_runcinated24.m` | 唯一の例外 x3o4o3x の全240根詳細（重なりペア数の分布） |
 
-`face_rotation_net_all4D_v2.m` は本体の main ループを走らせずに定義だけ読み込む（テキストを `Print["Face-rotation BFS net check v2` の直前で切って `ToExpression`）。
+`src/bfsnet/face_rotation_net_all4D_v2.m` は本体の main ループを走らせずに定義だけ読み込む（テキストを `Print["Face-rotation BFS net check v2` の直前で切って `ToExpression`）。
 
-### 生成アルゴリズム（`uniform4D_wythoff.m`）
+### 生成アルゴリズム（`src/uniform/uniform4D_wythoff.m`）
 
 1. Coxeter マーク → Gram 行列 → Cholesky で単位鏡法線 n_i
 2. 群 W = 4つの鏡映の閉包（ハッシュキーは `Round[x/grid]` で**厳密整数**にする。`Round[x, dx]` は精度付き実数を返しキーに使えない）
@@ -577,7 +609,7 @@ ALL INVALID        : 1
 | [[5]] | 面隣接（辺を共有する面） |
 | [[6]] | セル（面添字リスト） |
 
-`face_rotation_net_all4D_v2.m` が使うのは [[1]], [[4]], [[6]] のみ。
+`src/bfsnet/face_rotation_net_all4D_v2.m` が使うのは [[1]], [[4]], [[6]] のみ。
 
 - [[3]] を「セルの頂点リスト」と誤読しやすい：f5.m では頂点数5・次数4がセル数5・4頂点と**偶然一致**する
 - **`f8.m` の [[2]] は32本の辺を両方向で64件**列挙（f5/f16/f24 は1回ずつ）。[[2]] は誰も読まないので実害なし。生成側は無向1回の規約
@@ -586,14 +618,14 @@ ALL INVALID        : 1
 
 ridge 検出を **O(C²) → O(|W|·多角形サイズ)** に書き換えて H₄（位数14400）に到達。
 
-**書き換えの中身**（`uniform4D_wythoff.m`）
+**書き換えの中身**（`src/uniform/uniform4D_wythoff.m`）
 - **ridge**：Wythoff 的多胞体の d-面は階数 d の放物型部分群の軌道。rank-2 放物型 W_{i,j} で ridge の原型を作り，その**頂点集合**を W で軌道に乗せる。セル対の総当たりが不要に
 - **ridge が属する2セル**：頂点→セルの逆引きを作り，ridge の全頂点が属するセルの共通部分（ちょうど2個になるはず）
 - **セル所属判定**：超平面ごとに1回の行列ベクトル積にベクトル化
 - 検証項目が2つ増加：**各 ridge がちょうど2セルに属する**，**全頂点の次数が一様（頂点推移性）**
 - A₄/B₄/F₄ の33種は書き換え前と**完全に同一の V/E/F/C**（回帰テスト通過）かつ高速化
 
-**生成結果：48/48 が全自己検証を通過**（A₄ 9 + B₄ 15 + F₄ 9 + H₄ 15），重複3組を除いて**正味45種**。総生成時間509秒，`wythoff_gen_all.mx` に保存。
+**生成結果：48/48 が全自己検証を通過**（A₄ 9 + B₄ 15 + F₄ 9 + H₄ 15），重複3組を除いて**正味45種**。総生成時間509秒，`data/wythoff_gen_all.mx` に保存。
 
 | symbol | V | E | F | C | |
 |---|---:|---:|---:|---:|---|
@@ -619,14 +651,14 @@ x5x3o3x   2640 cells   2570/2640   MIXED   overlaps 0/1
 >
 > **「root 1 は強い指標」も誤り。** x5o3x3x は root 1 で VALID だが全根では **47/2640** しか valid でない（root 1 がたまたま47個のうちの1つだった）。root 1 のみの結果に判断材料としての価値はほとんどない。
 
-**MIXED の裏取り（`verify_mixed_h4.m`，2026-08-13）**：数値誤差の疑いを排除済み。
+**MIXED の裏取り（`src/uniform/verify_mixed_h4.m`，2026-08-13）**：数値誤差の疑いを排除済み。
 
 - 失敗根5個・成功根3個 × 2多胞体 = 16根で **SAT と RegionMeasure が判定・重なり数とも完全一致**
 - eps を 10⁻⁴ 〜 10⁻¹⁰ まで振っても重なり数は不変（閾値上の縁の判定ではない）
 - x5o3x3x の重なり数分布は滑らか：`{{0,47},{1,282},{2,361},{3,546},{4,608},{5,439},{6,225},{7,76},{8,34},{9,12},{10,9},{11,1}}`
 - x5x3o3x は `{{0,2570},{1,70}}` で，失敗根はすべて重なり1個ちょうど
 
-### snub 24-cell と grand antiprism（2026-08-12，`uniform4D_special.m`）
+### snub 24-cell と grand antiprism（2026-08-12，`src/uniform/uniform4D_special.m`）
 
 Wythoff 構成（リング付き Coxeter 図）で到達できない2種。**どちらも「600胞体から頂点を除いて凸包を取る」同一の構成**で作れる。
 
@@ -642,9 +674,9 @@ snub 24-cell      s3s4o3o    96   432   480  144   OK  cells {{4,120},{12,24}}  
 grand antiprism   gap       100   500   720  320   OK  cells {{4,300},{10,20}}  deg {{10,100}}
 ```
 
-**BFS 全根：両方とも ALL VALID，重なり0**（144/144 が31.6秒，320/320 が344.9秒）。結果は `special_bfs_allroots.mx`。
+**BFS 全根：両方とも ALL VALID，重なり0**（144/144 が31.6秒，320/320 が344.9秒）。結果は `data/special_bfs_allroots.mx`。
 
-### 角柱17種（2026-08-13，`uniform4D_prisms.m`）
+### 角柱17種（2026-08-13，`src/uniform/uniform4D_prisms.m`）
 
 Platonic 5 + Archimedean 13 − 立方体角柱（＝8胞体，正則なので既出）= **17種**。3D 多面体 P の角柱は**組合せ的に直接構成でき，凸包計算は不要**：
 
@@ -682,7 +714,7 @@ Platonic 5 + Archimedean 13 − 立方体角柱（＝8胞体，正則なので�
 
 ### 組合せデータ公開（`_4DData_uniform/`，2026-08-15）
 
-`export_uniform_data.m` で64種のデータを出力。**64ファイル 13.3 MB**。`index.csv` 付き。
+`src/uniform/export_uniform_data.m` で64種のデータを出力。**64ファイル 13.3 MB**。`index.csv` 付き。
 
 **5要素形式**（`_4DData/f*.m` の6要素から2つ削り1つ足した）：
 
@@ -695,7 +727,7 @@ Platonic 5 + Archimedean 13 − 立方体角柱（＝8胞体，正則なので�
 ```
 
 **削った2つ**：`vertAdj`（第3要素）と `faceAdj`（第5要素）。理由は容量ではない。
-- **`face_rotation_net_all4D_v2.m` は `raw[[1]], raw[[4]], raw[[6]]` の3つしか読まない**（138行目）。この2つはリポジトリ内のどこからも参照されていない
+- **`src/bfsnet/face_rotation_net_all4D_v2.m` は `raw[[1]], raw[[4]], raw[[6]]` の3つしか読まない**（138行目）。この2つはリポジトリ内のどこからも参照されていない
 - 45種で 2.2 MB と 6.4 MB。README に**1行での復元コード**を掲載済み
 
 **足した1つ**：`cellAdj`。**ネットに必要な唯一の隣接情報**であり，`_4DData/` はこれを持っていない（パイプラインは読み込みのたびに `cellsF` から再計算している）。45種で 1.3 MB＝面隣接の5分の1。
@@ -712,7 +744,7 @@ Platonic 5 + Archimedean 13 − 立方体角柱（＝8胞体，正則なので�
 
 ### STL / OFF 公開（`uniform_nets/`，2026-08-13）
 
-`export_uniform_nets.m` で **67ケース**（64種の root 1 ＋ 例外3種の追加根）を出力。合計55MB。
+`src/uniform/export_uniform_nets.m` で **67ケース**（64種の root 1 ＋ 例外3種の追加根）を出力。合計55MB。
 
 ```
 uniform_nets/
@@ -746,7 +778,7 @@ uniform_nets/
 
 §4 は3つの paragraph：*Construction*（Wythoff 45種・600胞体の diminishing 2種・角柱17種の作り方と検証4項目）／*Results*（表 `tab:uniform` = 4群×5列，三分の内訳，根依存2種の議論，セル次数が両方向に効かない段落）／*Caveats*（タイブレーク規則依存の理由，SAT の妥当性検証）。
 
-**Figure 2（`fig:uniformfail`）新設**：`make_uniform_figure.m` で生成。失敗の2つの型を1つずつ。
+**Figure 2（`fig:uniformfail`）新設**：`src/figures/make_uniform_figure.m` で生成。失敗の2つの型を1つずつ。
 - (a) runcinated 24-cell の**最良の根**（root 47，交差3組）を**全体図**で — 「どの根でもダメ」は最悪例より最良例が効く
 - (b) runcitruncated 120-cell の失敗根（root 748）の**交差ペア近傍8セルの拡大図**— 2640セル全体は団子になるため
 - 交差ペアの2セルは**赤と青に塗り分け**（同色だと相貫が1個の多面体に見える）
@@ -766,7 +798,7 @@ uniform_nets/
 | 交差ペア | **エッジなし**，赤 `RGBColor[1,0.28,0.24,0.95]` / 青 `RGBColor[0.35,0.62,1,0.95]` | 陰影のみで面が分かれ Figure 1 と揃う |
 | 不透明度 | **パネルごとに変える**：(a) 0.13，(b) 0.25 | 重なるセル数に反比例させる必要がある。(b) の36セルで最適な 0.25 は (a) の240セルでは下半分が白い塊に飽和する |
 
-`make_uniform_figure.m` は white / black 両方を出力（`fig_uniform_a.png` / `fig_uniform_a_black.png` 等）。論文は black 版を使用。
+`src/figures/make_uniform_figure.m` は white / black 両方を出力（`fig_uniform_a.png` / `fig_uniform_a_black.png` 等）。論文は black 版を使用。
 
 **パネル(b) の表示範囲（2026-08-17 修正）**：当初 `PlotRange` を明示していたが，選択半径（重心 5·cellR 以内）と表示範囲（3.2·cellR）が食い違っており，**セルが箱の面でスライスされて切断面が見えていた**。
 
@@ -811,7 +843,7 @@ Abstract に1文追加（64種24,487根，61/1/2）。Introduction の構成説�
 >
 > 全6種で |Aut(セル隣接グラフ)| = 対称群の位数（120 / 384 / 384 / 1152 / 14400 / 14400）と一致するので，組合せ的自動同型＝幾何的対称性として読んでよい。
 >
-> 検証スクリプト：**`check_tiebreak_orbits.wls`**（`wolframscript -file` で実行，全6種で約20分）。
+> 検証スクリプト：**`src/symmetry/check_tiebreak_orbits.wls`**（`wolframscript -file` で実行，全6種で約20分）。
 >
 > **落とし穴**：`Graph[edges]` の `VertexList` は出現順であり `Range[n]` ではない。`GraphAutomorphismGroup` が返す置換はこの添字に作用するので，頂点名でそのまま `PermutationReplace` すると**黙って別の頂点を動かす**。`Graph[Range[n], edges]` と明示すること。最初これで 16胞体・24胞体まで「軌道が分裂する」という誤った結果を得た。
 >
@@ -832,13 +864,13 @@ $$\prod_{v \neq r} |N(v) \cap L_{d(v)-1}|$$
 | 120胞体 | 120 | 1.76×10⁴⁴ |
 | 600胞体 | 600 | 1.78×10⁶⁵ |
 
-#### 結果1：正多胞体は規則に完全に鈍感（`tiebreak_regular.m`）
+#### 結果1：正多胞体は規則に完全に鈍感（`src/tiebreak/tiebreak_regular.m`）
 
 **5/8/16/24胞体は全 BFS 木（1,118,261本）が valid**。120/600胞体は根あたり20本の一様サンプル（14,400本）も全て valid。**総計 1,132,661 本で invalid ゼロ。**
 
 **24胞体は D&H の未解決ケースで，BFS 族全体について決着した。** 定理を2部構成に書き換え（part 1 = 全 BFS 木，part 2 = $\mathcal{T}_r$）。
 
-#### 結果2：探索が到達できる木は族の一部（`order_induced_trees.m`）
+#### 結果2：探索が到達できる木は族の一部（`src/tiebreak/order_induced_trees.m`）
 
 **Lemma**：BFS 木が探索で生成可能 ⟺ 親選択が全順序で誘導される ⟺ 制約有向グラフ $p(v) \to q$ が非巡回。
 
@@ -852,7 +884,7 @@ $$\prod_{v \neq r} |N(v) \cap L_{d(v)-1}|$$
 
 > **障害は「候補を2つ共有する兄弟ペア」ではない**（それは十分条件にすぎない）。16胞体はそのペアが0組なのに4分の3が到達不可能 — $v_1$ が $a{\prec}b$，$v_2$ が $b{\prec}c$，$v_3$ が $c{\prec}a$ で**循環**するため。
 
-#### 結果3：一様多胞体は規則に極度に敏感（`tiebreak_all61.m`, `tiebreak_maxindex.m`, `tiebreak_rules.m`）
+#### 結果3：一様多胞体は規則に極度に敏感（`src/tiebreak/tiebreak_all61.m`, `src/tiebreak/tiebreak_maxindex.m`, `src/tiebreak/tiebreak_rules.m`）
 
 ```
                           queue        max-index     min-index
@@ -1001,7 +1033,7 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 
 5胞体・8胞体で全ネットが合同なのは**層が浅く選択の余地が無い／あっても対称で吸収される**ため。16胞体以降は層が深く親候補が実質的に分岐するので，同じ議論は使えない（全木 valid であることとネットが合同であることは別問題）。
 
-検証スクリプトはスクラッチのみで未保存。`face_rotation_net_all4D_v2.m` を `Print["Face-rotation BFS net check v2` の直前で切って `ToExpression` し，`faceUpForRootP` / `bfsUnfoldP` / `applyAff` で重心・頂点を出すだけで再現できる。
+検証スクリプトはスクラッチのみで未保存。`src/bfsnet/face_rotation_net_all4D_v2.m` を `Print["Face-rotation BFS net check v2` の直前で切って `ToExpression` し，`faceUpForRootP` / `bfsUnfoldP` / `applyAff` で重心・頂点を出すだけで再現できる。
 
 #### スピーカーノート（2026-08-19 追加）
 
@@ -1022,8 +1054,8 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 当初「Fig 1 は黒背景グレースケール，5胞体と grand antiprism は白背景カラー」という混在があった。2段階で解消：
 
 1. スライド2の図を 5胞体 → **8胞体**（`face_rotation_net_8cell.png`）に差し替え
-2. `make_talk_figures.m` の `renderNet` に **`Background -> GrayLevel[0.13]`** を追加し `talk_gap.png` を再生成
-3. `face_rotation_net_viz_all.m` の背景を `Black` → **`bgCol = GrayLevel[0.13]`**（冒頭で定義）に変更し 8胞体を再生成
+2. `src/figures/make_talk_figures.m` の `renderNet` に **`Background -> GrayLevel[0.13]`** を追加し `talk_gap.png` を再生成
+3. `src/bfsnet/face_rotation_net_viz_all.m` の背景を `Black` → **`bgCol = GrayLevel[0.13]`**（冒頭で定義）に変更し 8胞体を再生成
 
 **どちらもセルの配色は変更していない**（gap は BFS 深さのグラデーション，8胞体は GrayLevel の濃淡）。
 
@@ -1037,7 +1069,7 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 
 31 と 33 の差は不可視。**スライドの3枚は揃った。**
 
-> **`face_rotation_net_viz_all.m` の PlotLabel について**：このスクリプトの `PlotLabel` は元々 `Black` で背景も `Black` だったため**一度も見えたことがない**（実測：上端60行が全て輝度0）。背景だけ変えると黒い幽霊文字が浮くので，**ラベル色も `bgCol` に変更**して不可視のまま維持した。削除しなかったのは，ラベルが上端の帯を確保しており，消すと 600×600 のキャンバス内でネットが再センタリング・拡大されて**構図が変わってしまう**ため。スライド側には独自のキャプションがある。
+> **`src/bfsnet/face_rotation_net_viz_all.m` の PlotLabel について**：このスクリプトの `PlotLabel` は元々 `Black` で背景も `Black` だったため**一度も見えたことがない**（実測：上端60行が全て輝度0）。背景だけ変えると黒い幽霊文字が浮くので，**ラベル色も `bgCol` に変更**して不可視のまま維持した。削除しなかったのは，ラベルが上端の帯を確保しており，消すと 600×600 のキャンバス内でネットが再センタリング・拡大されて**構図が変わってしまう**ため。スライド側には独自のキャプションがある。
 
 > **未再生成**：`face_rotation_net_{5,16,24,120,600}cell.png` は**純黒（0）のまま**。スライドでは使っていないので実害はないが，スクリプトの既定は 0.13 になったので次に流せば揃う。600胞体は hull 構築が重い。
 
@@ -1073,7 +1105,7 @@ face-up 後，$\mathrm{Stab}(r)$ は $w$ 軸を固定するので $xyz$ 超平�
 
 #### 対称性の上限（全6種，確定）
 
-`symmetry_ceiling.wls`（根 r=1，Aut(セル隣接グラフ) を全列挙）
+`src/symmetry/symmetry_ceiling.wls`（根 r=1，Aut(セル隣接グラフ) を全列挙）
 
 | | 根セル | \|Stab(r)\| | 現行(queue) | **上限 MAX \|H\|** | 最大部分群の個数 |
 |---|---|---:|---:|---:|---:|
@@ -1113,7 +1145,7 @@ $$\text{MAX}\,|H| \;=\; \frac{|\mathrm{Stab}(r)|}{(\text{根セルの2-面の数
 
 > **留保**：回転半径と凸包体積は**順位が一致しない**。120胞体の $H$-不変ネットは無作為な木より回転半径が小さい（4.7224 < 4.7473）が凸包体積は大きい（1463 > 1450）。「質量の広がり」と「必要な外接空間」は別物。どちらを採るかは設計判断。
 
-#### 120胞体：扇形構想は最適だった（`sector120_nets.wls`）
+#### 120胞体：扇形構想は最適だった（`src/symmetry/sector120_nets.wls`）
 
 ユーザーが 2026-08-17 に発案した「根の正十二面体の五角形面の軸で5回対称に分割する」案は，**計算上ちょうど最適**だった。
 
@@ -1124,7 +1156,7 @@ $$\text{MAX}\,|H| \;=\; \frac{|\mathrm{Stab}(r)|}{(\text{根セルの2-面の数
 - 回転半径 4.722389 〜 4.781145（相異なる値 563個），**最小は2本ちょうど**が達成（鏡像対と思われる）
 - 最良木：index 1824，R_gyr = 4.722389，凸包体積 1463.28
 
-データは `sector120_setup.mx` / `sector120_best.mx`。
+データは `data/sector120_setup.mx` / `data/sector120_best.mx`。
 
 #### 16胞体・600胞体に対称ネットが無い理由（2026-08-19，決着）
 
@@ -1136,9 +1168,9 @@ $$\text{MAX}\,|H| \;=\; \frac{|\mathrm{Stab}(r)|}{(\text{根セルの2-面の数
 
 > **$\mathrm{Fix}(H)$ はセル隣接グラフの中で，根を含む連結部分グラフを誘導しなければならない。**
 
-**BFS を外しても変わらない**（`symmetry_spanning_trees.wls`）。親を「1層上」に限らず任意の隣接セルに許した一般の全域木でも，上限は 24 / 8 / **1** / 6 / 10 / **1** で BFS と完全に同一。**障害は最短路条件ではない。**
+**BFS を外しても変わらない**（`src/symmetry/symmetry_spanning_trees.wls`）。親を「1層上」に限らず任意の隣接セルに許した一般の全域木でも，上限は 24 / 8 / **1** / 6 / 10 / **1** で BFS と完全に同一。**障害は最短路条件ではない。**
 
-`symmetry_fixed_column.wls` による $\mathrm{Fix}(h)$ の層分布と連結成分数（各元位数の代表1個）：
+`src/symmetry/symmetry_fixed_column.wls` による $\mathrm{Fix}(h)$ の層分布と連結成分数（各元位数の代表1個）：
 
 | | 位数 | \|Fix\| | 層ごとの分布 | 成分数 |
 |---|---:|---:|---|---:|
@@ -1168,7 +1200,7 @@ $$\text{MAX}\,|H| \;=\; \frac{|\mathrm{Stab}(r)|}{(\text{根セルの2-面の数
 
 セル隣接グラフの $|\mathrm{Aut}| = 2304 = 1152 \times 2$（24胞体の自己双対性による拡大 F₄ 群）。セル軌道は2つ（八面体48・三角柱192）。どちらの軌道の根でも **MAX \|H\| = 3**（$C_3$）。
 
-`uniform_symmetry_nets.wls`，各600本サンプル：
+`src/symmetry/uniform_symmetry_nets.wls`，各600本サンプル：
 
 | 根 | 軌道 | \|Stab(r)\| | MAX \|H\| | **$H$-不変な木** | **無制約ランダム木（対照）** |
 |---|---:|---:|---:|---|---|
@@ -1214,7 +1246,7 @@ $$\text{MAX}\,|H| \;=\; \frac{|\mathrm{Stab}(r)|}{(\text{根セルの2-面の数
 
 **ユーザーの発案**：「胞を作る多面体が空間充填できるかは指標になりうる。いや，充填できなくても面を重ね続けたときに変な曲がり方をしなければいいのかな」。
 
-**この2つの言い方は同じ量を指す。** `edge_angular_defect.wls`：
+**この2つの言い方は同じ量を指す。** `src/symmetry/edge_angular_defect.wls`：
 
 $$\mathrm{defect}(e) \;=\; 2\pi - \sum_{c \ni e} (\text{セル } c \text{ の } e \text{ における二面角})$$
 
@@ -1258,9 +1290,9 @@ D&H が全スパニング木で解決した3種（5/8/16胞体）が上位3つ�
 
 > **「セルの多面体が空間充填するか」自体も指標にならない**：立方体（充填する）を持つ8胞体は易しいが，正四面体（充填しない）の5胞体はもっと易しい。逆に `x3o4o3x` は三角柱（充填する）を192個持つのに最難。効くのは**個々のセルの性質ではなく，辺のまわりの配置**である。
 
-#### 積算量（defect × 深さ）も駄目（2026-08-19，`curvature_battery.wls`）
+#### 積算量（defect × 深さ）も駄目（2026-08-19，`src/symmetry/curvature_battery.wls`）
 
-「defect は局所量なので，木の深さで積算すれば巨大種と小さい種を同じ土俵に乗せられるのでは」という案を検定した。全50種について辺 defect の全リスト，総曲率 $\sum_e \mathrm{defect}(e)\cdot|e|$，セル隣接グラフの radius / diameter を計算し（`curvature_stats.mx`），**13個の候補統計量**で3つの問題種を分離できるか調べた。
+「defect は局所量なので，木の深さで積算すれば巨大種と小さい種を同じ土俵に乗せられるのでは」という案を検定した。全50種について辺 defect の全リスト，総曲率 $\sum_e \mathrm{defect}(e)\cdot|e|$，セル隣接グラフの radius / diameter を計算し（`data/curvature_stats.mx`），**13個の候補統計量**で3つの問題種を分離できるか調べた。
 
 | 統計量 | 3種の順位（昇順，全50中） |
 |---|---|
@@ -1305,6 +1337,29 @@ defect への翻訳で捨てた情報がある。**「セルが空間充填す�
 
 **検定するなら**：64種を「全セルが充填多面体／一部／どれも充填しない」で三分し valid 率と突き合わせる。充填する凸多面体は有限リストで判定可能，計算は軽い。**未着手（ユーザー方針 2026-08-19：可能性として記録するにとどめる）。**
 
+#### 凸一様64種の対称性上限（2026-08-19，`src/symmetry/symmetry_ceiling_uniform.wls`）
+
+論文2の骨格を固めるため，**全64種 × 全セル軌道**で上限を計算。セル軌道ごとに根を1つ取れば十分（対称群が軌道に推移的なので同じ軌道の根は等価）。結果は `data/ceiling64.mx`，所要約25分。
+
+**64種・170セル軌道。**
+
+| 上限 \|H\| | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12 | 24 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 軌道数 | **28** | 10 | 21 | 19 | 17 | **42** | 17 | 14 | 1 | 1 |
+
+- **170根のうち28根（16%）が対称ネットを全く持たない**
+- **どの根からも持たない種は3つ**：16胞体，600胞体，そして**runcinated 5-cell `x3o3o3x`（新発見）**
+- **全安定化群を達成する種は2つ**：5胞体（24），そして**正四面体角柱（12，側面セル4個の軌道で）**（新発見）
+- **上限が根に依らないのは 64種中18種だけ。** 最大の振れ幅は grand antiprism の **10 : 1**，次いで `x4x3o3o` と `o4x3o3o` の 8 : 1。正多胞体はセル推移的なので自明に一定
+
+**runcinated 5-cell も同じ機構**（`Fix(h)` 非連結）で説明できる。根1（|Stab|=24）・根11（|Stab|=12）とも**非単位元すべてで非連結**。層ごとの分布 {1,1,1,1,1,1}（全層に固定セルがあるのに2成分）という 16胞体の鏡映と同型のケースも現れる。**定理は3種について述べられる。**
+
+> ### ⚠️ 方法論上の落とし穴：セル隣接グラフの Aut は幾何的対称群より大きいことがある
+>
+> `o3x3x3o`（bitruncated 5-cell，10セル）は **\|Aut(セル隣接グラフ)\| = 3840 に対し多胞体の等長変換は240**。グラフを鵜呑みにすると上限 **48** が出るが，**正しくは 6**。
+>
+> 対策：安定化群を**セル重心への直交写像で実現される置換だけに制限**してから探索する（`isometryQ`：$A = \mathrm{LeastSquares}[C, C[[h]]]$ が直交かつ $C\!\cdot\!A = C[[h]]$）。この修正後，**全64種で極大 $H$ がすべて等長変換で実現されている**ことを確認済み。影響を受けたのは `o3x3x3o` 1種のみだが，論文では明記すべき。
+
 #### 次の課題
 
 - 24胞体・120胞体で「上限＝面安定化群」を**証明**する（8胞体は済み）
@@ -1315,7 +1370,7 @@ defect への翻訳で捨てた情報がある。**「セルが空間充填す�
 ### 残る留保と未着手
 
 - 3つの結果を分ける不変量の探索（§5 Open Problems に記載）
-- MIXED 2種と x3o4o3x の自己交差構造の分析（`analyze_120cell_overlap_bands.m` 相当）
+- MIXED 2種と x3o4o3x の自己交差構造の分析（`src/peel4d/analyze_120cell_overlap_bands.m` 相当）
 - JCDCG³ 発表内容との整合（ユーザー方針：`And more results...` の形で部分的に新情報を入れる）
 - 120/600胞体は BFS 木が 10⁴⁴・10⁶⁵ で全数列挙が原理的に不可能。**構造的証明が必要**。局所性（交差は木の距離が有界なセル間でしか起きない）が示せれば突破口になりうる
 
@@ -1374,7 +1429,7 @@ defect への翻訳で捨てた情報がある。**「セルが空間充填す�
 ### 査読で指摘されうる主要点（Opus 4.7 レビュー）
 
 1. ~~等変性結果が「Remark」止まり~~ → **完了（2026-05-17）**：Remark 3.1 を `Proposition 3.1 [Equivariance and the 0/100% dichotomy]` + `Proof` に格上げし，実装詳細は残余 Remark 3.1（label `rem:symmetry3d` 維持）に整理。4 箇所のクロス参照を更新。`prop:equivariance` を新ラベルとして導入
-2. ~~600-cell の "icosahedral bottleneck" が経験則止まり~~ → **完了（2026-05-17）**：Discussion「The 600-Cell」段落に Worked Example（`analyze_600cell_stuck_example.m` で抽出した (C1=1, C2=2, k=146, last=cell 20) を表 `tab:600stuck-example` として）を追加。スタックの真の原因が「Det フィルタによる候補排除」ではなく「貪欲 max-w が外殻 4-隣接を先に消費し，唯一の下方出口も並行ブランチで既訪となるデッドエンド」であることを 4-正則性と関連付けて記述。120-cell（12-regular）との比較で構造的差を明示。Proposition 3.1 を介して 5 通り停止ステップへの propagation を説明
+2. ~~600-cell の "icosahedral bottleneck" が経験則止まり~~ → **完了（2026-05-17）**：Discussion「The 600-Cell」段落に Worked Example（`src/peel4d/analyze_600cell_stuck_example.m` で抽出した (C1=1, C2=2, k=146, last=cell 20) を表 `tab:600stuck-example` として）を追加。スタックの真の原因が「Det フィルタによる候補排除」ではなく「貪欲 max-w が外殻 4-隣接を先に消費し，唯一の下方出口も並行ブランチで既訪となるデッドエンド」であることを 4-正則性と関連付けて記述。120-cell（12-regular）との比較で構造的差を明示。Proposition 3.1 を介して 5 通り停止ステップへの propagation を説明
 3. ~~コード/データ可用性ステートメントの欠如~~ → **完了（2026-05-17）**：`paper_draft.tex` の Acknowledgements 直後に `\section*{Code and data availability}` を追加；GitHub: <https://github.com/takashi-randomwalker/apple-peel-4d>
 4. ~~参考文献が 10 件と寡少~~ → **完了（2026-05-17）**：4 件追加して 14 件に（`Pak2010` book draft, `Bern2003` Comput. Geom. 24 51-62, `Schlickenrieder1997` TU Berlin Diplomarbeit, `Coxeter1973` Dover 3rd ed.）。Towle は権威ある同名参照が存在しないためスキップ（Devadoss2022 が代替として既出）
 5. ~~「なぜこの 2 規則か」の動機付けが弱い~~ → **完了（2026-05-17）**：Section 2.2 規則定義の直前に 1 段落追加。nearest neighbour / min angular deviation / smallest dihedral angle といった local rule が等変性を破る点を Proposition 3.1 に紐づけて説明し，global +z 軸と c_1 参照を使う rule の中で max azimuthal turn (RS) と max axial conservation (RZ) が 2 つの自然な端点であることを動機として記述
@@ -1454,7 +1509,7 @@ defect への翻訳で捨てた情報がある。**「セルが空間充填す�
 
 - bibitem キー：`\bibitem{Yoshino2026arXiv}`（arXiv 2604.16204）
 - 3D RS フォールバック（Darboux Frame）は Algorithm 節で説明，4D アルゴリズムには使用しない
-- xy-projection アプローチ（`peeling4Df.m`）は **論文から削除済み**
+- xy-projection アプローチ（`src/peel4d/peeling4Df.m`）は **論文から削除済み**
 
 ---
 
@@ -1468,7 +1523,7 @@ defect への翻訳で捨てた情報がある。**「セルが空間充填す�
 Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/visualize_platonic_nets_v2.m"]
 ```
 
-`dataPlatonic.mx`（標準）と `dataPlatonic_strict.mx`（厳密）を読み込み，5種 × RS/RZ × withFallback/noFallback を描画。R2 は廃止済みのため非表示。
+`data/dataPlatonic.mx`（標準）と `data/dataPlatonic_strict.mx`（厳密）を読み込み，5種 × RS/RZ × withFallback/noFallback を描画。R2 は廃止済みのため非表示。
 
 ### 3D アルキメデス
 
@@ -1476,7 +1531,7 @@ Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/visualize_plato
 Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/visualize_archimedean_nets.m"]
 ```
 
-`archimedean_faceup_results.mx` を読み込み，13 種 × RS/RZ × with fallback を描画。`showR2 = True` で R2 表示，`showR2 = False` がデフォルト。SnubCube は mirror（右手系）も inline 表示。
+`data/archimedean_faceup_results.mx` を読み込み，13 種 × RS/RZ × with fallback を描画。`showR2 = True` で R2 表示，`showR2 = False` がデフォルト。SnubCube は mirror（右手系）も inline 表示。
 
 ### 4D 正多胞体
 
@@ -1484,7 +1539,7 @@ Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/visualize_archi
 Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/unfold4D.m"]
 ```
 
-`ans4DGlobal_v4.mx` + `unfold3DExport.m` で 5/8/16/24/120 胞体の 4D→3D 展開図を `Graphics3D` 描画。等変性により C1=3 を代表として固定し全成功 C2 バリアントを表示。色付け：青（C1）→緑→赤（末尾）グラデーション。
+`data/ans4DGlobal_v4.mx` + `src/peel4d/unfold3DExport.m` で 5/8/16/24/120 胞体の 4D→3D 展開図を `Graphics3D` 描画。等変性により C1=3 を代表として固定し全成功 C2 バリアントを表示。色付け：青（C1）→緑→赤（末尾）グラデーション。
 
 ### 設定パラメータ（スクリプト冒頭で変更可）
 
@@ -1508,11 +1563,11 @@ Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/unfold4D.m"]
 ## コードを読むときの注意
 
 - `summary.tex`（または `summary_en.tex`）が最も包括的な情報源
-- 3D版の右条件は `Det[{cc[[top]], cc[[last]], cc[[j]]}] <= eps`（c_1 大域固定参照，`eps = 10^-10`）。`peeling3DLoxo.m` の `p3lPeelPair` 参照
+- 3D版の右条件は `Det[{cc[[top]], cc[[last]], cc[[j]]}] <= eps`（c_1 大域固定参照，`eps = 10^-10`）。`src/peel3d/peeling3DLoxo.m` の `p3lPeelPair` 参照
 - 3D版の選択基準も Det ベース（2026-05-12）：RS は min Det，RZ は max z → min Det タイブレーク。RS フォールバックのみ Darboux frame min φ
 - **単一候補優先は廃止**（2026-05-06）：大域螺旋保証のため，単一候補でも右条件を適用
-- 4D版（`peeling4Df4.m`）は k=2 で xy クロス積，k≥3 は Det，Det=0 縮退時は xy クロス積にフォールバック
-- 旧版 `peeling4Df.m` / `peeling4Df3.m` は左条件が異なる（xy 2成分 / xyz ローカル参照）— **使用非推奨**
+- 4D版（`src/peel4d/peeling4Df4.m`）は k=2 で xy クロス積，k≥3 は Det，Det=0 縮退時は xy クロス積にフォールバック
+- 旧版 `src/peel4d/peeling4Df.m` / `src/peel4d/peeling4Df3.m` は左条件が異なる（xy 2成分 / xyz ローカル参照）— **使用非推奨**
 - アルキメデス計算結果は 2026-05-12 に Det ベース選択で再計算済み
 - Mathematica の `Round[x, N]` は N 小数点以下ではなく N の最近傍倍数に丸める（3 桁表示には `Round[x, 0.001]`）
 
@@ -1520,9 +1575,9 @@ Get["/Users/yoshino/Library/CloudStorage/Dropbox/260324Peeling4D/unfold4D.m"]
 
 ## コンパニオン論文（arXiv:2604.16204）との実装差異
 
-`peeling3DLoxo.m`（本論文）は旧コード `peeling3Df` と次の 3 点で異なる。これらは等変性の回復を目的とした修正。
+`src/peel3d/peeling3DLoxo.m`（本論文）は旧コード `peeling3Df` と次の 3 点で異なる。これらは等変性の回復を目的とした修正。
 
-| 項目 | 旧 `peeling3Df` | 現行 `peeling3DLoxo.m` |
+| 項目 | 旧 `peeling3Df` | 現行 `src/peel3d/peeling3DLoxo.m` |
 |------|----------------|----------------------|
 | フィルタ参照点 | c_k（局所，毎ステップ変化），厳密 `> 0` | c_1（大域固定），`<= ε`，ε = 10⁻¹⁰ |
 | タイブレーク | リスト順（`Position` の最初の要素，非幾何） | min Det（幾何学的・等変） |
