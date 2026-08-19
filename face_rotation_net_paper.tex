@@ -617,7 +617,13 @@ Table~\ref{tab:uniform}.
 \begin{table}[ht]
 \centering
 \caption{Face-rotation BFS nets of the 64 convex uniform 4-polytopes,
-  over all root cells.}
+  over all root cells, for the tree $\mathcal{T}_r$ of
+  Remark~\ref{rem:rule}.
+  The columns count roots, not trees, and the classification is one of
+  (polytope, rule) pairs rather than of polytopes: under other rules
+  four of the 61 in the first column lose roots and one of them, the
+  grand antiprism, loses all of them.
+  See Table~\ref{tab:rules}.}
 \label{tab:uniform}
 \begin{tabular}{lrrrrr}
 \toprule
@@ -634,6 +640,8 @@ Total                 & 64 & $24{,}487$ & 61 & 2 & 1\\
 \end{table}
 
 \noindent
+Throughout this paragraph the tree is $\mathcal{T}_r$; how much of
+what follows survives a change of rule is taken up below.
 Sixty-one of the 64 yield a valid net from every root.
 The runcinated 24-cell $t_{0,3}\{3,4,3\}$ yields one from no root: all
 240 of its unfoldings self-intersect, in between 3 and 23 pairs of
@@ -693,13 +701,62 @@ dodecahedron, and all 17 are valid from every root, whereas the
 root-dependent runcitruncated 120-cell also carries cells of
 degree~32.
 
+\paragraph{The classification is a statement about one rule.}
+Table~\ref{tab:uniform} counts the tree $\mathcal{T}_r$ of
+Remark~\ref{rem:rule}, one per root.
+That is not the same as counting BFS trees, and for the uniform
+polytopes the difference is not a technicality: the classification
+moves when the rule does.
+Table~\ref{tab:rules} gives the three exceptional polytopes under three
+rules---the queue of Remark~\ref{rem:rule}, and choosing for each cell
+the candidate parent of largest or smallest index.
+
+\begin{table}[ht]
+\centering
+\caption{Roots that yield a valid net, over all roots, under three
+  rules for choosing parents.}
+\label{tab:rules}
+\begin{tabular}{llrrr}
+\toprule
+Polytope & & queue & max-index & min-index\\
+\midrule
+Runcinated 24-cell        & $t_{0,3}\{3,4,3\}$    & $0/240$      & $0/240$      & $0/240$\\
+Runcitruncated 600-cell   & $t_{0,2,3}\{5,3,3\}$  & $47/2640$    & $2635/2640$  & $2627/2640$\\
+Runcitruncated 120-cell   & $t_{0,1,3}\{5,3,3\}$  & $2570/2640$  & $2640/2640$  & $2151/2640$\\
+\midrule
+Grand antiprism           &                       & $320/320$    & $320/320$    & $0/320$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The runcitruncated 600-cell goes from $1.8\%$ of its roots to $99.8\%$;
+the runcitruncated 120-cell reaches every root under max-index.
+The grand antiprism is the sharpest case, and it is not one of the
+three: it is valid from all $320$ roots under the queue and under
+max-index, and from \emph{none} under min-index.
+So a polytope can sit in any of the three classes depending on how
+parents are chosen, and ``valid from every root'' is a property of a
+rule together with a polytope, not of the polytope.
+Three more of the 61 lose roots under one of these rules, though only a
+few each: $t_{0,2,3}\{3,3,3\}$ loses one of its $30$ under max-index,
+and $t_{0,3}\{4,3,3\}$ and $t_{0,3}\{5,3,3\}$ lose one of $80$ and
+$26$ of $2{,}640$ under min-index.
+
+Sampling BFS trees uniformly instead of fixing a rule separates the
+uniform polytopes from the regular ones more sharply still.
+Ten random trees at one root leave 48 of the 61 untouched, but 13 fail,
+and the failures are concentrated among the large polytopes: all four
+with $2{,}640$ cells fail every one of the ten, as does the grand
+antiprism, even though each of them is valid from every root under both
+index rules.
+Against this, the regular polytopes did not produce a single failure in
+$1{,}132{,}661$ trees.
+What distinguishes the regular case is not that some tree works but
+that the choice does not matter, and it is exactly that insensitivity
+which the uniform polytopes lack.
+
 \paragraph{Caveats.}
-The BFS tree depends on the tie-breaking rule of
-Definition~\ref{def:bfs}.
-For a cell-transitive polytope the rule is immaterial, but the uniform
-polytopes have several cell orbits, so the counts $47$ and $2{,}570$
-above are those of one fixed rule (cell index order); another rule may
-change them.
 For the polytopes with more than a few hundred cells the intersection
 test was carried out with a separating-axis implementation rather than
 by measuring the volume of the intersection; the two were checked to
