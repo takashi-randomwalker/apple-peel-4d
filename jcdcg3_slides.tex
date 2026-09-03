@@ -32,8 +32,19 @@
 % The title frame reports an overfull \vbox: metropolis builds its title
 % page in a minipage of height \paperheight, which cannot fit inside a
 % frame by construction.  Nothing is clipped -- compare the output.
+% That is the ONLY warning the build should produce.
+%
+% 4:3 is the target: the JCDCG^3 room in 2024 had a 4:3 projector.  The
+% deck was first laid out for 16:9 and every two-column frame overflowed
+% when it was switched, because 4:3 is narrower (128mm against 160mm),
+% so each column takes more lines for the same text.  The column splits,
+% the \small on frames 2/4/8/9 and the reduced tikz scale on frame 4 are
+% all sized for 4:3 and should not be re-tuned without rechecking the
+% log.  Switching back to 16:9 would compile, but would leave the text
+% columns unnecessarily narrow.
 % =====================================================================
-\documentclass[aspectratio=169,11pt]{beamer}
+\documentclass[aspectratio=43,11pt]{beamer}
+%\documentclass[aspectratio=169,11pt]{beamer}  % layout is tuned for 4:3
 
 \usetheme[progressbar=frametitle,numbering=fraction,block=fill]{metropolis}
 \usepackage[sfdefault]{FiraSans}   % Fira under pdflatex, as metropolis intends
@@ -48,7 +59,7 @@
 
 % --- speaker notes ---------------------------------------------------
 % Uncomment exactly one line to build a version with the notes.
-%\usepackage{pgfpages}
+\usepackage{pgfpages}
 %\setbeameroption{show notes on second screen=right} % presenting, 2 screens
 %\setbeameroption{show only notes}                   % notes alone, to print
 % ---------------------------------------------------------------------
@@ -74,7 +85,7 @@
 \begin{frame}[plain]
   \titlepage
   \note{\textbf{0:20 \quad (cumulative 0:20)}\\
-    Name, affiliation, and one sentence: this is about nets of
+    I'm Takashi Yoshino, Toyo University, and one sentence: this is about nets of
     4-dimensional polytopes, and the talk closes three cases that were
     left open.}
 \end{frame}
@@ -83,12 +94,13 @@
 \begin{frame}{Unfolding a 4-polytope}
   \begin{columns}[T]
     \begin{column}{0.58\textwidth}
+      \small
       A \alert{net} of a convex polytope: cut it open and lay the
       facets out flat, without overlap.
-      \medskip
+      \smallskip
 
       In 3D this is D\"urer's problem, still open.
-      \medskip
+      \smallskip
 
       In 4D the facets are \alert{3-dimensional cells} and the net
       lives in $\RR^3$.
@@ -97,7 +109,7 @@
         \item Devadoss--Harvey (2023): \emph{every} spanning tree works
           for the 5-, 8-, 16-cell
       \end{itemize}
-      \medskip
+      \smallskip
 
       \alert{Left open: 24-cell, 120-cell, 600-cell.}
     \end{column}
@@ -149,7 +161,7 @@
 % ---------------------------------------------------------------- 4
 \begin{frame}{Step 2 hides a choice}
   \begin{columns}[T]
-    \begin{column}{0.57\textwidth}
+    \begin{column}{0.68\textwidth}
       \small
       The layers are forced: $L_d$ is the set of cells at distance $d$
       from $r$, and no rule can change that.
@@ -171,9 +183,9 @@
       Ours breaks the tie by cell index, which is not equivariant
       either. \alert{We come back to this.}
     \end{column}
-    \begin{column}{0.39\textwidth}
+    \begin{column}{0.29\textwidth}
       \centering
-      \begin{tikzpicture}[scale=0.95,
+      \begin{tikzpicture}[scale=0.62,
           cell/.style={circle,draw,inner sep=1.7pt,fill=white},
           every node/.style={font=\scriptsize}]
         \node at (-1.5,1.9) {$L_0$};
@@ -306,12 +318,13 @@
 \begin{frame}{And more: the tie-breaking question}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
+      \small
       The abstract left this open:
-      \begin{quote}\small
+      \begin{quote}\small\raggedright
         ``Whether validity extends to all BFS tie-breakings \dots\
         remains open.''
       \end{quote}
-      \medskip
+      \smallskip
 
       BFS layers do not depend on the rule, so a BFS tree is just a
       choice of parent, one layer up, for each cell --- and the trees
@@ -319,7 +332,7 @@
     \end{column}
     \begin{column}{0.47\textwidth}
       \centering
-      {\small
+      {\small\setlength{\tabcolsep}{2pt}
       \begin{tabular}{lrr}
         \toprule
         & trees / root & checked\\
@@ -335,28 +348,41 @@
       \end{tabular}}
     \end{column}
   \end{columns}
-  \medskip
+  \smallskip
 
+  {\small\begin{sloppypar}
   \alert{$1{,}132{,}661$ trees, no self-intersection.}
-  For the first four the rule is irrelevant --- including the 24-cell,
-  one of the open cases.
-  \note{\textbf{1:40 \quad (cumulative 10:00)}\\
+  For the first four the rule is irrelevant --- including the 24-cell.
+  And BFS is not a vacuous restriction: the 24-cell is \alert{not}
+  all-net (Seamons 2026) --- some spanning tree does overlap.
+  \end{sloppypar}}
+  \note{\textbf{1:50 \quad (cumulative 10:10)}\\
     Quote the abstract first --- this answers the question the abstract
     asked, it is not a side remark. The idea: BFS layers are determined
     by distance from the root, so a BFS tree is nothing but one parent
     per cell chosen from the layer above. That makes the family
     countable without ever naming a rule. Four polytopes exhausted, two
-    sampled. If asked why only 20 per root: $10^{44}$.}
+    sampled. If asked why only 20 per root: $10^{44}$.
+    \\[2pt]
+    The last sentence is the payoff --- it answers ``why BFS and not
+    every tree?'', which is the obvious objection to the whole talk.
+    For the 24-cell the two families genuinely differ: some spanning
+    tree overlaps, and yet all $786{,}432$ BFS trees do not. Say it as
+    the reason the restriction is the right one, not as an apology.
+    \\[2pt]
+    \textbf{If pressed on the citation:} a preprint of August 2026
+    (Zenodo, doi:10.5281/zenodo.22004769) confirming the
+    Devadoss--Harvey conjecture for the 24-cell. I reproduced the
+    overlap myself in exact rational arithmetic, so I am not repeating
+    it on trust.}
 \end{frame}
 
 % ---------------------------------------------------------------- 9
 \begin{frame}{$\triangle$ Warning: this does not extend}
   \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.58\textwidth}
       \small
       Beyond the regular case the rule stops being harmless.
-      \smallskip
-
       \begin{alertblock}{Grand antiprism, 320 cells}
         \centering
         \begin{tabular}{ll}
@@ -364,8 +390,6 @@
           rule B & valid from \alert{no} root\\
         \end{tabular}
       \end{alertblock}
-      \smallskip
-
       Same polytope, same roots, same family of BFS trees.
       Only the choice of parent differs.
       \smallskip
@@ -373,18 +397,17 @@
       Among the 64 convex uniform 4-polytopes this is not isolated:
       others swing from $1.8\%$ to $99.8\%$ of their roots.
     \end{column}
-    \begin{column}{0.42\textwidth}
+    \begin{column}{0.39\textwidth}
       \centering
-      \includegraphics[width=0.72\textwidth]{talk_gap.png}\\
+      \includegraphics[width=0.86\textwidth]{talk_gap.png}\\
       {\scriptsize Grand antiprism, one valid net}
     \end{column}
   \end{columns}
-  \smallskip
 
   \centering
   \textbf{\small What regularity buys is not that some tree works,
   but that the choice does not matter.}
-  \note{\textbf{1:40 \quad (cumulative 11:40)}\\
+  \note{\textbf{1:40 \quad (cumulative 11:50)}\\
     The warning is the corollary of the previous slide, so say ``and
     this is exactly what fails once you leave the regular case''.
     Grand antiprism is the cleanest instance: all 320 or none,
@@ -397,8 +420,8 @@
 \begin{frame}{Open problems}
   \begin{itemize}
     \item Why? A proof that does not enumerate.
-    \item From BFS trees to \alert{all} spanning trees --- still open
-      for the 24-, 120- and 600-cell.
+    \item From BFS trees to \alert{all} spanning trees --- settled for
+      the 24-cell (Seamons 2026), still open for the 120- and 600-cell.
     \item For the 120- and 600-cell even the BFS family is open:
       $10^{44}$ and $10^{65}$ trees per root put enumeration out of
       reach, so an argument would have to be structural.
@@ -409,7 +432,7 @@
   \centering
   \small Code, data and nets:
   \texttt{github.com/takashi-randomwalker/apple-peel-4d}
-  \note{\textbf{0:40 \quad (cumulative 12:20)}\\
+  \note{\textbf{0:40 \quad (cumulative 12:30)}\\
     Do not read all four. Say the first and the last, point at the URL,
     stop. Leaves roughly three minutes for questions.}
 \end{frame}
