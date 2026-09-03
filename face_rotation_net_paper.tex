@@ -80,6 +80,10 @@ admit a non-overlapping edge unfolding?) remains open as the D\"{u}rer
 conjecture \cite{Shephard1975}.
 For four-dimensional polytopes, the facets are 3-dimensional cells and
 a net is an arrangement of those cells in~$\RR^3$.
+Non-overlap is not a cosmetic condition: a point covered twice would
+have to travel to two different cells of the polytope when the net is
+folded up, so only an injective unfolding can be cut from a single solid
+body (Remark~\ref{rem:whyvalid}).
 Early work on unfolding the 4-cube into 3D arrangements of its cubical
 cells was carried out by Turney~\cite{Turney1984}, who enumerated
 all 261 topologically distinct nets of the 8-cell (hypercube).
@@ -172,6 +176,23 @@ shared polygon with its parent $p$ until it lies in the same
 hyperplane as $p$.
 The resulting arrangement is a \emph{net} if no two cells overlap in
 their interiors.
+
+\begin{remark}[Why overlap must be excluded]\label{rem:whyvalid}
+The map from $\partial P$ into $H$ induced by the construction above is
+well defined whether or not cells overlap, and running the rotations
+backwards reassembles $P$ in either case.  What overlap destroys is the
+\emph{inverse} assignment.  If two cells overlap, a point of the overlap
+belongs to both of them, and folding sends it to two distinct cells of
+$P$; a solid body occupying that region of $H$ therefore has no
+consistent destination, since one piece of matter cannot be in two
+places of $\RR^4$ at once.  Equivalently, an overlapping arrangement is
+an immersed image of $\partial P$ rather than a subset of $H$, so it
+cannot be cut from a single solid block in the first place.  Requiring
+the unfolding to be injective is thus the exact analogue of requiring a
+polyhedral net to be cuttable from one sheet of paper, and it is why
+validity, rather than the mere existence of an unfolding, is the object
+of study here.
+\end{remark}
 
 Ridge unfoldings are also accessible through interactive software.
 Stella4D~\cite{Webb2026} has displayed 3D nets of polychora since
