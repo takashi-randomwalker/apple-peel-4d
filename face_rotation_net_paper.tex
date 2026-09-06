@@ -52,7 +52,11 @@ This extends the work of Devadoss and Harvey
 \cite{DevadossHarvey2022}, who established validity for the 5-, 8-,
 and 16-cell for \emph{all} spanning trees and left the remaining three
 polytopes open; we resolve the open cases for the BFS subfamily.
-By contrast, our result stands in sharp contrast to the apple-peel
+For the 24-cell that subfamily is exactly the right one: a spanning
+tree whose unfolding overlaps has since been exhibited
+\cite{Seamons2026}, so the 24-cell is not all-net, and yet all
+$786{,}432$ of its BFS trees are valid.
+Our result stands in sharp contrast to the apple-peel
 unfolding algorithm \cite{YoshinoChaidee2026}, for which the 120-cell
 produces no valid nets despite admitting $1{,}440$ valid orderings,
 and the 600-cell admits no valid ordering at all.
@@ -540,6 +544,30 @@ The new content of Theorem~\ref{thm:main} is therefore the 24-cell,
 120-cell, and 600-cell.
 \end{remark}
 
+\begin{remark}[For the 24-cell the BFS restriction is not vacuous]
+\label{rem:notallnet}
+Devadoss and Harvey close \cite{DevadossHarvey2022} by conjecturing
+that the 24-, 120- and 600-cell fail to be \emph{all-net}, that is,
+that each admits some spanning tree whose unfolding overlaps.
+For the 24-cell this has since been confirmed: Seamons
+\cite{Seamons2026} exhibits a spanning tree whose ridge unfolding
+self-intersects, in exact rational arithmetic.
+(The example is so far announced only in a preprint; the present author
+has reproduced the overlap independently in exact arithmetic, which is
+possible because the octahedral cells are centrally symmetric, so that
+each hinge acts as a reflection in the plane of the shared triangle and
+the whole unfolding stays rational.)
+That tree is not a BFS tree, and not even a shortest-path tree: the
+cell-adjacency graph of the 24-cell has eccentricity $3$ from every
+cell, with layers $1+8+14+1$, whereas in Seamons's tree $13$ of the
+$24$ cells sit deeper than their distance from the root.
+It therefore lies outside the family enumerated here, and the two
+results are consistent.
+Taken together they are sharper than either alone: the 24-cell is not
+all-net, and yet all $786{,}432$ of its BFS trees are valid.
+Restricting to BFS trees is what separates the two verdicts.
+\end{remark}
+
 \begin{remark}[The 8-cell has only one net]
 For the 8-cell the theorem admits a shorter proof, and the net is a
 familiar one.
@@ -555,19 +583,29 @@ possible orientations, so all $48$ nets of the 8-cell are congruent.
 \begin{remark}[On the number of verifications]\label{rem:equivariance}
 Each regular convex $4$-polytope has a symmetry group acting
 transitively on cells.
-If the BFS algorithm uses a geometrically equivariant tie-breaking
-rule, then for any symmetry $g$ mapping root $r$ to root $r'$,
-the net from $r'$ is the image of the net from $r$ under $g$,
-and validity is preserved by the rigidity of $g$.
-In that case, verification of a \emph{single} root cell per polytope
-would suffice to establish Theorem~\ref{thm:main}.
-Our implementation uses index-based tie-breaking in the BFS queue,
-which is not equivariant under the symmetry group; we therefore
-verified all $773$ roots independently.
-In either case, Theorem~\ref{thm:main} guarantees the
-\emph{existence} of a valid face-rotation BFS net from every root cell
-under this tie-breaking rule.
-Whether validity holds for every possible tie-breaking rule remains open.
+A symmetry $g$ carrying a root $r$ to a root $r'$ induces an
+automorphism of $G(P)$ carrying $L_k(r)$ to $L_k(r')$, hence a
+bijection between the BFS trees rooted at $r$ and those rooted at $r'$;
+and the unfolding is equivariant, the net obtained from $(r', g(T))$
+being congruent to the one obtained from $(r,T)$, so that one is valid
+exactly when the other is.
+
+For part~1 a single root would therefore have sufficed, and no
+assumption about the tie-breaking rule is needed: the statement
+quantifies over \emph{all} BFS trees of the root, and that whole family
+is carried onto the corresponding family at any other root.
+We ran every root regardless, the extra cost being negligible, and no
+root behaved differently from any other.
+
+Part~2 is not of this form, since it names one tree per root rather
+than all of them.
+The tree $\mathcal{T}_r$ of Remark~\ref{rem:rule} is selected by cell
+index, which is not equivariant, so $\mathcal{T}_{r'}$ need not be
+$g(\mathcal{T}_r)$ and validity at one root implies nothing about
+another; the $120$ and $600$ roots were accordingly verified
+individually.
+Whether \emph{every} BFS tree is valid for these two polytopes---which
+part~1 settles for the other four---remains open.
 \end{remark}
 
 \begin{figure}[p]
@@ -787,10 +825,11 @@ $26$ of $2{,}640$ under min-index.
 Sampling BFS trees uniformly instead of fixing a rule separates the
 uniform polytopes from the regular ones more sharply still.
 Ten random trees at one root leave 48 of the 61 untouched, but 13 fail,
-and the failures are concentrated among the large polytopes: all four
-with $2{,}640$ cells fail every one of the ten, as does the grand
-antiprism, even though each of them is valid from every root under both
-index rules.
+and the failures are concentrated among the large polytopes: every one
+of the four polytopes with $2{,}640$ cells fails all ten---two of them
+being the root-dependent pair, and so outside the 61 to begin with---as
+does the grand antiprism, which is valid from all $320$ of its roots
+under the queue rule and under max-index.
 Against this, the regular polytopes did not produce a single failure in
 $1{,}132{,}661$ trees.
 What distinguishes the regular case is not that some tree works but
@@ -847,17 +886,17 @@ Is there a theoretical proof that does not rely on computer
 enumeration?}
 \end{quote}
 
-A second open problem is whether Theorem~\ref{thm:main} extends to
-all spanning trees (not just BFS) for the 24-cell, 120-cell, and
-600-cell, as was proved for the 5-, 8-, and 16-cell by
-\cite{DevadossHarvey2022}.
-Within the BFS family the 24-cell is settled by part~1 of the theorem,
-so what remains there is the step from BFS trees to arbitrary spanning
-trees.
-For the 120- and 600-cell even the BFS family is open: with
-$1.8\times10^{44}$ and $1.8\times10^{65}$ trees per root, enumeration
-is hopeless and a proof would have to be structural rather than
-computational.
+A second open problem is whether Theorem~\ref{thm:main} extends to all
+spanning trees and not merely to BFS trees, as \cite{DevadossHarvey2022}
+proved for the 5-, 8-, and 16-cell.
+For the 24-cell it does not, and the question is settled in the
+negative: by Remark~\ref{rem:notallnet} some spanning tree of the
+24-cell overlaps, while part~1 of the theorem covers every one of its
+BFS trees.
+Whether the 120- and 600-cell are all-net is still open, and for them
+even the BFS family is: with $1.8\times10^{44}$ and
+$1.8\times10^{65}$ trees per root, enumeration is hopeless and a proof
+would have to be structural rather than computational.
 
 A third question is the characterization left open by
 Section~\ref{sec:uniform}.
@@ -946,6 +985,14 @@ S.~L. Devadoss and M.~S. Harvey.
 \newblock {\em Computational Geometry: Theory and Applications},
   111:\penalty0 101977, 2023.
 \newblock \href{https://arxiv.org/abs/2111.01359}{arXiv:2111.01359}.
+
+\bibitem{Seamons2026}
+J.~Seamons.
+\newblock The regular 24-cell is not all-net: An exact overlapping ridge
+  unfolding.
+\newblock Zenodo preprint, 2026.
+\newblock \href{https://doi.org/10.5281/zenodo.22004769}
+  {doi:10.5281/zenodo.22004769}.
 
 \bibitem{Shephard1975}
 G.~C. Shephard.

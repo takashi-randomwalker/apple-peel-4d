@@ -488,6 +488,28 @@ BFS spanning tree を根セルから構築し，各子セルを親との共有�
 >
 > **覚え方（ユーザー，2026-08-23）**：「重なった紙の図形を，辺で折れば立体になるからといって**展開図と呼ぶか**？」— 折れるかどうかは初めから争点ではなく，1枚から切り出せる型紙かどうかが争点。
 
+#### 2026-09-06 セッションの修正（内部矛盾3件 — **12 → 13ページ**）
+
+発表準備でスライドと論文を突き合わせて見つかったもの。いずれも**論文内部の矛盾**。
+
+| 修正 | 内容 |
+|------|------|
+| **(A) `rem:equivariance` の最終文** | "Whether validity holds for every possible tie-breaking rule remains open." は part 1 が 5/8/16/24胞体について**決着させている**ので誤り。**120/600胞体に限定**。あわせて論理を整理：**part 1 に等変性の仮定は要らない**（対称性が根 $r$ の BFS 木の**族全体**を根 $r'$ の族へ全単射で写すので，規則が何であれ1根で足りる）。等変性の但し書きが要るのは1根1本の $\mathcal{T}_r$ を名指しする **part 2 だけ** |
+| **(B) §4 の random-tree の文** | "as does the grand antiprism, even though each of them is valid from every root under both index rules" は同じ論文の Table 3 と矛盾（gap は **min-index で 0/320**）。さらに 2,640セルの4種のうち**2種は MIXED なので「61種」の外**。両方を書き分けた |
+| **(C) Seamons 2026 の反映** | §3.1 に `Remark 7`（`\label{rem:notallnet}`）を新設，§5 の第2 open problem を書き換え（**24胞体は否定的に決着**），Abstract に1文，`\bibitem{Seamons2026}`（Zenodo, doi:10.5281/zenodo.22004769）追加で **References 7 → 8件** |
+
+Abstract の "By contrast, our result stands in sharp contrast to..." の重複も1語削った。
+未定義参照なし，Overfull/Underfull は既存4件のみ。
+
+> **2,640セルの多胞体はちょうど4種**（`_4DData_uniform/index.csv` で確認）：runcinated 120-cell `x5o3o3x`／
+> runcitruncated 600-cell `x5o3x3x`／runcitruncated 120-cell `x5x3o3x`／omnitruncated 120-cell `x5x3x3x`。
+> **真ん中の2つが MIXED**。「2640セル級」とまとめて書くと61種の内訳と食い違う。
+
+> **Remark 7 の中身**：Seamons の木が BFS でないことの根拠を数字で示した。24胞体は任意の根から
+> 離心数3・層 $1+8+14+1$ なのに，彼の木では **13/24 セルが距離より深い**。「preprint での announce に
+> 留まる／著者が独立に厳密算術で再現した」の留保も入れた。八面体セルが中心対称ゆえ各蝶番が共有三角形の
+> 平面での鏡映になり，展開が有理数に留まる。
+
 #### 2026-08-11 セッションの修正（Stella4D の引用追加）
 
 | 修正 | 内容 |
@@ -917,7 +939,7 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 
 **grand antiprism は queue と max-index で全320根 valid，min-index で1根も valid でない。** 「全根で valid」は多胞体の性質ではなく**(多胞体, 規則) の組の性質**。他に3種が根を失う（$t_{0,2,3}\{3,3,3\}$ が max-index で1根，$t_{0,3}\{4,3,3\}$ と $t_{0,3}\{5,3,3\}$ が min-index で1根・26根）。
 
-**一様ランダム木では61種中13種が落ちる**（2640セル級は4種とも 0/10）。両 index 規則では全根 valid なのに。対して正多胞体は 1,132,661 本で失敗ゼロ。
+**一様ランダム木では61種中13種が落ちる**。2640セルの多胞体は4種とも 0/10 だが，**うち2種（runcitruncated 600-cell と 120-cell）は MIXED なので61種には入っていない** — まとめて「61種のうち」と書かないこと（2026-09-06 に論文とスライドで修正）。grand antiprism も 0/10 で，こちらは queue と max-index では全320根 valid（min-index は 0/320 なので「両 index 規則で全根 valid」も誤り）。対して正多胞体は 1,132,661 本で失敗ゼロ。
 
 > **結論：正則性とは「タイブレークに鈍感であること」だった。** 当初の三分類（61/2/1）より内容のある主張。
 
@@ -951,7 +973,7 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 
 ### JCDCG³ 発表スライド（`jcdcg3_slides.tex`，2026-08-19 仮作成）
 
-**持ち時間：質疑込み15分，交代1分で16分刻み** → 実質12分弱。本編9枚＋backup 2枚，**4:3**（2026-09-03 に 16:9 から変更）。
+**発表は 9/8（火）16:42--16:57**（プログラムで確認）。本編10枚＋**backup 5枚**，**4:3**（2026-09-03 に 16:9 から変更）。合計 12:30 なので**質疑は実質2分強**。
 
 **構成の要点：Warning を単独の話題にせず，タイブレークの結果の系として置く。**
 
@@ -977,8 +999,11 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 | 10 | Open problems ＋ GitHub URL（**24胞体は settled に訂正**） | 0:40 |
 | B1 | backup：探索が到達できる木は 24胞体で 7.9% だけ | — |
 | B2 | backup：3規則の比較表 | — |
+| B3 | backup：runcinated 24-cell は等変な木なら valid（スライド4の伏線回収） | — |
+| B4 | backup：セル次数も辺の角度欠損も両方向で効かない | — |
+| B5 | backup：正多胞体6種の基本データ（論文 Table 1 ＋ 深さ・木の数） | — |
 
-**合計 12:30**（2026-09-03 に 12:20 から。スライド8に Seamons の一文を追加した分）。15分枠・交代1分なので質疑は約1分30秒。**縮めたくなった場合の削りどころはスライド6（図を見せる時間 −10秒）とスライド2（−10秒）** で，スライド4は削らない。
+**合計 12:30**（2026-09-03 に 12:20 から。スライド8に Seamons の一文を追加した分）。枠は 16:42--16:57 なので質疑は約2分。**縮めたくなった場合の削りどころはスライド6（図を見せる時間 −10秒）とスライド2（−10秒）** で，スライド4は削らない。
 
 **Warning は grand antiprism 一択**（`rule A → all 320 / rule B → no root`）。**64種の三分類（61/2/1）は出さない** — 数字自体が規則依存で留保が要り，切れ味を鈍らせるため。締めは "What regularity buys is not that some tree works, but that the choice does not matter."
 
@@ -1132,6 +1157,86 @@ Grand antiprism           320/320      320/320       0/320     ← 決定的
 **残る警告はタイトル枚の overfull vbox 1件のみ**（metropolis が title page を `\paperheight` の minipage で組む構造上のもの，従来どおり無害）。**12ページ**維持。
 
 段幅・`\small`・tikz scale は**すべて 4:3 前提で調整済み**なので，16:9 に戻すとコンパイルは通るが本文段が不必要に細いままになる。この経緯は `jcdcg3_slides.tex` のヘッダコメントにも記載。
+
+#### 2026-09-06（発表2日前）：動画・印刷用・ノートの上限
+
+**引用の裏取り**：スライド8が引く *"Whether validity extends to all BFS tie-breakings ... remains open."*
+は**採択後の camera-ready `260702JCDCGGG_FaceRotationNet.pdf` にある**（初回提出の 0611 版には無い）。
+省略した後半 "and further to all spanning trees" もスライド8末尾の Seamons とスライド10で答えており，
+**引用文の前半と後半を講演が両方埋める**構図になっている。
+
+**修正3件**：(1) B2 の「61種のうち13種，その中に2640セルの4種」→ 2640セルの4種のうち**2種は MIXED で
+61に入っていない**（population 違い）。同じ誤りが本ファイルと論文§4にもあった。(2) スライド9
+`others swing` → `another swings`（1.8→99.8% は runcitruncated 600-cell 1種）。(3) 質疑時間を2分に訂正。
+
+##### 埋め込み動画（3本，pympress で再生）
+
+`\usepackage{multimedia}` の `\movie` が書く PDF Movie 注釈を pympress が Poppler 経由で拾い，
+GStreamer で再生する（`avdec_h264` と Apple の `vtdec` を実機確認）。**2画面版でも注釈の矩形が
+正しく半分に縮む**ことを Poppler で実測確認済み。
+
+| スライド | ファイル | 内容 |
+|---|---|---|
+| 2 | `talk_8cell_spin.mp4` | 完成したネットのターンテーブル。10秒で1回転 |
+| 3 | `talk_8cell_unfold.mp4` | テッセラクト → Dalí の十字架 → 再び折り畳む。**層ごとに開く** |
+| 6 | `talk_mainresult_spin.mp4` | Figure 1 の**下段2枚だけが同時に回る**。8秒で1回転 |
+
+**poster に静止画を置くのが肝**：メディア非対応のビューアでは注釈が無効になり poster が出るので，
+**素の4:3 PDF を会場PCに渡しても一切劣化しない**。**クリックで再生開始**（Poppler が autoplay
+フラグを公開しないため pympress に自動再生はない）。**mp4 は PDF と同じディレクトリに置く**。
+生成は `./build_talk_video.sh`（`src/figures/make_talk_video_{8cell,unfold,mainresult}.wls` ＋ ffmpeg，約5分）。
+
+**展開アニメ（スライド3）**：$T_r(t)=\mathrm{id}$，$T_c(t)=\mathrm{rot}(t\theta_e)\circ T_p(t)$。
+蝶番平面は親の**現在の**フレームで取り直し，$\theta$ は子を**まだ回していない**位置に対して測るので
+$t$ に依らない。`coords4` は**層ごとの展開率のベクトル**を取り，6個 → **0.6秒の静止** → 最後の1個
+という順に開く。素直に $w$ を落とすと $t=0$ でただの立方体になるので，$w$ 軸上の視点による
+**4次元透視投影**を使い，重みを $1-t$ で消して $t=1$ でちょうど plain drop-$w$ ＝本物のネットにする。
+
+> **描画の落とし穴**
+> - 透視を最後まで効かせると，$w=-2.5$ まで降りるセルが縮み**広がる前に一度小さくなる**
+> - **`SphericalRegion -> True` は展開アニメでは外す**（外接球に合わせるので $\sqrt3$ 損する）。
+>   カメラが動く turntable では必要
+> - `PlotRange` は**クリップする**ので幾何より狭められない。しかも直方体の投影は六角形なので
+>   外接矩形との差で**3分の1が空く**。→ 大きめに描いて **`ffmpeg` の `cropdetect` で全フレームの
+>   描画範囲の和を測ってクロップ**（`build_talk_video.sh` の `tight_crop`）。数値をハードコード
+>   しないのでカメラを変えても自動追従する
+> - スライド6は `260612AllFaceRotation.pdf` が**Illustrator の組版**なので再現不能。元の図を
+>   100 dpi で起こし，**下段2枚だけを同じ矩形に overlay** する（562×560，y=302，x=12 と 583）。
+>   元パネルが `face_rotation_net_viz_all.m` 由来と判明したので，同じ `ViewPoint {2.4,-2.0,1.8}`
+>   から回し始めればフレーム0が印刷図と一致する
+
+##### ノートが切れるのは LaTeX の問題（pympress ではない）
+
+beamer のノート頁は**改頁しない単一の vbox** なので，はみ出した分は頁の外へ押し出され **PDF に
+入らない**。`pdftotext` で確認したところ，スライド2・3・8のノートは末尾数行が PDF に存在しなかった。
+
+> **ログは当てにならない**：TeX は overflow が大きいときしか `Overfull \vbox` を出さない。
+> 3件切れていたのに警告は2件。しかも `build_slides.sh` は素のビルドのログしか見ていなかった
+> （素のビルドではノートを組まないので永久に気づけない）。
+
+**`check_notes.py`** を追加（`build_slides.sh` から自動実行）。各 `\note` の末尾5語を，**ノート領域
+だけを `pdftotext -x/-y/-W/-H` で切り出した文字列**と照合する。領域を限るのは必須で，スライド本体と
+同じ語で終わるノート（スライド4の "we come back to this"）は頁全体を見ると**切れていても通る**。
+2026-09-06 に全10枚のノートを短く平易な英語に書き直した（目安は組み上がり12行）。
+
+##### 3種のビルドと印刷用
+
+ノートの切り替えはコメントの付け替えをやめ **`\ifdefined\NOTES` / `\ifdefined\NOTESPRINT`** に変更。
+`./build_slides.sh` が3種を焼き，警告数・ノートの完全性・持ち物を表示する。
+
+- `jcdcg3_slides.pdf` 素の4:3（会場PC用。**必ず持参**）
+- `jcdcg3_slides_notes.pdf` 横長2画面版 → `pympress -t 12:30 -N right ...`
+- `jcdcg3_slides_print.pdf` **印刷用**。`show only notes` ＋自前の `note page` テンプレートで
+  **左にスライド・右にスクリプト**，`\note` を持つ frame だけなので10ページ
+
+> **印刷用テンプレートの落とし穴**：幅は **`\paperwidth` ではなく `\textwidth` の割合**で指定する
+> （ノート頁もスライドの余白を保つ）。`\insertslideintonotes{f}` の返す箱は **f×paperwidth より広い**
+> （係数およそ 388pt）ので，左の minipage をそれより広く取らないと overfull hbox が10ページ分出る。
+> 現行は scale 0.40／minipage 0.48・0.49。本文は `\footnotesize`（`\small` だとスライド4と8が切れる）。
+
+**pympress 1.8.6**（homebrew，導入済み）。既定の `[notes position] horizontal = right` が
+`show notes on second screen=right` と一致する。キー：`s` 画面入れ替え，`b` 暗転，`n` ノートモード，
+`p` タイマー一時停止，`r` リセット，`f` 全画面。
 
 ### 「良いネット」の三層定義と対称性の上限（2026-08-19）
 
