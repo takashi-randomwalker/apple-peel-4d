@@ -23,8 +23,27 @@
 % it is chosen for is filled blocks: under the old dove colours the
 % alertblock on slide 8 had no visible frame at all.
 %
-% Every frame carries a \note with its target time.  The notes are not
-% typeset unless one of the two \setbeameroption lines is uncommented.
+% Every frame carries a \note with its target time.  The notes are off
+% unless \NOTES is defined on the pdflatex command line; see below.
+% KEEP THEM SHORT.  A note page is a single vbox and does not break, so
+% a note that runs past the bottom is pushed off the page and never
+% reaches the PDF at all -- and TeX warns only when the overflow is
+% large, so three notes were losing their last lines while the log
+% showed nothing.  build_slides.sh now runs check_notes.py, which reads
+% the note back out of the PDF and compares it with the source.  Twelve
+% typeset lines is about the limit.
+% Three files are wanted on the day, all from build_slides.sh:
+%   jcdcg3_slides.pdf        plain 4:3, to hand over if the room
+%                            supplies the machine
+%   jcdcg3_slides_notes.pdf  the wide two-screen build pympress splits
+%                            between projector and laptop
+%   jcdcg3_slides_print.pdf  each script beside its slide, to print --
+%                            the paper fallback for the case above,
+%                            where there is no presenter screen
+% The backups are B1 reachable trees, B2 the three rules, B3 the
+% runcinated 24-cell, B4 what does not separate them, B5 the
+% combinatorial data of the six polytopes.  They carry no \note, so
+% they are absent from the printed file; slide 10's note lists them.
 %
 % Two log messages are expected and harmless.  Metropolis asks for
 % XeLaTeX or LuaLaTeX because it wants the Fira OTFs; FiraSans below
@@ -58,16 +77,52 @@
 \setbeamersize{text margin left=6mm,text margin right=6mm}
 
 % --- speaker notes ---------------------------------------------------
-% Uncomment exactly one line to build a version with the notes.
+% Notes are off unless a macro is defined on the command line, so this
+% block never has to be edited and the two builds cannot be confused:
+%   \NOTES       wide page, slide left and note right -- what pympress
+%                splits between projector and laptop
+%   \NOTESPRINT  the notes alone, to print
+% build_slides.sh passes them; see the top of this file.
 \usepackage{pgfpages}
-%\setbeameroption{show notes on second screen=right} % presenting, 2 screens
-%\setbeameroption{show only notes}                   % notes alone, to print
+\ifdefined\NOTES
+  \setbeameroption{show notes on second screen=right}
+\fi
+\ifdefined\NOTESPRINT
+  \setbeameroption{show only notes}
+  % The paper fallback, for the day the room supplies the machine and
+  % there is no presenter screen.  Beamer's own note page puts a stamp-
+  % sized slide in a corner under a repeated title; on paper what is
+  % wanted is the slide big enough to recognise, beside its script.
+  % Only frames that carry a \note come out, so this is 10 pages, and
+  % the backup slides are not among them -- slide 10's note lists them.
+  % Fractions of \textwidth, not of \paperwidth: the note page keeps the
+  % slide margins, so paperwidth fractions run off the right edge.
+  \setbeamertemplate{note page}{%
+    \vskip1mm
+    \begin{minipage}[t]{0.48\textwidth}
+      \vskip0pt\insertslideintonotes{0.40}\par
+      \vskip1mm{\tiny slide \insertframenumber}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.49\textwidth}
+      \vskip1mm\footnotesize\raggedright\insertnote
+    \end{minipage}%
+  }
+\fi
 % ---------------------------------------------------------------------
 
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{tikz}                  % the layer diagram on slide 4
+% The films on slides 2, 3 and 6.  \movie writes a PDF Movie
+% annotation, which pympress finds and plays through GStreamer; the
+% file is resolved relative to the PDF, so the three mp4s must travel
+% beside it.  In a viewer with no media support the annotation is inert
+% and the poster is what shows -- and each poster is a frame of its own
+% film, so the plain build looks like the deck always did.  Click a
+% picture to start it; pympress has no autoplay, because Poppler does
+% not expose the flag.  All three are made by ./build_talk_video.sh.
+\usepackage{multimedia}
 
 \newcommand{\RR}{\mathbb{R}}
 
@@ -85,9 +140,9 @@
 \begin{frame}[plain]
   \titlepage
   \note{\textbf{0:20 \quad (cumulative 0:20)}\\
-    I'm Takashi Yoshino, Toyo University, and one sentence: this is about nets of
-    4-dimensional polytopes, and the talk closes three cases that were
-    left open.}
+    I am Takashi Yoshino, Toyo University.
+    This talk is about nets of 4-dimensional polytopes.
+    It closes three open cases.}
 \end{frame}
 
 % ---------------------------------------------------------------- 2
@@ -115,47 +170,71 @@
     \end{column}
     \begin{column}{0.4\textwidth}
       \centering
-      \includegraphics[width=0.97\textwidth]{face_rotation_net_8cell.png}\\
+      \movie[loop]%
+        {\includegraphics[width=0.97\textwidth]{face_rotation_net_8cell.png}}%
+        {talk_8cell_spin.mp4}\\
       {\scriptsize A net of the 8-cell: Dal\'{\i}'s cross}
     \end{column}
   \end{columns}
   \note{\textbf{1:20 \quad (cumulative 1:40)}\\
-    Cut open, lay flat, no overlap. In 3D this is D\"urer; in 4D the
-    pieces are solids and the net is a 3D object you can print. Use the
-    picture: the 8-cell is the tesseract, and the net our algorithm
-    returns is exactly Dal\'{\i}'s cross --- one of Turney's 261. Worth
-    saying that this is forced, not luck: cells of the 8-cell are
-    adjacent unless opposite, so the BFS layers from any root are
-    $1+6+1$, and every one of the 6 trees per root gives this same
-    cross. Devadoss--Harvey settled the three small ones for
-    \emph{every} spanning tree. Land on the last line: three polytopes
-    left open --- that is where this talk starts.}
+    Cut it open, lay it flat, no overlap. In 3D this is D\"urer's
+    problem. In 4D the pieces are solids, so the net is a 3D object you
+    can print.
+    \\[2pt]
+    The picture: the 8-cell is the tesseract, and our net is Dal\'{\i}'s
+    cross --- one of Turney's 261. It is forced, not luck. Two cells are
+    adjacent unless they are opposite, so the layers are $1+6+1$ and all
+    6 trees give this cross.
+    \\[2pt]
+    Devadoss--Harvey settled the three small ones for \emph{every}
+    spanning tree. End on the last line: three polytopes left open.
+    That is where the talk starts.
+    \\[2pt]
+    \textbf{Click the picture} to make it turn. Do not wait for it.}
 \end{frame}
 
 % ---------------------------------------------------------------- 3
 \begin{frame}{Face-rotation BFS}
-  Fix a \alert{root cell} $r$. Three steps.
-  \medskip
+  \begin{columns}[T]
+    \begin{column}{0.61\textwidth}
+      \small
+      Fix a \alert{root cell} $r$. Three steps.
 
-  \begin{enumerate}
-    \item[\textbf{1}] \textbf{Face-up.} Rotate in $SO(4)$ so the
-      centroid of $r$ sits on the $+w$ axis.
-    \item[\textbf{2}] \textbf{BFS.} Take a breadth-first spanning tree
-      of the cell-adjacency graph from $r$. For each tree edge
-      (parent $p$, child $c$), rotate $c$ about the shared polygon
-      until it lands in $p$'s hyperplane.
-    \item[\textbf{3}] \textbf{Project.} All cells now share one
-      $w$-coordinate (spread $<4\times10^{-13}$). Drop $w$.
-  \end{enumerate}
-  \medskip
+      \begin{enumerate}
+        \item[\textbf{1}] \textbf{Face-up.} Rotate in $SO(4)$ so the
+          centroid of $r$ sits on the $+w$ axis.
+        \item[\textbf{2}] \textbf{BFS.} Take a breadth-first spanning
+          tree of the cell-adjacency graph from $r$. For each tree edge
+          (parent $p$, child $c$), rotate $c$ about the shared polygon
+          until it lands in $p$'s hyperplane.
+        \item[\textbf{3}] \textbf{Project.} All cells now share one
+          $w$-coordinate (spread $<4\times10^{-13}$). Drop $w$.
+      \end{enumerate}
+      \smallskip
 
-  The result is a net iff no two cells share interior volume.
+      The result is a net iff no two cells share interior volume.
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \centering
+      \movie[loop]%
+        {\includegraphics[width=\textwidth]{talk_8cell_unfold_poster.png}}%
+        {talk_8cell_unfold.mp4}\\
+      {\scriptsize Opening one BFS layer at\\a time, into Dal\'{\i}'s cross}
+    \end{column}
+  \end{columns}
   \note{\textbf{1:20 \quad (cumulative 3:00)}\\
-    Slowest slide of the talk --- the audience has to picture the
-    rotation. Emphasise that the rotation is forced: the shared polygon
-    is the hinge. Step 3 is a check, not an assumption --- the cells
-    really do land in one hyperplane. Do \emph{not} dwell on step 2
-    here; the next slide is about exactly what it leaves open.}
+    The slowest slide. The rotation is forced: the shared polygon is
+    the hinge. Step 3 is a check, not an assumption --- the cells really
+    do land in one hyperplane. Do not dwell on step 2; the next slide is
+    about what it leaves open.
+    \\[2pt]
+    \textbf{Click the picture} and let it run while you read the three
+    steps. It opens \emph{by layer}: the six neighbours first, then a
+    pause, then the last cell. On that pause, say that BFS fixes the
+    layers.
+    \\[2pt]
+    If asked why the cells look bent: it is a 4D view, and it fades out
+    as the net flattens. The last frame is the real net.}
 \end{frame}
 
 % ---------------------------------------------------------------- 4
@@ -207,22 +286,21 @@
     \end{column}
   \end{columns}
   \note{\textbf{0:50 \quad (cumulative 3:50)}\\
-    Short slide, but it is the one the referees will care about. Two
-    beats only. One: BFS fixes the layers, not the parents. Two: a
-    cleverer geometric rule does not repair it --- for those four the
-    candidates are genuinely interchangeable under the symmetry group,
-    so any equivariant score ties. Checked over every cell that has
-    more than one candidate parent --- 1, 11 and 7 cells for the 8-,
-    16- and 24-cell, all single orbits; the 5-cell has none at all.
+    Short, but this is the slide the referees care about. Two beats.
+    One: BFS fixes the layers, not the parents. Two: a cleverer
+    geometric rule does not help. For those four the candidates are
+    interchangeable under the symmetry group, so any equivariant score
+    ties on all of them.
     \\[2pt]
-    \textbf{If pressed:} this is stated for those four because it
-    \emph{fails} for the 120-cell --- there 50 of the 71 such cells have
-    candidates in two or more orbits, so an equivariant rule could
-    discriminate. We have not looked for one. Do not volunteer this;
-    the paper claims nothing stronger.
+    Checked on every cell with more than one candidate: 1, 11 and 7
+    cells for the 8-, 16- and 24-cell, each a single orbit. The 5-cell
+    has none.
     \\[2pt]
-    Close with ``we come back to this'' and move on --- the answer is
-    slide 8.}
+    \textbf{If pressed:} it fails for the 120-cell, where 50 of the 71
+    such cells have candidates in two or more orbits. Do not volunteer
+    this.
+    \\[2pt]
+    Close with ``we come back to this''.}
 \end{frame}
 
 % ---------------------------------------------------------------- 5
@@ -246,10 +324,11 @@
     Measuring \emph{volume} ignores contact of measure zero.
   \end{alertblock}
   \note{\textbf{1:20 \quad (cumulative 5:10)}\\
-    Tell it as something that actually happened: the first run reported
-    total failure for three polytopes. Cells that meet along an edge are
-    not overlapping. The fix is one line of code, but without it the
-    main theorem reads the other way round.}
+    Tell it as something that happened. The first run said these three
+    polytopes failed completely.
+    \\[2pt]
+    But cells that meet along an edge do not overlap. The fix is one
+    line of code. Without it the theorem comes out backwards.}
 \end{frame}
 
 % ---------------------------------------------------------------- 6
@@ -269,14 +348,27 @@
     \end{column}
     \begin{column}{0.56\textwidth}
       \centering
-      \includegraphics[width=0.95\textwidth]{260612AllFaceRotation.pdf}
+      % The poster is the same figure, with its two large panels
+      % re-rendered so that frame 0 stands where the printed figure
+      % stands; in the film those two turn and the four small ones do
+      % not.  260612AllFaceRotation.pdf is still the source of the top
+      % row and of the paper's Figure 1.
+      \movie[loop]%
+        {\includegraphics[width=0.95\textwidth]{talk_mainresult_poster.png}}%
+        {talk_mainresult_spin.mp4}
     \end{column}
   \end{columns}
   \note{\textbf{1:40 \quad (cumulative 6:50)}\\
     State the theorem, then let the picture sit. Six polytopes, one net
-    each, all from root cell 1. Say the number out loud: 773 roots, no
-    exceptions, no near misses --- the overlap count is exactly zero
-    every time. The three new ones are the three D--H left open.}
+    each, all from root cell 1.
+    \\[2pt]
+    Say the number out loud: 773 roots, no exceptions. The overlap
+    count is exactly zero every time --- there are no near misses.
+    \\[2pt]
+    The three new ones are the three Devadoss--Harvey left open.
+    \\[2pt]
+    \textbf{Click the figure} and the two big nets turn, both at once.
+    Eight seconds a turn. Let them run while you talk.}
 \end{frame}
 
 % ---------------------------------------------------------------- 7
@@ -307,11 +399,14 @@
   \end{block}
   \note{\textbf{1:30 \quad (cumulative 8:20)}\\
     The companion algorithm peels the polytope like an apple, one cell
-    at a time. Read the two rows as a pair of opposite failures: the
-    120-cell always finds an order and the order is never a net; the
-    600-cell never finds an order at all. Conclusion in the block ---
-    ordering and net are independent. Do not get drawn into how the
-    apple-peel rule works; the point is only the contrast.}
+    at a time.
+    \\[2pt]
+    Read the two rows as opposite failures. The 120-cell always finds
+    an order, and the order is never a net. The 600-cell never finds an
+    order at all.
+    \\[2pt]
+    Then the block: ordering and net are independent. Do not explain
+    how the apple-peel rule works. Only the contrast matters.}
 \end{frame}
 
 % ---------------------------------------------------------------- 8
@@ -357,24 +452,21 @@
   all-net (Seamons 2026) --- some spanning tree does overlap.
   \end{sloppypar}}
   \note{\textbf{1:50 \quad (cumulative 10:10)}\\
-    Quote the abstract first --- this answers the question the abstract
-    asked, it is not a side remark. The idea: BFS layers are determined
-    by distance from the root, so a BFS tree is nothing but one parent
-    per cell chosen from the layer above. That makes the family
-    countable without ever naming a rule. Four polytopes exhausted, two
-    sampled. If asked why only 20 per root: $10^{44}$.
+    Quote the abstract first. This answers the question the abstract
+    asked; it is not a side remark.
     \\[2pt]
-    The last sentence is the payoff --- it answers ``why BFS and not
-    every tree?'', which is the obvious objection to the whole talk.
-    For the 24-cell the two families genuinely differ: some spanning
-    tree overlaps, and yet all $786{,}432$ BFS trees do not. Say it as
-    the reason the restriction is the right one, not as an apology.
+    The idea: the layers depend only on distance from the root, so a
+    BFS tree is one parent per cell, taken from the layer above. The
+    family can then be counted without naming a rule. Four polytopes
+    exhausted, two sampled. If asked why only 20 per root: $10^{44}$.
     \\[2pt]
-    \textbf{If pressed on the citation:} a preprint of August 2026
-    (Zenodo, doi:10.5281/zenodo.22004769) confirming the
-    Devadoss--Harvey conjecture for the 24-cell. I reproduced the
-    overlap myself in exact rational arithmetic, so I am not repeating
-    it on trust.}
+    The last sentence is the payoff. It answers ``why BFS and not every
+    tree?''. For the 24-cell some spanning tree overlaps, and yet all
+    $786{,}432$ BFS trees do not. Say it as the reason, not as an
+    apology.
+    \\[2pt]
+    \textbf{Source, if asked:} a Zenodo preprint of August 2026. I
+    reproduced the overlap myself in exact arithmetic.}
 \end{frame}
 
 % ---------------------------------------------------------------- 9
@@ -395,7 +487,7 @@
       \smallskip
 
       Among the 64 convex uniform 4-polytopes this is not isolated:
-      others swing from $1.8\%$ to $99.8\%$ of their roots.
+      another swings from $1.8\%$ to $99.8\%$ of its roots.
     \end{column}
     \begin{column}{0.39\textwidth}
       \centering
@@ -408,12 +500,14 @@
   \textbf{\small What regularity buys is not that some tree works,
   but that the choice does not matter.}
   \note{\textbf{1:40 \quad (cumulative 11:50)}\\
-    The warning is the corollary of the previous slide, so say ``and
-    this is exactly what fails once you leave the regular case''.
-    Grand antiprism is the cleanest instance: all 320 or none,
-    decided by nothing but which parent you pick. Then the closing
-    sentence --- say it slowly, it is the line to remember.
-    Backup B2 has the full rule comparison if it is questioned.}
+    This follows from the last slide, so say ``and this is exactly what
+    fails once you leave the regular case''.
+    \\[2pt]
+    The grand antiprism is the cleanest case: all 320 roots or none,
+    decided by nothing but which parent you pick.
+    \\[2pt]
+    Then the closing sentence. Say it slowly; it is the line to
+    remember. B2 has the full rule comparison.}
 \end{frame}
 
 % ---------------------------------------------------------------- 10
@@ -434,7 +528,12 @@
   \texttt{github.com/takashi-randomwalker/apple-peel-4d}
   \note{\textbf{0:40 \quad (cumulative 12:30)}\\
     Do not read all four. Say the first and the last, point at the URL,
-    stop. Leaves roughly three minutes for questions.}
+    and stop. The slot ends at 16:57, so this leaves about two minutes
+    for questions.
+    \\[2pt]
+    Backups: B1 reachable trees, B2 the three rules, B3 the runcinated
+    24-cell, B4 what does \emph{not} separate them, B5 the data of the
+    six.}
 \end{frame}
 
 % ================================================================
@@ -482,6 +581,7 @@
   \end{tabular}}
 
   \raggedright\medskip
+  {\small
   ``queue'' is the textbook BFS loop, neighbours scanned in index
   order. ``min/max-index'' choose, for each cell, the smallest or
   largest indexed candidate parent.
@@ -489,7 +589,105 @@
 
   Uniformly random trees are harsher still: of the 61 uniform
   polytopes valid from every root under the queue rule, 13 fail within
-  10 random trees --- including all four with $2{,}640$ cells.
+  10 random trees, the grand antiprism among them --- and every one of
+  the four polytopes with $2{,}640$ cells fails all ten, whether or not
+  it is one of the 61.}
+\end{frame}
+
+% ---------------------------------------------------------------- B3
+\begin{frame}{Backup: the one that no rule could unfold}
+  \small
+  Runcinated 24-cell $t_{0,3}\{3,4,3\}$, 240 cells, $0/240$ under all
+  three index rules. Ask instead for a \emph{symmetric tree}: a BFS
+  tree invariant under $H\le\mathrm{Stab}(r)$ exists iff every cell has
+  a candidate parent fixed by its stabilizer in $H$. Here
+  $|\mathrm{Aut}| = 2{,}304$, with two cell orbits, and the largest
+  such $H$ has order~$3$.
+  \smallskip
+
+  \centering
+  {\footnotesize
+  \begin{tabular}{lrrrr}
+    \toprule
+    root orbit & $|\mathrm{Stab}(r)|$ & $\max|H|$
+      & $H$-invariant & random\\
+    \midrule
+    $48$ (octahedra)          & $48$ & $3$ & $70/600$ & \alert{$0/600$}\\
+    $192$ (triangular prisms) & $12$ & $3$ & $83/600$ & \alert{$0/600$}\\
+    \bottomrule
+  \end{tabular}}
+
+  \raggedright\smallskip
+  The control is the point: unconstrained trees at those roots give
+  nothing. Transitivity on each orbit then gives a valid net from
+  \alert{all 240 roots} --- not a polytope without a net, but one whose
+  nets no index rule finds.
+  \smallskip
+
+  (No conflict with slide 4: there the candidates form one orbit under
+  the \emph{full} stabilizer, so no invariant tree exists at all.)
+\end{frame}
+
+% ---------------------------------------------------------------- B4
+\begin{frame}{Backup: what does \emph{not} separate them}
+  \small
+  \textbf{Cell degree} fails both ways. The grand antiprism and the
+  snub 24-cell have cells of degree~4 --- the poverty that stops
+  apple-peel on the 600-cell --- yet are valid from every root, while
+  the runcinated 24-cell has minimum degree~5 and is valid from none.
+  Nor does high degree help: every prism has a cell of degree up
+  to~$92$ and all 17 are fine, and the root-dependent runcitruncated
+  120-cell carries cells of degree~$32$.
+  \medskip
+
+  \textbf{Angular defect at an edge} --- $2\pi$ less the dihedral
+  angles meeting there, zero exactly when those cells tile $\RR^3$
+  around it. For the regular six it is one number, and it orders them
+  \emph{exactly} by how hard they proved to be: $148.4^\circ$,
+  $90^\circ$, $77.9^\circ$, $31.6^\circ$, $10.3^\circ$, $7.4^\circ$.
+  Among the uniform ones it breaks both ways: the omnitruncated
+  120-cell shares its minimum defect, $0.736^\circ$, with the
+  root-dependent runcitruncated 120-cell and is valid from every root,
+  while the runcinated 24-cell sits at $10.5^\circ$, above many that
+  are. Weighting by depth or by size does not repair it.
+\end{frame}
+
+% ---------------------------------------------------------------- B5
+\begin{frame}{Backup: the six polytopes}
+  \centering
+  {\footnotesize\setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{lcrrrlcrr}
+    \toprule
+    Polytope & Symbol & $V$ & $F$ & $C$ & Cell & deg & depth
+      & trees / root\\
+    \midrule
+    5-cell   & $\{3,3,3\}$ &   5 &   10 &   5 & tetrahedron  & 4  & 1
+      & $1$\\
+    8-cell   & $\{4,3,3\}$ &  16 &   24 &   8 & cube         & 6  & 2
+      & $6$\\
+    16-cell  & $\{3,3,4\}$ &   8 &   32 &  16 & tetrahedron  & 4  & 4
+      & $20{,}736$\\
+    24-cell  & $\{3,4,3\}$ &  24 &   96 &  24 & octahedron   & 8  & 3
+      & $32{,}768$\\
+    120-cell & $\{5,3,3\}$ & 600 &  720 & 120 & dodecahedron & 12 & 5
+      & $1.8\times10^{44}$\\
+    600-cell & $\{3,3,5\}$ & 120 & 1200 & 600 & tetrahedron  & 4  & 15
+      & $1.8\times10^{65}$\\
+    \bottomrule
+  \end{tabular}}
+
+  \raggedright\smallskip
+  {\small
+  \emph{deg} counts the cells sharing a 2-face; \emph{depth} is the
+  eccentricity of the cell-adjacency graph, the same
+  from every cell. The layers are $1{+}4$; \; $1{+}6{+}1$; \;
+  $1{+}4{+}6{+}4{+}1$; \; $1{+}8{+}14{+}1$; \;
+  $1{+}12{+}32{+}42{+}32{+}1$; and sixteen layers for the 600-cell.
+
+  The 24-cell row tells the two families apart: every BFS tree of it
+  fits in $1{+}8{+}14{+}1$, whereas the overlapping spanning tree of
+  Seamons puts 13 of its 24 cells deeper than their distance from the
+  root.}
 \end{frame}
 
 \end{document}
