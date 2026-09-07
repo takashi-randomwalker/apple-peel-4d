@@ -425,8 +425,8 @@
       \smallskip
 
       BFS layers do not depend on the rule, so a BFS tree is just a
-      choice of parent, one layer up, for each cell --- and the trees
-      can be counted and enumerated with no rule at all.
+      choice of parent, one layer up, for each cell. They can then be
+      counted with no rule at all.
     \end{column}
     \begin{column}{0.47\textwidth}
       \centering
@@ -450,26 +450,25 @@
 
   {\small\begin{sloppypar}
   \alert{$1{,}132{,}661$ trees, no self-intersection.}
-  For the first four the rule is irrelevant --- including the 24-cell.
-  And BFS is not a vacuous restriction: the 24-cell is \alert{not}
-  all-net (Seamons 2026) --- some spanning tree does overlap.
+  For the first four the rule is irrelevant. And BFS is not a vacuous
+  restriction: the 600-cell (Devadoss--Harvey) and the 24-cell
+  (Seamons 2026) are \alert{not all-net}.
   \end{sloppypar}}
   \note{\textbf{1:50 \quad (cumulative 10:10)}\\
     Quote the abstract first. This answers the question the abstract
     asked; it is not a side remark.
     \\[2pt]
     The idea: the layers depend only on distance from the root, so a
-    BFS tree is one parent per cell, taken from the layer above. The
-    family can then be counted without naming a rule. Four polytopes
-    exhausted, two sampled. If asked why only 20 per root: $10^{44}$.
+    BFS tree is one parent per cell from the layer above, and the family
+    can be counted without naming a rule. Four exhausted, two sampled;
+    if asked why only 20 per root, $10^{44}$.
     \\[2pt]
-    The last sentence is the payoff. It answers ``why BFS and not every
-    tree?''. For the 24-cell some spanning tree overlaps, and yet all
-    $786{,}432$ BFS trees do not. Say it as the reason, not as an
-    apology.
+    The last sentence is the payoff: it answers ``why BFS and not every
+    tree?''. Two of the six are not all-net, and BFS works on both. Say
+    it as the reason, not an apology.
     \\[2pt]
-    \textbf{Source, if asked:} a Zenodo preprint of August 2026. I
-    reproduced the overlap myself in exact arithmetic.}
+    \textbf{If asked:} the 600-cell is Devadoss--Harvey's Theorem 11;
+    the 24-cell, a 2026 preprint I checked myself.}
 \end{frame}
 
 % ---------------------------------------------------------------- 9
@@ -517,8 +516,9 @@
 \begin{frame}{Open problems}
   \begin{itemize}
     \item Why? A proof that does not enumerate.
-    \item From BFS trees to \alert{all} spanning trees --- settled for
-      the 24-cell (Seamons 2026), still open for the 120- and 600-cell.
+    \item From BFS trees to \alert{all} spanning trees: the 600-cell
+      is not all-net (Devadoss--Harvey), nor is the 24-cell
+      (Seamons 2026). \alert{Only the 120-cell is left.}
     \item For the 120- and 600-cell even the BFS family is open:
       $10^{44}$ and $10^{65}$ trees per root put enumeration out of
       reach, so an argument would have to be structural.
@@ -530,8 +530,9 @@
   \small Code, data and nets:
   \texttt{github.com/takashi-randomwalker/apple-peel-4d}
   \note{\textbf{0:40 \quad (cumulative 12:30)}\\
-    Do not read all four. Say the first and the last, point at the URL,
-    and stop. The slot ends at 16:57, so this leaves about two minutes
+    Do not read all four. Say the second and the last, point at the
+    URL, and stop --- ``only the 120-cell is left'' is the line worth
+    saying. The slot ends at 16:57, so this leaves about two minutes
     for questions.
     \\[2pt]
     Backups: B1 reachable trees, B2 the three rules, B3 the runcinated
