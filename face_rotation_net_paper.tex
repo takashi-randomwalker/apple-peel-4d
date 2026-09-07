@@ -50,12 +50,13 @@ for those four the conclusion does not depend on how ties in the
 traversal are broken.
 This extends the work of Devadoss and Harvey
 \cite{DevadossHarvey2022}, who established validity for the 5-, 8-,
-and 16-cell for \emph{all} spanning trees and left the remaining three
-polytopes open; we resolve the open cases for the BFS subfamily.
+and 16-cell for \emph{all} spanning trees and did not settle the
+remaining three; we resolve them for the BFS subfamily.
 For the 24-cell that subfamily is exactly the right one: a spanning
 tree whose unfolding overlaps has since been exhibited
-\cite{Seamons2026}, so the 24-cell is not all-net, and yet all
-$786{,}432$ of its BFS trees are valid.
+\cite{Seamons2026}, so the 24-cell is not all-net---as the 600-cell
+already was not---and yet all $786{,}432$ BFS trees of the 24-cell are
+valid.
 Our result stands in sharp contrast to the apple-peel
 unfolding algorithm \cite{YoshinoChaidee2026}, for which the 120-cell
 produces no valid nets despite admitting $1{,}440$ valid orderings,
@@ -98,7 +99,8 @@ proving that every spanning tree of the cell-adjacency graph yields a
 valid net for the 4-simplex (5-cell), 4-cube (8-cell), and 4-orthoplex
 (16-cell).
 They demonstrated failure for the analogous result in dimension $n\ge5$
-for orthoplexes, but left the 24-cell, 120-cell, and 600-cell open.
+for orthoplexes, and showed that the 600-cell too admits an overlapping
+unfolding, leaving the 24-cell and the 120-cell undecided.
 
 In this paper we study a canonical subfamily of spanning trees,
 namely those produced by \emph{breadth-first search} (BFS) from a
@@ -544,12 +546,14 @@ The new content of Theorem~\ref{thm:main} is therefore the 24-cell,
 120-cell, and 600-cell.
 \end{remark}
 
-\begin{remark}[For the 24-cell the BFS restriction is not vacuous]
+\begin{remark}[The BFS restriction is not vacuous]
 \label{rem:notallnet}
-Devadoss and Harvey close \cite{DevadossHarvey2022} by conjecturing
-that the 24-, 120- and 600-cell fail to be \emph{all-net}, that is,
-that each admits some spanning tree whose unfolding overlaps.
-For the 24-cell this has since been confirmed: Seamons
+Call a polytope \emph{all-net}, after O'Rourke, if \emph{every} ridge
+unfolding of it is valid.
+Devadoss and Harvey prove that the 600-cell is not all-net
+(\cite{DevadossHarvey2022}, Theorem 11) and conjecture the same for the
+24-cell and the 120-cell.
+For the 24-cell the conjecture has since been confirmed: Seamons
 \cite{Seamons2026} exhibits a spanning tree whose ridge unfolding
 self-intersects, in exact rational arithmetic.
 (The example is so far announced only in a preprint; the present author
@@ -566,6 +570,15 @@ results are consistent.
 Taken together they are sharper than either alone: the 24-cell is not
 all-net, and yet all $786{,}432$ of its BFS trees are valid.
 Restricting to BFS trees is what separates the two verdicts.
+
+Two of the six are thus known to fail the all-net property, and the
+face-rotation BFS unfolding succeeds on both.
+For the 600-cell the overlapping unfolding of
+\cite{DevadossHarvey2022} is a chain of eight cells, so whether it can
+be completed to a BFS tree---that is, whether it is a shortest path in
+the cell-adjacency graph---we have not determined; we verified only
+$\mathcal{T}_r$ and a sample for that polytope, so no contradiction
+arises either way.
 \end{remark}
 
 \begin{remark}[The 8-cell has only one net]
@@ -889,14 +902,15 @@ enumeration?}
 A second open problem is whether Theorem~\ref{thm:main} extends to all
 spanning trees and not merely to BFS trees, as \cite{DevadossHarvey2022}
 proved for the 5-, 8-, and 16-cell.
-For the 24-cell it does not, and the question is settled in the
-negative: by Remark~\ref{rem:notallnet} some spanning tree of the
-24-cell overlaps, while part~1 of the theorem covers every one of its
-BFS trees.
-Whether the 120- and 600-cell are all-net is still open, and for them
-even the BFS family is: with $1.8\times10^{44}$ and
-$1.8\times10^{65}$ trees per root, enumeration is hopeless and a proof
-would have to be structural rather than computational.
+For two of the three it does not, and the question is settled in the
+negative: by Remark~\ref{rem:notallnet} the 600-cell and the 24-cell
+both admit an overlapping spanning tree, while part~1 of the theorem
+covers every BFS tree of the 24-cell.
+Only the 120-cell is left, and there both questions are open at once:
+whether it is all-net, and whether every one of its BFS trees is valid.
+With $1.8\times10^{44}$ trees per root---and $1.8\times10^{65}$ for the
+600-cell---enumeration is hopeless and a proof would have to be
+structural rather than computational.
 
 A third question is the characterization left open by
 Section~\ref{sec:uniform}.
