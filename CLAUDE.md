@@ -505,6 +505,26 @@ Abstract の "By contrast, our result stands in sharp contrast to..." の重複�
 > runcitruncated 600-cell `x5o3x3x`／runcitruncated 120-cell `x5x3o3x`／omnitruncated 120-cell `x5x3x3x`。
 > **真ん中の2つが MIXED**。「2640セル級」とまとめて書くと61種の内訳と食い違う。
 
+#### 2026-09-07 の訂正（**600胞体は D&H の定理**）
+
+**Remark 7 に「D&H は 24/120/600 の3つとも all-net でないと予想している」と書いたのは誤り。**
+CGTA 掲載版の実際の記述は
+
+- **Theorem 11. The 600-cell is not all-net.**（§5.1，証明つき）
+- **Conjecture. The 24-cell and 120-cell fail to be all-net.**（§5.2）
+
+**Seamons が24胞体を落としたので，all-net の未解決は 120胞体だけ。** 原論文を確認せず，
+メモリの誤った引用に従ったのが原因。**学会会場でユーザーが原論文を読んで気づいた。**
+
+**訂正で主張は強くなった**：正多胞体6種のうち**2種が all-net でないと分かっていて，
+face-rotation BFS はその両方で成功する**。Introduction・Abstract・§5・Remark 7 を修正し，
+スライド8と10も直した（スライド10は「Only the 120-cell is left.」）。
+`all-net` が **O'Rourke の命名**であることも追記（D&H 脚注1）。
+
+> **留保**：600胞体の反例は**8セルの鎖**で，それが最短路かどうかは未確認。600胞体については
+> $\mathcal{T}_r$ と標本しか検証していないので**どちらでも矛盾しない**旨を Remark に明記した。
+> もし最短路なら「600胞体には invalid な BFS 木がある」ことになる。**発表後に確認する価値あり。**
+
 > **Remark 7 の中身**：Seamons の木が BFS でないことの根拠を数字で示した。24胞体は任意の根から
 > 離心数3・層 $1+8+14+1$ なのに，彼の木では **13/24 セルが距離より深い**。「preprint での announce に
 > 留まる／著者が独立に厳密算術で再現した」の留保も入れた。八面体セルが中心対称ゆえ各蝶番が共有三角形の
