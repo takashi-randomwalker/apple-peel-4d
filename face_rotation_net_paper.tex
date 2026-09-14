@@ -516,6 +516,73 @@ in all cases, confirming that all cells lie in a common 3D hyperplane
 to numerical precision.
 \end{proof}
 
+\begin{remark}[How close the nets come to overlapping]\label{rem:margin}
+The verification is numerical, and whether rounding could have hidden an
+overlap deserves a better answer than the value of
+$\eps_{\mathrm{vol}}$.
+We therefore measured, for every pair of cells not joined by an edge of
+$\mathcal{T}_r$ and every root, not whether the two cells meet but how far
+apart they are.
+For two convex polyhedra the direction realizing the minimum distance is a
+face normal of one of them or a cross product of an edge of each, so the
+largest gap over that finite set of directions \emph{is} the distance; the
+computation is a few hundred inner products per pair.
+Cells are congruent, so only pairs whose centroids are close enough for the
+distance to be small need be examined.
+
+The verdict turns out to be nowhere near the boundary
+(Table~\ref{tab:margin}).
+Every such pair either touches---sharing a face, an edge or a vertex, at
+distance zero to within $2\times10^{-15}$---or stands at least $0.086$
+apart, and none lies in between.
+Touching is not an artifact of the arithmetic: the two cells carry common
+vertices of $P$, and the unfolding sends them to the same point.
+It is also common, a third to a half of the near pairs, and it is exactly
+what a closed-region membership test misreads.
+What matters is the width of the empty band between the two.
+About eleven orders of magnitude separate the error the unfolding
+accumulates, at most $4\times10^{-13}$, from the smallest genuine gap, so
+no choice of $\eps_{\mathrm{vol}}$ within ten orders of magnitude of ours
+changes a single verdict.
+
+Making the verification exact rather than merely robust would not mean
+redoing the unfolding.
+The floating-point run already exhibits, for each pair, a direction along
+which the two cells separate; certifying the result is a matter of
+re-evaluating those inner products in exact arithmetic, over $\mathbb{Q}$
+for the 8-, 16- and 24-cell and over $\mathbb{Q}(\sqrt{5})$ for the rest.
+A separating hyperplane is the right certificate to ask for, since it
+proves what is actually wanted---that the interiors are disjoint---while
+permitting the contact that genuinely occurs.
+\end{remark}
+
+\begin{table}[ht]
+\centering
+\caption{How close the cells come to one another, over all roots, for
+  every pair not joined by an edge of $\mathcal{T}_r$ whose centroids are
+  near enough for the distance to be small.
+  ``Contact'' is the largest deviation from zero among the pairs that
+  touch, and ``smallest gap'' the least distance among those that do not.
+  Distances are in the scale of the data files, for which the last column
+  gives the diameter of a cell.}
+\label{tab:margin}
+\begin{tabular}{lrrrrr}
+\toprule
+Polytope & Near pairs & Touching & Contact & Smallest gap & Cell diameter\\
+\midrule
+5-cell   &      $30$ &      $30$ & $1.7\times10^{-16}$ & ---     & $1.73$\\
+8-cell   &     $128$ &      $96$ & $0$                 & $2.000$ & $3.46$\\
+16-cell  &  $1{,}536$ &  $1{,}248$ & $3.3\times10^{-16}$ & $1.000$ & $1.73$\\
+24-cell  &  $2{,}760$ &  $1{,}368$ & $8.9\times10^{-16}$ & $0.787$ & $2.83$\\
+120-cell & $38{,}940$ & $10{,}047$ & $1.6\times10^{-15}$ & $0.086$ & $2.14$\\
+600-cell$^{*}$ & $95{,}890$ & $33{,}892$ & $1.8\times10^{-15}$ & $0.115$ & $1.51$\\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+{\footnotesize $^{*}$over the first 10 of its 600 roots.}
+\end{table}
+
 \begin{table}[ht]
 \centering
 \caption{Comparison of face-rotation BFS and apple-peel RZ unfolding.
