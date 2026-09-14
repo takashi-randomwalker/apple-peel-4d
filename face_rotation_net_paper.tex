@@ -533,12 +533,12 @@ distance to be small need be examined.
 The verdict turns out to be nowhere near the boundary
 (Table~\ref{tab:margin}).
 Every such pair either touches---sharing a face, an edge or a vertex, at
-distance zero to within $2\times10^{-15}$---or stands at least $0.086$
+distance zero to within $3\times10^{-15}$---or stands at least $0.086$
 apart, and none lies in between.
 Touching is not an artifact of the arithmetic: the two cells carry common
 vertices of $P$, and the unfolding sends them to the same point.
-It is also common, a third to a half of the near pairs, and it is exactly
-what a closed-region membership test misreads.
+It is also common---from a quarter of the near pairs to all of them---and
+it is exactly what a closed-region membership test misreads.
 What matters is the width of the empty band between the two.
 About eleven orders of magnitude separate the error the unfolding
 accumulates, at most $4\times10^{-13}$, from the smallest genuine gap, so
@@ -575,12 +575,9 @@ Polytope & Near pairs & Touching & Contact & Smallest gap & Cell diameter\\
 16-cell  &  $1{,}536$ &  $1{,}248$ & $3.3\times10^{-16}$ & $1.000$ & $1.73$\\
 24-cell  &  $2{,}760$ &  $1{,}368$ & $8.9\times10^{-16}$ & $0.787$ & $2.83$\\
 120-cell & $38{,}940$ & $10{,}047$ & $1.6\times10^{-15}$ & $0.086$ & $2.14$\\
-600-cell$^{*}$ & $95{,}890$ & $33{,}892$ & $1.8\times10^{-15}$ & $0.115$ & $1.51$\\
+600-cell & $5{,}780{,}237$ & $2{,}064{,}332$ & $2.7\times10^{-15}$ & $0.115$ & $1.51$\\
 \bottomrule
 \end{tabular}
-
-\vspace{2pt}
-{\footnotesize $^{*}$over the first 10 of its 600 roots.}
 \end{table}
 
 \begin{table}[ht]
