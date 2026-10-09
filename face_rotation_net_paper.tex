@@ -9,6 +9,8 @@
 \usepackage{geometry}
 \geometry{margin=2.5cm}
 \usepackage{graphicx}
+\usepackage{lineno}
+\linenumbers
 
 % ---------- theorem environments ----------
 \newtheorem{theorem}{Theorem}
@@ -188,7 +190,8 @@ The resulting arrangement is a \emph{net} if no two cells overlap in
 their interiors.
 
 \begin{remark}[Why overlap must be excluded]\label{rem:whyvalid}
-The map from $\partial P$ into $H$ induced by the construction above is
+The map from the boundary $\partial P$ of $P$ (the union of its cells)
+into $H$ induced by the construction above is
 well defined whether or not cells overlap, and running the rotations
 backwards reassembles $P$ in either case.  What overlap destroys is the
 \emph{inverse} assignment.  If two cells overlap, a point of the overlap
@@ -219,8 +222,10 @@ Let $G(P)$ be the cell-adjacency graph of a 4-polytope $P$, let $r$ be
 a root cell, and write $L_k$ for the set of cells at distance $k$ from
 $r$ in $G(P)$.
 A \emph{BFS spanning tree} rooted at $r$ is a spanning tree in which
-the parent of each cell $v\neq r$ is one of its neighbors in
-$L_{d(v)-1}$, where $d(v)$ is the distance from $r$ to $v$.
+the parent $p(v)$ of each cell $v\neq r$ is one of its
+\emph{candidates}, the cells of $N(v)\cap L_{d(v)-1}$, where $N(v)$ is
+the set of neighbors of $v$ in $G(P)$ and $d(v)$ is the distance from
+$r$ to $v$.
 The layers $L_k$ are determined by $P$ and $r$ alone; a BFS tree is
 exactly a choice of such a parent for each cell, and different choices
 give different trees.
@@ -359,11 +364,11 @@ appear in the adjacency list, if $c \notin \mathrm{Vis}$: add $c$ to $\mathrm{Vi
 enqueue $c$, and compute the cumulative 4D affine transform $T_c$
 by the procedure in Algorithm~\ref{alg:unfoldTF}.
 The algorithm terminates when $Q$ is empty (no candidates remain);
-since $G(P)$ is connected for every regular 4-polytope,
+since $G(P)$ is connected for every convex 4-polytope,
 all cells are visited.
-The order in which neighbors are added to $Q$ constitutes the
-tie-breaking rule of Definition~\ref{def:bfs} and determines which
-BFS spanning tree is produced.
+The order in which neighbors are added to $Q$ is the tie-breaking
+rule: it determines which of the BFS spanning trees of
+Definition~\ref{def:bfs} is produced (Lemma~\ref{lem:reach}).
 In our implementation, ties are broken by the order in which neighbors
 appear in the adjacency list of the input data.
 
@@ -457,7 +462,7 @@ at the scale used), so no true interior overlap is missed.
 \section{Results}\label{sec:results}
 % =========================================
 
-\subsection{Main result}
+\subsection{Main Result}
 
 By Definition~\ref{def:bfs} the BFS trees rooted at $r$ are in
 bijection with the parent choices, so there are exactly
@@ -551,6 +556,14 @@ The floating-point run already exhibits, for each pair, a direction along
 which the two cells separate; certifying the result is a matter of
 re-evaluating those inner products in exact arithmetic, over $\mathbb{Q}$
 for the 8-, 16- and 24-cell and over $\mathbb{Q}(\sqrt{5})$ for the rest.
+The coordinates stay in these fields even though the hinge rotations
+involve $\sin\theta$ (for the 16-cell $\theta=60^\circ$): a regular cell
+is determined by one of its faces together with the side on which it
+lies, so each unfolded cell coincides, as a point set, with the
+reflection of its parent in the plane of their shared polygon, and a
+reflection can be written without normalizing its normal vector.
+The face-up rotation of Step~1 does introduce square roots, so an exact
+check would omit it and unfold into the root's own hyperplane.
 A separating hyperplane is the right certificate to ask for, since it
 proves what is actually wanted---that the interiors are disjoint---while
 permitting the contact that genuinely occurs.
@@ -748,9 +761,9 @@ Theorem~\ref{thm:main} does not extend to the convex uniform
 4-polytopes.
 Excluding the two infinite prismatic families, there are exactly 64 of
 these; unlike the enumeration of all uniform 4-polytopes, which is
-still open, this list is known to be complete, the exceptional
-non-Wythoffian member being the grand antiprism of Conway and
-Guy~\cite{ConwayGuy1965}.
+still open, this list is known to be complete~\cite{ConwayGuy1965,Moeller2004},
+the exceptional non-Wythoffian member being the grand antiprism of
+Conway and Guy~\cite{ConwayGuy1965}.
 We generated all 64 and ran the face-rotation BFS unfolding from every
 cell, $24{,}487$ roots in all.
 
@@ -1057,6 +1070,12 @@ in a BFS tree.
 \section*{Acknowledgements}
 % =========================================
 
+The author used Claude (Anthropic), a large language model, to assist
+in writing and running the code for the computations, in searching
+and checking the literature, and in editing the manuscript.
+The author takes full responsibility for the content of this paper,
+including the correctness of the computations.
+
 The author declares no known competing financial interests or personal
 relationships that could have appeared to influence the work reported
 in this paper.
@@ -1080,12 +1099,22 @@ S.~L. Devadoss and M.~S. Harvey.
 \newblock Unfoldings and nets of regular polytopes.
 \newblock {\em Computational Geometry: Theory and Applications},
   111:\penalty0 101977, 2023.
-\newblock \href{https://arxiv.org/abs/2111.01359}{arXiv:2111.01359}.
+\newblock \href{https://doi.org/10.1016/j.comgeo.2022.101977}
+  {doi:10.1016/j.comgeo.2022.101977}.
 
 \bibitem{DevadossHarveyRichter2026}
 S.~L. Devadoss, M.~Harvey, and D.~Richter.
 \newblock Unfolding overlaps of the exceptional regular polytopes.
 \newblock \href{https://arxiv.org/abs/2608.30285}{arXiv:2608.30285}, 2026.
+\newblock \href{https://doi.org/10.48550/arXiv.2608.30285}
+  {doi:10.48550/arXiv.2608.30285}.
+
+\bibitem{Moeller2004}
+M.~M\"oller.
+\newblock {\em Vierdimensionale Archimedische Polytope}.
+\newblock PhD thesis, Universit\"at Hamburg, 2004.
+\newblock \href{https://ediss.sub.uni-hamburg.de/handle/ediss/689}
+  {https://ediss.sub.uni-hamburg.de/handle/ediss/689}.
 
 \bibitem{Seamons2026}
 J.~Seamons.
@@ -1100,6 +1129,8 @@ G.~C. Shephard.
 \newblock Convex polytopes with convex nets.
 \newblock {\em Mathematical Proceedings of the Cambridge Philosophical
   Society}, 78(3):389--403, 1975.
+\newblock \href{https://doi.org/10.1017/S0305004100051860}
+  {doi:10.1017/S0305004100051860}.
 
 \bibitem{Turney1984}
 P.~D. Turney.
@@ -1118,6 +1149,8 @@ T.~Yoshino and S.~Chaidee.
 \newblock Apple-peel unfolding in three and four dimensions:
   Spiral and zonal selection rules.
 \newblock {\em arXiv:2605.30373}, 2026.
+\newblock \href{https://doi.org/10.48550/arXiv.2605.30373}
+  {doi:10.48550/arXiv.2605.30373}.
 
 \end{thebibliography}
 
