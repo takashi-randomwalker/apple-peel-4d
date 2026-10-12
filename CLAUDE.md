@@ -550,6 +550,41 @@ face-rotation BFS はその両方で成功する**。Introduction・Abstract・�
 > 留まる／著者が独立に厳密算術で再現した」の留保も入れた。八面体セルが中心対称ゆえ各蝶番が共有三角形の
 > 平面での鏡映になり，展開が有理数に留まる。
 
+#### 2026-10-09 セッションの修正（通し読み途中の8件 — **13 → 14ページ**，コミット `385c387`）
+
+| 修正 | 内容 |
+|------|------|
+| 記号の定義 | $\partial P$（Remark `rem:whyvalid`），$N(v)$・$p(v)$・candidate（Definition `def:bfs` の文を書き換えて一括定義）が未定義だった |
+| Step 2 の食い違い | "tie-breaking rule of Definition 1" → キュー順がタイブレークで，Definition 1 の族のどの木が返るかを決める（`Lemma~\ref{lem:reach}`）。Definition 1 は順序に触れないと明言しているため |
+| 連結性 | "connected for every regular" → "convex"（一様も扱うため） |
+| Remark `rem:margin` | 厳密化が $\mathbb{Q}$／$\mathbb{Q}(\sqrt5)$ に収まる理由：展開した子セルは親を共有面で鏡映したものと点集合として一致（正多面体セルは1面と側で決まる）。face-up は平方根を持ち込むので厳密版では省く |
+| Möller 2004 | 凸一様64種の**完全性の証明**（Conway–Guy 1965 は2頁の発表）。Hamburg 大学の学位論文，独語231頁，公開 PDF あり。References 8 → 9件 |
+| JoCG 要項 | **行番号必須**（`lineno`），**節見出しは title case**（`Main result` → `Main Result`），DOI を4件に付与（Crossref で照合）。JoCG に生成 AI の規定は無い |
+| AI 開示 | Acknowledgements 冒頭に Claude の利用（コード作成・実行，文献の検索と確認，原稿の編集）と著者の全責任を明記 |
+
+**投稿方針（2026-10-09 決定）**：読み直しが済み次第 **JoCG に投稿**。G&C 特集号の招待（10月末に遅延，締切 2027-03 末以降）は待たず，招待は**論文2**に使う。カバーレターに **JCDCG³ 2026 で発表済み**と明記する。
+JCDCG³ の LNCS 論文集（締切 2026-11-30）には出さない。
+
+> Möller の証明は「辺のまわりのセルの二面角の和 $<2\pi$」で辺近傍を全列挙する方式で，論文2の**辺の角度欠損**と同じ量。
+
+#### ✅ JoCG 投稿完了（2026-10-12，**submission 6208**）
+
+ユーザーが通し読みを終えて修正なし（「検討したことが余すこと無くすべて書かれていた」）。投稿直前に2件だけ直した：
+
+| 修正 | 内容 |
+|------|------|
+| 図2(b) のトリミング | 上下の背景を削って (a) と同じ 2167×2194 に（コミット `08a1c0b`）。描画は 330–1865 行のみで，**描かれた画素は1つも削っていない** |
+| **US letter** | JoCG 要項は **US letter 必須**（10-09 の要項確認で見落としていた）。`a4paper` → `letterpaper`（コミット `3e16d8d`）。14ページ維持，Overfull/Underfull 4 → **1件** |
+
+- **ダッシュボード**：<https://jocg.org/index.php/jocg/authorDashboard/submission/6208>（username `takashiyoshino`，登録 email `tyoshino@toyo.jp`，ORCID 登録済み）
+- **提出版**：git タグ **`jocg-submitted-2026-10-12`**（→ `3e16d8d`，push 済み）。改訂時は `git diff jocg-submitted-2026-10-12 -- face_rotation_net_paper.tex`
+- **提出物**：原稿 PDF を *Article PDF*，`cover_letter_jocg.pdf` を *Supplementary files*（ファイル種別の選択肢はこの2つだけ）。LaTeX ソースは accept 後で可
+- **Comments for the Editor**：`attic/misc/cover_letter_jocg.txt`（JCDCG³ 発表済み・LNCS 論文集には出していない・companion paper は "under review elsewhere"・AI 開示）。チェックリスト1項目目が「既発表は Comments で説明せよ」と求めているため
+- **Abstract**：要項は「**LaTeX markup を含めて**論文と同一」。`attic/misc/abstract_jocg_latex.txt`（`\cite` だけを PDF の番号 [3]，[6, 4]，[10] に置換）。プレーンテキスト版 `abstract_jocg.txt` は**使っていない**
+- **カバーレター**には **arXiv preprint に触れていない**（submit/7751072 が未公開のため）
+- **査読者登録はオフ**（後でプロフィールで決める）
+- **accept 後**：`jocg.cls`，参考文献は `plainurl` スタイル，ページ番号・行番号を外す。気が変わらなければ arXiv submit/7751072 を問い合わせる
+
 #### 2026-08-11 セッションの修正（Stella4D の引用追加）
 
 | 修正 | 内容 |
@@ -606,6 +641,7 @@ Coxeter "Regular Polytopes" 3rd ed. (Dover, 1973) に 120-cell の**頂点座標
 - **再問い合わせメール：2026-08-07 送信済み**（JCDCG³ 採択を新しい判断材料として追加した文案。submit/7751072・2604.16204・2605.30373 を明記）。**受け取り確認の返信はあったが，2026-08-11 時点で on hold のまま変化なし**
 - 方針：この1通だけ送ってあとは完全放置。**arXiv プレプリントは JCDCG³ 発表・journal 投稿の前提ではない**ため，hold が続いても本筋の損失はない
 - **JCDCG³ 2026 は採択済み**（2026-07-03 通知）→ proceedings 掲載・発表は確保。journal 投稿（第1候補 JoCG）は arXiv の状態と無関係に進められる
+- **2026-10-12**：同じアカウントの球面折り紙論文 v3（arXiv:2605.01184）が普通に公開された → **アカウント全体ではなく submit/7751072 の1件だけが止まっている**ことが確定。方針：**放置して JoCG を優先，accept 後に問い合わせ**（その際この事実を根拠にする）。取り下げ・再投稿はしない
 
 #### "We" vs "I"（単著慣習）
 
@@ -897,7 +933,7 @@ uniform_nets/
 
 > **未解決の限界（2点）**
 > 1. パネル(a) の3組目の交差ペアは深部にあり，不透明度をどう調整しても明瞭にならない。図の役割は「最良の根でも3組が交差する」ことなのでキャプションの数字で足りるが，3組すべてを見せたい場合は視点変更か別カットが必要
-> 2. パネル(b) はパネル(a) より約17%縦長で，横並びにすると高さが揃わない。**これは余白ではなくトリミングできない** — 一見空白に見える下部にも淡い半透明セルが実在する（コンテンツマスクで実測，両者とも既に密着）
+> 2. ~~パネル(b) はパネル(a) より約17%縦長で，トリミングできない~~ → **誤りだった（2026-10-12 解決）**。背景（輝度33）との差を行ごとに測ると描画は 330–1865 行だけで，上下は純粋な背景。(a) と同じ 2167×2194 に切り詰め，上下余白はほぼ均等（330/327 px）。両パネルとも右端1列・下端1行に明るい縁があるので，切るときは**最下行を残して** vstack した
 
 Abstract に1文追加（64種24,487根，61/1/2）。Introduction の構成説明に §4 を追加。Code and Data Availability に角柱・SAT・`uniform_nets/` を追記。**9ページ**でビルド通過，警告なし。
 
