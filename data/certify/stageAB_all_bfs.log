@@ -1,0 +1,113 @@
+5-cell: 5 cells, roots all
+  root   0  trees        1  placements     5  pairs       10  overlaps 0  (0.0s)
+  root   1  trees        1  placements     5  pairs       10  overlaps 0  (0.0s)
+  root   2  trees        1  placements     5  pairs       10  overlaps 0  (0.0s)
+  root   3  trees        1  placements     5  pairs       10  overlaps 0  (0.0s)
+  root   4  trees        1  placements     5  pairs       10  overlaps 0  (0.0s)
+TOTAL  trees 5  pairs certified 50  overlaps 0  (0.0s)
+8-cell: 8 cells, roots all
+  root   0  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   1  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   2  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   3  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   4  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   5  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   6  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+  root   7  trees        6  placements    13  pairs       63  overlaps 0  (0.1s)
+TOTAL  trees 48  pairs certified 504  overlaps 0  (0.6s)
+16-cell: 16 cells, roots all
+  root   0  trees    20736  placements    65  pairs     1534  overlaps 0  (0.4s)
+  root   1  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   2  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   3  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   4  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   5  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   6  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   7  trees    20736  placements    65  pairs     1534  overlaps 0  (0.6s)
+  root   8  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root   9  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root  10  trees    20736  placements    65  pairs     1534  overlaps 0  (0.6s)
+  root  11  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root  12  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root  13  trees    20736  placements    65  pairs     1534  overlaps 0  (0.7s)
+  root  14  trees    20736  placements    65  pairs     1534  overlaps 0  (0.6s)
+  root  15  trees    20736  placements    65  pairs     1534  overlaps 0  (0.8s)
+TOTAL  trees 331776  pairs certified 24544  overlaps 0  (10.7s)
+24-cell: 24 cells, roots all
+  root   0  trees    32768  placements    49  pairs     1112  overlaps 0  (1.0s)
+  root   1  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root   2  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root   3  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root   4  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root   5  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root   6  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root   7  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root   8  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root   9  trees    32768  placements    49  pairs     1112  overlaps 0  (1.5s)
+  root  10  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  11  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  12  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  13  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  14  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  15  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  16  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root  17  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  18  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  19  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root  20  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root  21  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+  root  22  trees    32768  placements    49  pairs     1112  overlaps 0  (1.3s)
+  root  23  trees    32768  placements    49  pairs     1112  overlaps 0  (1.4s)
+TOTAL  trees 786432  pairs certified 26688  overlaps 0  (32.3s)
+OK  5-cell: 5 roots, 5 BFS trees, 25 placements checked, 50 pairs separated
+OK  8-cell: 8 roots, 48 BFS trees, 104 placements checked, 504 pairs separated
+OK  16-cell: 16 roots, 331776 BFS trees, 1040 placements checked, 24544 pairs separated
+OK  24-cell: 24 roots, 786432 BFS trees, 1176 placements checked, 26688 pairs separated
+== tamper 5
+untouched      : OK  5-cell: 5 roots, 5 BFS trees, 25 placements checked, 50 pairs separated
+coordinate     : rejected  FAIL: root 0 path (0, 4): shared face moved
+mirror         : rejected  FAIL: root 0 path (0, 1): not on the far side of the shared face
+drop pair      : rejected  FAIL: root 0: pairs present are not exactly the compatible pairs (9 vs 10)
+flip u         : rejected  FAIL: root 0 pair (0,) (0, 1): not separated
+zero u         : rejected  FAIL: root 0: functional constant on the flat
+polytope       : rejected  FAIL: 5-cell vertices are not e_1..e_5
+ALL MUTATIONS REJECTED
+== tamper 8
+untouched      : OK  8-cell: 8 roots, 48 BFS trees, 104 placements checked, 504 pairs separated
+coordinate     : rejected  FAIL: root 0 path (0, 6, 7): not an isometry
+mirror         : rejected  FAIL: root 0 path (0, 1): not on the far side of the shared face
+drop pair      : rejected  FAIL: root 0: pairs present are not exactly the compatible pairs (62 vs 63)
+flip u         : rejected  FAIL: root 0 pair (0,) (0, 1): not separated
+zero u         : rejected  FAIL: root 0: functional constant on the flat
+polytope       : rejected  FAIL: vertices differ from _4DData
+ALL MUTATIONS REJECTED
+== tamper 16
+untouched      : OK  16-cell: 16 roots, 331776 BFS trees, 1040 placements checked, 24544 pairs separated
+coordinate     : rejected  FAIL: root 0 path (0, 8, 12, 14, 15): shared face moved
+mirror         : rejected  FAIL: root 0 path (0, 1): not on the far side of the shared face
+drop pair      : rejected  FAIL: root 0: pairs present are not exactly the compatible pairs (1533 vs 1534)
+flip u         : rejected  FAIL: root 0 pair (0,) (0, 1): not separated
+zero u         : rejected  FAIL: root 0: functional constant on the flat
+polytope       : rejected  FAIL: vertices differ from _4DData
+ALL MUTATIONS REJECTED
+== tamper 24
+untouched      : OK  24-cell: 24 roots, 786432 BFS trees, 1176 placements checked, 26688 pairs separated
+coordinate     : rejected  FAIL: root 0 path (0, 10, 22, 23): not an isometry
+mirror         : rejected  FAIL: root 0 path (0, 1): not on the far side of the shared face
+drop pair      : rejected  FAIL: root 0: pairs present are not exactly the compatible pairs (1111 vs 1112)
+flip u         : rejected  FAIL: root 0 pair (0,) (0, 1): not separated
+zero u         : rejected  FAIL: root 0: functional constant on the flat
+polytope       : rejected  FAIL: vertices differ from _4DData
+ALL MUTATIONS REJECTED
+24-cell, root 0, simple paths up to 8 cells: explored 3731, overlaps found 3
+  cell 0 (path [0]) overlaps cell 12 (path [0, 10, 22, 21, 19, 18, 7, 12])
+    path is a BFS path from the root: False
+    common interior point: ['398/405', '220157/315900', '-473773/789750']
+  cell 0 (path [0]) overlaps cell 18 (path [0, 10, 22, 21, 16, 12, 7, 18])
+    path is a BFS path from the root: False
+    common interior point: ['398/405', '220157/315900', '-125939/1579500']
+  cell 0 (path [0]) overlaps cell 11 (path [0, 10, 22, 20, 19, 18, 4, 11])
+    path is a BFS path from the root: False
+    common interior point: ['487423/789750', '220157/315900', '-473773/789750']
+24-cell, root 0, simple paths up to 7 cells: explored 98609, overlaps found 0
+16-cell, root 0, simple paths up to 9 cells: explored 5645, overlaps found 0
