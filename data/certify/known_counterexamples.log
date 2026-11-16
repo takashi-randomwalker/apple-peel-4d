@@ -1,0 +1,14 @@
+Seamons, 24-cell
+  most significant bit first: path is a chain True; cell 5 = (0, 0, 1, 0), cell 3 = (0, 1, 0, 0), N5.N3 = 0 -> NOT adjacent
+  least significant bit first: path is a chain True; cell 5 = (0, 0, 1, 0), cell 3 = (0, 1, 0, 0), N5.N3 = 0 -> NOT adjacent
+Devadoss-Harvey-Richter, 24-cell
+  f2 lands on the printed M2 f2: True
+  chains whose 14th cell lands on the printed M14 f14: 2
+   [(0, 2, 0, 0), (-1, 1, 1, -1), (-1, -1, 1, -1), (0, -2, 0, 0), (1, -1, -1, -1), (-1, -1, -1, -1), (-2, 0, 0, 0), (-1, 1, 1, 1), (1, 1, 1, 1), (2, 0, 0, 0), (1, 1, 1, -1), (0, 0, 2, 0), (-1, -1, 1, 1), (-1, -1, -1, 1)]
+    exact placement matches: True; vertices of f14 strictly inside f1: 1
+    f1 = (0, 2, 0, 0), f14 = (-1, -1, -1, 1), f1.f14 = -2 -> NOT adjacent, common vertices 0
+   [(0, 2, 0, 0), (-1, 1, 1, -1), (-1, 1, -1, -1), (0, 0, 0, -2), (1, -1, 1, -1), (2, 0, 0, 0), (1, 1, -1, 1), (1, 1, 1, 1), (1, 1, 1, -1), (1, 1, -1, -1), (1, -1, -1, -1), (-1, -1, -1, -1), (-2, 0, 0, 0), (-1, -1, -1, 1)]
+    exact placement matches: True; vertices of f14 strictly inside f1: 1
+    f1 = (0, 2, 0, 0), f14 = (-1, -1, -1, 1), f1.f14 = -2 -> NOT adjacent, common vertices 0
+Devadoss-Harvey-Richter, 600-cell (every 8-cell path in one vertex figure)
+  1440 paths; {'chains overlapping': 120, 'cells 1 and 8, adjacent in P': 120}

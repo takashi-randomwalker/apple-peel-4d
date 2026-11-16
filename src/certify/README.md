@@ -43,6 +43,21 @@ standard library only.
    **600-cell**: the 1,757,416 pairs of its 1,889 root paths are all
    disjoint, so every BFS tree of the 600-cell gives a net.
 
+5. **Where BFS overlaps can occur** (`path_classes.py`, observations, not
+   claims).  Every pair of cells is placed by its tree path alone, so the
+   pairs fall into classes under the symmetry group.  Of these classes
+   exactly one overlaps (120-cell), and it is across a *cut ridge* (two
+   cells adjacent in P, not joined in the tree).  The holonomy of the
+   shortest cycle of a cut ridge is a
+   rotation by the angle defect of an edge (24-cell 31.59°, 120-cell
+   10.30°, 600-cell 7.36°; the 16-cell has no odd cycles, its shortest
+   is 4, 77.88°).  The one overlapping class (120-cell) is a twist of 36°
+   about the cut ridge's normal: one vertex of b lies 0.019 inside a.
+   In the known non-BFS counterexamples the overlapping cells are not
+   adjacent (Seamons and DHR 24-cell, DHR 120-cell) except in the DHR
+   600-cell chain (`known_counterexamples.py`,
+   `src/bfsnet/check_dhr_chain_120cell.wls`).
+
 Pairs joined by a tree edge are checked too, so the exemption in the
 paper's definition of a valid net is not needed.
 
@@ -59,6 +74,9 @@ paper's definition of a valid net is not needed.
 | `export_random_trees.wls` | redraws the random trees of `tiebreak_regular.m` (same seed) as parent arrays |
 | `export_sector120_trees.wls` | writes the 2,048 D_5-invariant trees of `src/symmetry/sector120_nets.wls` |
 | `all_bfs.py` | claim 4: certifies all root-path pairs of the 120- or 600-cell; `classify` sorts them by cycle type |
+| `path_classes.py` | the root-path pairs up to symmetry (16/24-cell 36 classes, 120-cell 2,876, 600-cell 37,169) and the holonomy of every cut-ridge class |
+| `known_counterexamples.py` | in the overlapping unfoldings of Seamons and of Devadoss–Harvey–Richter, are the overlapping cells adjacent in P? |
+| `tree_observations_120.py` | 120-cell: bent-preferring trees are valid; straight branches that overlap miss the root; tree shape does not decide validity |
 | `straight_loops_120.py` | counts the straight 7-cycles of a 120-cell tree, which by claim 4 is its number of overlapping pairs |
 | `crosscheck_float.py` / `.wls` | the exact placements agree with the paper's floating-point unfolding (`unfoldTFP`, `bfsUnfoldP`) |
 
@@ -109,5 +127,8 @@ python3 -I straight_loops_120.py ../../data/certify/random_trees_120.json.gz   #
 python3 -I all_bfs.py 120                          # claim 4 (53 min, 7 processes)
 python3 -I all_bfs.py 120 classify
 python3 -I all_bfs.py 600                          # 34 min, 7 processes
+python3 -I path_classes.py 120 --all               # 1 min; 600: 10 min
+python3 -I known_counterexamples.py                # about 10 min
+python3 -I tree_observations_120.py                # 6 s
 python3 -I second_checker.py 600                   # about 5.5 h with 8 processes (120-cell: 72 min)
 ```

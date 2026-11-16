@@ -10,6 +10,9 @@
    exactly one common neighbour.
 
    Answer: no, for none of the 120 roots.
+
+   Also reported (2026-11-16): the overlapping cells f1 and f9 are not
+   adjacent in P (graph distance 2), unlike every overlap in a BFS tree.
 *)
 
 (* Can the DHR overlapping chains lie in a BFS tree?
@@ -45,6 +48,8 @@ Print["=== 120-cell (cells = vertices of the 600-cell) ==="];
 Print["graph: ", Length[V], " nodes, degrees ", Union[Length/@adj]];
 Print["layers from node 1: ", Module[{d=dists[adj,1]}, Table[Count[d,k],{k,0,Max[d]}]]];
 Print["chain is a path: ", And @@ Table[MemberQ[adj[[chain[[i]]]], chain[[i+1]]], {i,8}]];
+Print["f1 and f9 (the overlapping pair) adjacent in P: ", MemberQ[adj[[chain[[1]]]], chain[[9]]],
+      "   graph distance ", dists[adj, chain[[1]]][[chain[[9]]]]];
 ok = Select[Range[120], pathOK[dists[adj,#][[chain]]] &];
 Print["roots for which the chain fits in a BFS tree: ", Length[ok], " of 120  ", ok];
 Do[Print["   root ", r, "  depths along the chain: ", dists[adj,r][[chain]]], {r, Take[ok, UpTo[3]]}];

@@ -1,0 +1,9 @@
+24-cell: |G| = 1152, 1112 root-path pairs from root 0, 36 classes: cut ridge 9, not adjacent in P 26, tree edge 1
+overlapping classes: 0
+
+cut ridges by fundamental cycle (layers of u, v; cycle length):
+layer len classes   rotation (deg)   min dist/touch   min normal   across at min   overlap
+next    4      2     54.53..77.88        1.374          +0.148        0.755        False
+next    6      3      0.00..141.06       3.000          -6.000        2.828        False
+same    3      1     31.59..31.59        1.155          +0.111        0.314        False
+same    5      3     79.33..109.47       1.764          -0.778        1.478        False
