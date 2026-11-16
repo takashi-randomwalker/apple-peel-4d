@@ -69,8 +69,9 @@ of the runcinated 24-cell are valid").
   (tag `jocg-submitted-2026-10-12`). **Removed from the repository** until it is
   revised; it remains in the git history.
 - `jcdcg3_slides.tex` / `.pdf`, the JCDCG³ 2026 talk (slides 8 and 9 and the
-  backup slides). Kept as the record of the talk.
-- The JCDCG³ 2026 abstract on the conference website.
+  backup slides). Kept as the record of the talk. The JCDCG³ 2026 abstract
+  itself claims only that $\mathcal{T}_r$ gives a net from every root,
+  which is true.
 - `uniform_nets/manifest.csv`, `uniform_nets/allroots.csv` and
   `uniform_nets/README.md`. **Corrected.** The STL and OFF nets themselves were
   right and are unchanged; only which of them self-intersect has changed.
