@@ -92,3 +92,10 @@ __MACOSX
 # exact certification of the BFS nets: the run logs are the evidence
 !data/certify/*.log
 __pycache__/
+
+# face-rotation BFS paper: withdrawn from the repository until revised (ERRATA.md)
+face_rotation_net_paper.tex
+face_rotation_net_paper.pdf
+
+# project notes for Claude Code: kept local, not published
+CLAUDE.md

@@ -2,6 +2,11 @@
 
 Mathematica implementation and 3D-printable nets for the Apple-Peel Unfolding algorithm applied to Platonic solids, Archimedean solids, and regular convex 4-polytopes.
 
+> **Errata (2026-11-16).** Results published here on *face-rotation BFS nets*
+> (the 120-cell, the uniform 4-polytopes, and the draft paper on them) were
+> affected by two bugs in the intersection test. See [ERRATA.md](ERRATA.md).
+> The apple-peel results below are not affected.
+
 ## Overview
 
 Apple-Peel Unfolding is a greedy algorithm that selects faces (or cells) of a polyhedron (or 4-polytope) one at a time in a spiral order, producing a net analogous to peeling an apple in a single continuous strip.

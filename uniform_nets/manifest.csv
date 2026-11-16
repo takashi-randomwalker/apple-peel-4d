@@ -26,25 +26,25 @@
 "o3x4o3x_root1","o3x4o3x","t_{1,3}{3,4,3}","Wythoffian",144,1,"valid",0,891,1440,2304
 "o3x4x3o_root1","o3x4x3o","t_{1,2}{3,4,3}","Wythoffian",48,1,"valid",0,891,672,2112
 "o3x4x3x_root1","o3x4x3x","t_{1,2,3}{3,4,3}","Wythoffian",144,1,"valid",0,1590,1440,4032
-"x3o4o3x_root1","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,1,"self-intersecting",5,654,1344,1920
-"x3o4x3x_root1","x3o4x3x","t_{0,2,3}{3,4,3}","Wythoffian",240,1,"valid",0,1886,2208,4800
+"x3o4o3x_root1","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,1,"self-intersecting",28,654,1344,1920
+"x3o4x3x_root1","x3o4x3x","t_{0,2,3}{3,4,3}","Wythoffian",240,1,"self-intersecting",24,1886,2208,4800
 "x3x4x3x_root1","x3x4x3x","t_{0,1,2,3}{3,4,3}","Wythoffian",240,1,"valid",0,3330,2784,8256
 "o5o3o3x_root1","o5o3o3x","t_{3}{5,3,3}","Wythoffian",600,1,"valid",0,603,2400,2400
-"o5o3x3o_root1","o5o3x3o","t_{2}{5,3,3}","Wythoffian",720,1,"valid",0,2883,7200,7200
-"o5o3x3x_root1","o5o3x3x","t_{2,3}{5,3,3}","Wythoffian",720,1,"valid",0,6027,7200,14400
+"o5o3x3o_root1","o5o3x3o","t_{2}{5,3,3}","Wythoffian",720,1,"self-intersecting",124,2883,7200,7200
+"o5o3x3x_root1","o5o3x3x","t_{2,3}{5,3,3}","Wythoffian",720,1,"self-intersecting",66,6027,7200,14400
 "o5x3o3o_root1","o5x3o3o","t_{1}{5,3,3}","Wythoffian",720,1,"valid",0,3611,6240,9120
-"o5x3o3x_root1","o5x3o3x","t_{1,3}{5,3,3}","Wythoffian",1440,1,"valid",0,12579,17280,30240
-"o5x3x3o_root1","o5x3x3o","t_{1,2}{5,3,3}","Wythoffian",720,1,"valid",0,10288,8640,25920
-"o5x3x3x_root1","o5x3x3x","t_{1,2,3}{5,3,3}","Wythoffian",1440,1,"valid",0,21222,17280,51840
+"o5x3o3x_root1","o5x3o3x","t_{1,3}{5,3,3}","Wythoffian",1440,1,"self-intersecting",16,12579,17280,30240
+"o5x3x3o_root1","o5x3x3o","t_{1,2}{5,3,3}","Wythoffian",720,1,"self-intersecting",12,10288,8640,25920
+"o5x3x3x_root1","o5x3x3x","t_{1,2,3}{5,3,3}","Wythoffian",1440,1,"self-intersecting",60,21222,17280,51840
 "x5o3o3o_root1","x5o3o3o","t_{0}{5,3,3}","Wythoffian",120,1,"valid",0,1805,1440,4320
 "x5o3o3x_root1","x5o3o3x","t_{0,3}{5,3,3}","Wythoffian",2640,1,"valid",0,8523,14880,27840
-"x5o3x3o_root1","x5o3x3o","t_{0,2}{5,3,3}","Wythoffian",1920,1,"valid",0,10837,18240,28320
-"x5o3x3x_root1","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,1,"valid",0,25321,26880,61440
+"x5o3x3o_root1","x5o3x3o","t_{0,2}{5,3,3}","Wythoffian",1920,1,"self-intersecting",4,10837,18240,28320
+"x5o3x3x_root1","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,1,"self-intersecting",24,25321,26880,61440
 "x5x3o3o_root1","x5x3o3o","t_{0,1}{5,3,3}","Wythoffian",720,1,"valid",0,6631,6240,16320
-"x5x3o3x_root1","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,1,"valid",0,24549,26880,61440
-"x5x3x3o_root1","x5x3x3o","t_{0,1,2}{5,3,3}","Wythoffian",1920,1,"valid",0,19260,18240,49920
-"x5x3x3x_root1","x5x3x3x","t_{0,1,2,3}{5,3,3}","Wythoffian",2640,1,"valid",0,42850,34080,104640
-"s3s4o3o_root1","s3s4o3o","snub 24-cell","diminished 600-cell",144,1,"valid",0,339,960,960
+"x5x3o3x_root1","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,1,"self-intersecting",52,24549,26880,61440
+"x5x3x3o_root1","x5x3x3o","t_{0,1,2}{5,3,3}","Wythoffian",1920,1,"self-intersecting",4,19260,18240,49920
+"x5x3x3x_root1","x5x3x3x","t_{0,1,2,3}{5,3,3}","Wythoffian",2640,1,"self-intersecting",12,42850,34080,104640
+"s3s4o3o_root1","s3s4o3o","snub 24-cell","diminished 600-cell",144,1,"self-intersecting",3,339,960,960
 "gap_root1","gap","grand antiprism","diminished 600-cell",320,1,"valid",0,423,1440,1520
 "Tetrahedron_prism_root1","Tetrahedron_prism","Tetrahedron prism","prism",6,1,"valid",0,17,28,40
 "Octahedron_prism_root1","Octahedron_prism","Octahedron prism","prism",10,1,"valid",0,33,56,80
@@ -63,6 +63,6 @@
 "Rhombicosidodecahedron_prism_root1","Rhombicosidodecahedron_prism","Rhombicosidodecahedron prism","prism",64,1,"valid",0,357,488,944
 "TruncatedIcosidodecahedron_prism_root1","TruncatedIcosidodecahedron_prism","TruncatedIcosidodecahedron prism","prism",64,1,"valid",0,590,608,1664
 "SnubDodecahedron_prism_root1","SnubDodecahedron_prism","SnubDodecahedron prism","prism",94,1,"valid",0,417,668,1064
-"x3o4o3x_root47","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,47,"self-intersecting",3,649,1344,1920
-"x5o3x3x_root14","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,14,"self-intersecting",1,25321,26880,61440
-"x5x3o3x_root748","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,748,"self-intersecting",1,24544,26880,61440
+"x3o4o3x_root47","x3o4o3x","t_{0,3}{3,4,3}","Wythoffian",240,47,"self-intersecting",20,649,1344,1920
+"x5o3x3x_root14","x5o3x3x","t_{0,2,3}{5,3,3}","Wythoffian",2640,14,"self-intersecting",26,25321,26880,61440
+"x5x3o3x_root748","x5x3o3x","t_{0,1,3}{5,3,3}","Wythoffian",2640,748,"self-intersecting",82,24544,26880,61440
