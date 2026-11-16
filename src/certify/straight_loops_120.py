@@ -2,7 +2,7 @@
 without any geometry.
 
 The count equals the number of overlapping cell pairs for every BFS tree:
-all_bfs_120.py certifies every pair of root paths and finds that exactly
+all_bfs.py certifies every pair of root paths and finds that exactly
 these straight 7-cycles overlap (2026-11-16).  It was first observed on the
 2,400 random and 2,048 D_5-invariant trees; it is 0 for T_r from every root.
 

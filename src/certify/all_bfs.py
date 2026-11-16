@@ -1,24 +1,27 @@
-"""all_bfs_120.py -- every BFS tree of the 120-cell, exactly.
+"""all_bfs.py -- every BFS tree of the 120- or 600-cell, exactly.
 
 A cell's placement in the net depends only on its path to the root, so a
-BFS tree gives a net iff no two of its root paths overlap.  From root 0
-there are 901 root paths and 388,464 pairs of them that occur together in
-some BFS tree (they give every shared cell the same parent).  Each pair is
-decided exactly over Q(sqrt5) with certify_bfs_exact.certificate.  The
-120-cell is cell-transitive, so root 0 stands for every root.
+BFS tree gives a net iff no two of its root paths overlap.  All pairs of
+root paths from root 0 that occur together in some BFS tree (they give
+every shared cell the same parent) are decided exactly over Q(sqrt5) with
+certify_bfs_exact.certificate.  Both polytopes are cell-transitive, so
+root 0 stands for every root.
 
-  python3 -I all_bfs_120.py            # certify all pairs (53 min, 7 processes),
-                                       # write data/certify/all_bfs_120_overlaps.json.gz
-  python3 -I all_bfs_120.py classify   # classify the 7-cycles against that file (seconds)
+  python3 -I all_bfs.py 120            # certify all pairs, write
+                                       # data/certify/all_bfs_120_overlaps.json.gz
+  python3 -I all_bfs.py 120 classify   # sort the pairs by cycle type (seconds)
 
-Result (2026-11-16): 240 overlapping pairs, all of one type -- see classify."""
+120-cell (2026-11-16): 901 root paths, 388,464 pairs, 53 min with 7
+processes; 240 overlap, all of one type -- see classify.
+600-cell: 1,889 root paths, 1,757,416 pairs."""
 import collections, gzip, itertools, json, os, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)                     # -I drops the script dir
 import certify_bfs_exact as C
-OUT = os.path.join(HERE, "..", "..", "data", "certify", "all_bfs_120_overlaps.json.gz")
+NAME = sys.argv[1] if len(sys.argv) > 1 else "120"
+OUT = os.path.join(HERE, "..", "..", "data", "certify", "all_bfs_%s_overlaps.json.gz" % NAME)
 r = 0
-Pt = C.Polytope("120")
+Pt = C.Polytope(NAME)
 dist, opts = Pt.layers(r)
 paths = C.root_paths(r, dist, opts)
 ADJ = [set(a) for a in Pt.adj]
@@ -76,11 +79,13 @@ def classify():
                     continue
                 pa, pb, x, y = p[-2], q[-2], p[-3], q[-3]
                 if not (pb in ADJ[pa] and v in ADJ[pa] and u in ADJ[pb]):
-                    cnt[("same layer, cycle 7, not around a vertex", hit)] += 1
+                    cnt[("same layer, cycle 7, {a,b,pa,pb} not a clique", hit)] += 1
                     continue
-                assert (pa in ADJ[y]) != (pb in ADJ[x])          # exactly one chord
+                if (pa in ADJ[y]) == (pb in ADJ[x]):            # the 120-cell always has exactly one chord
+                    cnt[("{a,b,pa,pb} a clique, %s chords" % ("two" if pa in ADJ[y] else "no"), hit)] += 1
+                    continue
                 side, other = ((x, pa, u), (y, pb, v)) if pa in ADJ[y] else ((y, pb, v), (x, pa, u))
-                cnt[("around a vertex: chord side %s, other side %s"
+                cnt[("{a,b,pa,pb} a clique: chord side %s, other side %s"
                      % ("straight" if straight(*side) else "bent",
                         "straight" if straight(*other) else "bent"), hit)] += 1
     assert seen == len(ov)
@@ -89,7 +94,7 @@ def classify():
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["classify"]:
+    if sys.argv[2:] == ["classify"]:
         classify()
         sys.exit()
     from concurrent.futures import ProcessPoolExecutor

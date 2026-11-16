@@ -1,0 +1,10 @@
+# src/bfsnet/validate_no_exemption.wls after both fixes to bfs_sat.m (2026-11-16)
+# per-tree overlap counts compared with src/certify (exact)
+f120.m  ../../data/certify/random_trees_120.json.gz  trees 2400  invalid 2238  overlaps 6585
+f120.m  queue  trees 120  invalid 0  overlaps 0
+random 120: identical per tree: True mismatches 0
+f120.m  ../../data/certify/sector_trees_120.json.gz  trees 2048  invalid 1280  overlaps 15360
+sector 120: identical per tree: True mismatches 0
+f600.m  ../../data/certify/random_trees_600.json.gz  trees 1200  invalid 0  overlaps 0
+f600.m  queue  trees 600  invalid 0  overlaps 0
+# 600-cell exact: all trees valid (random_trees_600.log, all_bfs_600.log)

@@ -65,7 +65,15 @@ satNormalsEdges[pts_, tri_, epr_] := Module[{nm, ed},
   ed = (pts[[#[[2]]]] - pts[[#[[1]]]]) & /@ epr;
   ed = Normalize /@ Select[ed, Norm[#] > 10^-10 &];
   {DeleteDuplicatesBy[nm, Round[#/10^-9] &],
-   DeleteDuplicatesBy[ed, Round[Sign[First[SortBy[#, Abs[#] > 10^-9 &]]] #/10^-9] &]}];
+   (* an edge and its reverse give the same axis: normalize the sign by the
+      first nonzero component.  Until 2026-11-16 this read
+      Sign[First[SortBy[#, Abs[#] > 10^-9 &]]], which sorts the ZERO
+      components first, so every edge with a zero component got sign 0 and
+      key {0,0,0} and all but one of them were dropped.  The missing edge
+      directions removed separating axes (edge x edge), and pairs that do
+      not overlap were reported as overlapping (found against the exact
+      certifier: 10 extra overlaps in the 2,400 random 120-cell trees). *)
+   DeleteDuplicatesBy[ed, Round[Sign[First[Select[#, Abs[#] > 10^-9 &]]] #/10^-9] &]}];
 
 (* SAT: True = the two convex cells genuinely overlap *)
 satOverlapQ[ptsA_, nA_, eA_, ptsB_, nB_, eB_] := Catch[
@@ -95,9 +103,12 @@ satBBoxPairs[cent_, bMin_, bMax_, radius_] := Module[
     Function[{ns, k}, Module[{i = First[k], up = Select[ns, # > First[k] &]},
       Transpose[{ConstantArray[i, Length[up]], up}]]], nbrs];
   If[pairs === {} || Length[pairs] === 0, Return[{}]];
-  (* pairs already satisfy j > i, so only adjacency has to be removed *)
-  pairs = Pick[pairs, Lookup[adjSetP, pairs, False], False];
-  If[Length[pairs] === 0, Return[{}]];
+  (* No pair is exempt.  Until 2026-11-16 every pair of cells adjacent in
+     P was dropped here, but only pairs joined by a tree edge are glued in
+     the net; the others can overlap (in the 120-cell most BFS trees
+     overlap exactly between such pairs).  A tree edge needs no exemption:
+     the two cells meet along the shared face, so its normal separates
+     them within satEps. *)
   i1 = pairs[[All, 1]]; j1 = pairs[[All, 2]];
   ok = Times @@ Table[
      UnitStep[bMax[[j1, k]] - bMin[[i1, k]]] *

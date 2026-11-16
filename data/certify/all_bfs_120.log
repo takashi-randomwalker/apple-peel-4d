@@ -119,7 +119,7 @@ cell 115 pairs      37 overlaps     0  (3198s)
 cell 117 pairs      28 overlaps     0  (3198s)
 cell 119 pairs       0 overlaps     0  (3198s)
 TOTAL pairs 388464 overlapping 240 (3198s)
-classify (python3 -I all_bfs_120.py classify):
+classify (python3 -I all_bfs.py 120 classify):
   adjacent, joined by a tree edge                                ok           900
   adjacent, next layer, cycle 10                                 ok           132
   adjacent, next layer, cycle 4                                  ok          1200
@@ -128,7 +128,7 @@ classify (python3 -I all_bfs_120.py classify):
   adjacent, same layer, cycle 3                                  ok           810
   adjacent, same layer, cycle 5                                  ok          2010
   adjacent, same layer, cycle 9                                  ok         16680
-  around a vertex: chord side bent, other side bent              ok           240
-  around a vertex: chord side straight, other side bent          OVERLAP      240
   not adjacent in P                                              ok        350472
-  same layer, cycle 7, not around a vertex                       ok          5580
+  same layer, cycle 7, {a,b,pa,pb} not a clique                  ok          5580
+  {a,b,pa,pb} a clique: chord side bent, other side bent         ok           240
+  {a,b,pa,pb} a clique: chord side straight, other side bent     OVERLAP      240

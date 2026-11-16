@@ -107,8 +107,10 @@ checkRootV2[r_] := Module[
   bMinR    = (Min/@Transpose[#])&/@unf3D;
   bMaxR    = (Max/@Transpose[#])&/@unf3D;
   bboxList = Reap[
-    Do[If[!adjQP[i,j] &&
-          And@@Thread[bMinR[[i]]<=bMaxR[[j]]] &&
+    (* no pair is exempt: until 2026-11-16 pairs adjacent in P were
+       skipped here (!adjQP[i,j]), but only tree edges are glued, and a
+       tree edge meets along a face, so its intersection has volume 0 *)
+    Do[If[And@@Thread[bMinR[[i]]<=bMaxR[[j]]] &&
           And@@Thread[bMinR[[j]]<=bMaxR[[i]]],
          Sow[{i,j}]],
        {i,nCP},{j,i+1,nCP}]][[2]];
