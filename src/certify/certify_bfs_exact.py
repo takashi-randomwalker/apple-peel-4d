@@ -426,10 +426,15 @@ def certify_tree(Pt, r, parent):
 
 
 def _tree_worker(args):
-    name, r = args
+    name, r, parent = args
     Pt = _tree_worker.cache.get(name) or _tree_worker.cache.setdefault(name, Polytope(name))
     t = time.time()
-    res = certify_tree(Pt, r, Pt.queue_tree(r))
+    if parent is None:
+        parent = Pt.queue_tree(r)
+    else:                                       # a given tree: check that it is a BFS tree
+        _, opts = Pt.layers(r)
+        assert parent[r] == -1 and all(parent[v] in opts[v] for v in range(Pt.nC) if v != r)
+    res = certify_tree(Pt, r, parent)
     res["time"] = time.time() - t
     return res
 
@@ -437,26 +442,36 @@ def _tree_worker(args):
 _tree_worker.cache = {}
 
 
-def main_tree(name, roots, jobs):
+def main_tree(name, roots, jobs, trees_file=None):
+    """Certify T_r, or with trees_file (gzip JSON, per root a list of parent
+    arrays, -1 at the root) the BFS trees listed there."""
     from concurrent.futures import ProcessPoolExecutor
     Pt = Polytope(name)
     roots = roots or list(range(Pt.nC))
-    print("%s-cell: %d cells, tree T_r, %d roots, %d processes" % (name, Pt.nC, len(roots), jobs), flush=True)
+    if trees_file:
+        with gzip.open(trees_file, "rt") as fh:
+            given = json.load(fh)
+        tasks = [(name, r, p) for r in roots for p in given[r]]
+        what = "%d given BFS trees" % len(tasks)
+    else:
+        tasks = [(name, r, None) for r in roots]
+        what = "tree T_r"
+    print("%s-cell: %d cells, %s, %d roots, %d processes" % (name, Pt.nC, what, len(roots), jobs), flush=True)
     tot = {"pairs": 0, "sweep": 0, "axis": 0, "sat": 0, "overlaps": 0}
     bad = []
     t0 = time.time()
     with ProcessPoolExecutor(jobs) as ex:
-        for i, res in enumerate(ex.map(_tree_worker, [(name, r) for r in roots])):
+        for i, res in enumerate(ex.map(_tree_worker, tasks, chunksize=4)):
             for k in tot:
                 tot[k] += res[k]
             if res["overlaps"]:
                 bad.append(res)
-            if i < 3 or (i + 1) % max(1, len(roots) // 20) == 0 or res["overlaps"]:
+            if i < 3 or (i + 1) % max(1, len(tasks) // 20) == 0 or res["overlaps"]:
                 print("  root %3d  depth %2d  pairs %7d = sweep %7d + axis %6d + SAT %5d  overlaps %d  (%.1fs)"
                       % (res["root"], res["depth"], res["pairs"], res["sweep"], res["axis"], res["sat"],
                          res["overlaps"], res["time"]), flush=True)
-    print("TOTAL  roots %d  pairs %d = sweep %d + axis %d + SAT %d  overlaps %d  invalid roots %d  (%.1fs)"
-          % (len(roots), tot["pairs"], tot["sweep"], tot["axis"], tot["sat"], tot["overlaps"], len(bad),
+    print("TOTAL  roots %d  trees %d  pairs %d = sweep %d + axis %d + SAT %d  overlaps %d  invalid trees %d  (%.1fs)"
+          % (len(roots), len(tasks), tot["pairs"], tot["sweep"], tot["axis"], tot["sat"], tot["overlaps"], len(bad),
              time.time() - t0))
 
 
@@ -465,8 +480,9 @@ def main():
     name = args[0]
     roots = [int(x) for x in args[1:]]
     jobs = next((int(a[7:]) for a in sys.argv if a.startswith("--jobs=")), os.cpu_count())
-    if "--tree" in sys.argv or name in ("120", "600"):
-        return main_tree(name, roots, jobs)
+    trees_file = next((a[8:] for a in sys.argv if a.startswith("--trees=")), None)
+    if "--tree" in sys.argv or trees_file or name in ("120", "600"):
+        return main_tree(name, roots, jobs, trees_file)
     Pt = Polytope(name)
     roots = roots or list(range(Pt.nC))
     print("%s-cell: %d cells, roots %s" % (name, Pt.nC, "all" if len(args) == 1 else roots))

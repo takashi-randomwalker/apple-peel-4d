@@ -14,6 +14,20 @@ standard library only.
 2. For all six regular 4-polytopes, the tree T_r of the paper (queue BFS,
    neighbours in ascending order) gives such a net from every root.
 
+3. **Given BFS trees** (`--trees=`), each checked to be a BFS tree first:
+
+   | trees | invalid | overlapping pairs | time |
+   |---|---:|---:|---:|
+   | 120-cell, 20 random per root (2,400) | **2,238** | 6,585 | 3.7 h |
+   | 120-cell, D_5-invariant from root 0 (2,048) | **1,280** | 15,360 | 3.9 h |
+   | 600-cell, 20 random per root (12,000) | **0** | 0 | 11.2 h |
+
+   These are the random trees of `src/tiebreak/tiebreak_regular.m`, which
+   the floating-point check reported all valid: it exempted every pair of
+   cells adjacent in P, and in the 120-cell the overlaps are between such
+   pairs.  So most BFS trees of the 120-cell do not give a net, while T_r
+   does from every root.
+
 Pairs joined by a tree edge are checked too, so the exemption in the
 paper's definition of a valid net is not needed.
 
@@ -27,10 +41,16 @@ paper's definition of a valid net is not needed.
 | `test_verifier_mutations.py` | six kinds of tampering; the verifier must reject each |
 | `second_checker.py` | an independent re-verification of both claims; shares no code |
 | `negative_control.py` | drops the BFS restriction and finds overlapping chains, with a rational point interior to both cells |
+| `export_random_trees.wls` | redraws the random trees of `tiebreak_regular.m` (same seed) as parent arrays |
+| `export_sector120_trees.wls` | writes the 2,048 D_5-invariant trees of `src/symmetry/sector120_nets.wls` |
+| `straight_loops_120.py` | predicts the 120-cell overlaps without geometry; matches the exact count on all 4,448 trees above (observed, not proved) |
 | `crosscheck_float.py` / `.wls` | the exact placements agree with the paper's floating-point unfolding (`unfoldTFP`, `bfsUnfoldP`) |
 
 Data and logs are in `data/certify/`: `cert_{5,8,16,24}cell.json.gz`
-(certificates, 0.2 MB at most) and the run logs.
+(certificates, 0.2 MB at most), the given trees
+`random_trees_{120,600}.json.gz` and `sector_trees_120.json.gz`
+(gzip JSON: per root a list of parent arrays, 0-based, −1 at the root; the
+sector file has one entry, root 0), and the run logs.
 
 ## How it works
 
@@ -64,5 +84,8 @@ python3 -I certify_bfs_exact.py 24                 # claim 1, all roots (17 s)
 python3 -I certify_bfs_exact.py 600                # claim 2, all roots (31 min, 8 processes)
 python3 -I certify_bfs_exact.py 24 --export=cert.json.gz
 python3 -I verify_certificate.py cert.json.gz
+python3 -I certify_bfs_exact.py 120 --trees=../../data/certify/random_trees_120.json.gz --jobs=7
+python3 -I certify_bfs_exact.py 120 0 --trees=../../data/certify/sector_trees_120.json.gz
+python3 -I straight_loops_120.py ../../data/certify/random_trees_120.json.gz   # 1 s
 python3 -I second_checker.py 600                   # about 5.5 h with 8 processes (120-cell: 72 min)
 ```
