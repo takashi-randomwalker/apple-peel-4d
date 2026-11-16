@@ -1,10 +1,10 @@
 """straight_loops_120.py -- predict the overlaps of a 120-cell BFS net
 without any geometry.
 
-Observed (2026-11-15) to equal, tree by tree, the number of overlapping
-cell pairs found by certify_bfs_exact.py on all 2,400 random trees
-(random_trees_120.json.gz) and all 2,048 D_5-invariant trees
-(sector_trees_120.json.gz); it is 0 for T_r from every root.  Not proved.
+The count equals the number of overlapping cell pairs for every BFS tree:
+all_bfs_120.py certifies every pair of root paths and finds that exactly
+these straight 7-cycles overlap (2026-11-16).  It was first observed on the
+2,400 random and 2,048 D_5-invariant trees; it is 0 for T_r from every root.
 
 Usage: python3 -I straight_loops_120.py TREES.json.gz [roots...]
        prints a JSON list of counts, one per tree, in file order."""

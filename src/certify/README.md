@@ -28,6 +28,19 @@ standard library only.
    pairs.  So most BFS trees of the 120-cell do not give a net, while T_r
    does from every root.
 
+4. **Every BFS tree of the 120-cell** (`all_bfs_120.py`).  From root 0
+   (all roots, by cell-transitivity) the 388,464 pairs of root paths that
+   occur together in some BFS tree are all decided; exactly 240 overlap.
+   They are all of one type: a and b adjacent in P and in the same layer,
+   their tree paths closing a 7-cycle L,x,pa,a,b,pb,y of G(P) with
+   {a,b,pa,pb} the four cells around a vertex.  Exactly one of the chords
+   pa~y, pb~x exists; the cycle overlaps iff the branch carrying it
+   (x→pa→a when pa~y) passes straight through its middle cell (the two
+   faces are opposite).  The other branch is always bent.  Hence a BFS
+   tree of the 120-cell gives a net iff it contains no such straight
+   7-cycle; even cycles, cycles of length 3, 5, 9 and pairs not adjacent
+   in P never overlap.  `straight_loops_120.py` counts these cycles.
+
 Pairs joined by a tree edge are checked too, so the exemption in the
 paper's definition of a valid net is not needed.
 
@@ -43,14 +56,16 @@ paper's definition of a valid net is not needed.
 | `negative_control.py` | drops the BFS restriction and finds overlapping chains, with a rational point interior to both cells |
 | `export_random_trees.wls` | redraws the random trees of `tiebreak_regular.m` (same seed) as parent arrays |
 | `export_sector120_trees.wls` | writes the 2,048 D_5-invariant trees of `src/symmetry/sector120_nets.wls` |
-| `straight_loops_120.py` | predicts the 120-cell overlaps without geometry; matches the exact count on all 4,448 trees above (observed, not proved) |
+| `all_bfs_120.py` | claim 4: certifies all root-path pairs of the 120-cell; `classify` sorts them by cycle type |
+| `straight_loops_120.py` | counts the straight 7-cycles of a 120-cell tree, which by claim 4 is its number of overlapping pairs |
 | `crosscheck_float.py` / `.wls` | the exact placements agree with the paper's floating-point unfolding (`unfoldTFP`, `bfsUnfoldP`) |
 
 Data and logs are in `data/certify/`: `cert_{5,8,16,24}cell.json.gz`
 (certificates, 0.2 MB at most), the given trees
 `random_trees_{120,600}.json.gz` and `sector_trees_120.json.gz`
 (gzip JSON: per root a list of parent arrays, 0-based, −1 at the root; the
-sector file has one entry, root 0), and the run logs.
+sector file has one entry, root 0), `all_bfs_120_overlaps.json.gz` (the 240
+overlapping root-path pairs), and the run logs.
 
 ## How it works
 
@@ -87,5 +102,7 @@ python3 -I verify_certificate.py cert.json.gz
 python3 -I certify_bfs_exact.py 120 --trees=../../data/certify/random_trees_120.json.gz --jobs=7
 python3 -I certify_bfs_exact.py 120 0 --trees=../../data/certify/sector_trees_120.json.gz
 python3 -I straight_loops_120.py ../../data/certify/random_trees_120.json.gz   # 1 s
+python3 -I all_bfs_120.py                          # claim 4 (53 min, 7 processes)
+python3 -I all_bfs_120.py classify
 python3 -I second_checker.py 600                   # about 5.5 h with 8 processes (120-cell: 72 min)
 ```
