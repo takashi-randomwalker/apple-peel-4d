@@ -1,0 +1,23 @@
+roots 24487  valid old 21584 new 9872
+classification old -> new:
+   ALL INVALID -> ALL INVALID  1
+   ALL VALID   -> ALL INVALID  5
+   ALL VALID   -> ALL VALID   51
+   ALL VALID   -> MIXED        5
+   MIXED       -> ALL INVALID  2
+
+changed polytopes:
+symbol                 name                       cells  old ok  new ok  lost gained  overlap pairs old -> new
+s3s4o3o                snub 24-cell                 144     144      48    96      0  0 -> 288
+x3o4o3x                runcinated 24-cell           240       0       0     0      0  2970 -> 7368
+x3o4x3x                t_{0,2,3}{3,4,3}             240     240       0   240      0  0 -> 2496
+o5o3x3o                t_{2}{5,3,3}                 720     720       0   720      0  0 -> 78683
+o5o3x3x                t_{2,3}{5,3,3}               720     720       0   720      0  0 -> 55647
+o5x3x3o                t_{1,2}{5,3,3}               720     720     120   600      0  0 -> 7200
+o5x3o3x                t_{1,3}{5,3,3}              1440    1440       1  1439      0  0 -> 29450
+o5x3x3x                t_{1,2,3}{5,3,3}            1440    1440       0  1440      0  0 -> 86159
+x5o3x3o                t_{0,2}{5,3,3}              1920    1920    1320   600      0  0 -> 2400
+x5x3x3o                t_{0,1,2}{5,3,3}            1920    1920    1320   600      0  0 -> 2400
+x5o3x3x                runcitruncated 600-cell     2640      47       0    47      0  9632 -> 78449
+x5x3o3x                runcitruncated 120-cell     2640    2570       0  2570      0  70 -> 215274
+x5x3x3x                t_{0,1,2,3}{5,3,3}          2640    2640       0  2640      0  0 -> 56520
