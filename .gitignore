@@ -99,3 +99,8 @@ face_rotation_net_paper.pdf
 
 # project notes for Claude Code: kept local, not published
 CLAUDE.md
+
+# revised paper 1 draft and the local-only history of private files (never pushed)
+bfs_nets_regular.tex
+bfs_nets_regular.pdf
+.private.git/
