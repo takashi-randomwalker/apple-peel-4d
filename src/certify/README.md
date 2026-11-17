@@ -75,6 +75,10 @@ paper's definition of a valid net is not needed.
 | `export_sector120_trees.wls` | writes the 2,048 D_5-invariant trees of `src/symmetry/sector120_nets.wls` |
 | `all_bfs.py` | claim 4: certifies all root-path pairs of the 120- or 600-cell; `classify` sorts them by cycle type |
 | `path_classes.py` | the root-path pairs up to symmetry (16/24-cell 36 classes, 120-cell 2,876, 600-cell 37,169) and the holonomy of every cut-ridge class |
+| `locality_balls.py` | which classes are separated by disjoint circumscribed balls alone, by tree-path length (24-cell 31/35, 120-cell 2,867/2,875, 600-cell 36,973/37,168) |
+| `locality_axes.py` | the classes the balls leave, by the first plane that separates them: centroid axis, face plane, edge × edge (600-cell 184 / 11 / 0) |
+| `close_cut_ridges.py` | the cut-ridge classes the balls leave, in detail: turns along the cycle, holonomy, whether the plane of F separates (120-cell: 8 classes, one the overlap) |
+| `cut_ridges_24.py` / `locality_24.py` | the 24-cell's 9 cut-ridge and 26 non-adjacent classes, one line each, exactly |
 | `known_counterexamples.py` | in the overlapping unfoldings of Seamons and of Devadoss–Harvey–Richter, are the overlapping cells adjacent in P? |
 | `tree_observations_120.py` | 120-cell: bent-preferring trees are valid; straight branches that overlap miss the root; tree shape does not decide validity |
 | `straight_loops_120.py` | counts the straight 7-cycles of a 120-cell tree, which by claim 4 is its number of overlapping pairs |

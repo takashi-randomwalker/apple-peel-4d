@@ -1,0 +1,34 @@
+600-cell, root 0: classes not separated by balls, by the first plane that separates them
+kind           path   centroid axis     face plane    edge x edge        OVERLAP
+cut ridge         5               1              0              0              0
+cut ridge         8               1              0              0              0
+cut ridge        10               2              1              0              0
+cut ridge        11               1              0              0              0
+cut ridge        13               4              1              0              0
+cut ridge        14               1              1              0              0
+cut ridge        15               3              0              0              0
+cut ridge        16               2              0              0              0
+cut ridge        17               3              0              0              0
+cut ridge        18               2              0              0              0
+cut ridge        20               5              0              0              0
+not adjacent      3               1              0              0              0
+not adjacent      4               2              0              0              0
+not adjacent      5               2              0              0              0
+not adjacent      6               4              0              0              0
+not adjacent      7               7              0              0              0
+not adjacent      8              10              0              0              0
+not adjacent      9              11              0              0              0
+not adjacent     10              15              1              0              0
+not adjacent     11              20              2              0              0
+not adjacent     12              15              2              0              0
+not adjacent     13              20              1              0              0
+not adjacent     14              21              0              0              0
+not adjacent     15              10              0              0              0
+not adjacent     16               4              1              0              0
+not adjacent     17               5              0              0              0
+not adjacent     18               3              0              0              0
+not adjacent     19               4              1              0              0
+not adjacent     20               2              0              0              0
+not adjacent     21               2              0              0              0
+not adjacent     22               1              0              0              0
+total                          184             11              0              0

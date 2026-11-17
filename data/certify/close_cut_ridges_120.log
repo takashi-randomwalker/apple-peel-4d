@@ -1,0 +1,11 @@
+120-cell, root 0: 8 cut-ridge classes closer than the ball bound (2R)^2 = 1.5836
+turns: cycle a ... L ... b, one letter per cell from a (s straight, a sharp, b bent)
+cycle layers turns        rot(deg) dist  normal  across  separated by   F-margin  pairs  overlap
+  3   1,1   aaa            10.30  1.051  +0.047   0.094  plane of F      +0.000    810  False
+  4   1,2   baba           19.60  1.143  +0.111   0.269  plane of F      +0.058   1200  False
+  5   2,2   ababa          20.81  1.091  +0.059   0.262  plane of F      +0.010    300  False
+  6   2,3   bbabba         27.00  1.211  +0.039   0.621  face of b       -0.148    360  False
+  7   3,3   asbasba        36.00  1.106  -0.200   0.763  OVERLAP         -0.400    240  True
+  7   3,3   bbbabsa        31.07  1.207  +0.007   0.665  edge x edge     -0.126    240  False
+  9   4,4   assbasbbb      36.00  1.106  -0.727   1.071  face of a       -1.453    120  False
+  9   4,4   assbassba      48.74  1.215  -0.978   1.215  face of a       -2.098    120  False

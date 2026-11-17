@@ -1,0 +1,30 @@
+24-cell, root 0: 26 classes of pairs not adjacent in P; (2R)^2 = 3 (glued distance^2 = 1)
+share in P   tree path   |c_u-c_v|^2   separated by     pairs
+a vertex         3       8/3           face of u         60
+a vertex         4       11/3          balls             48
+a vertex         5       88/27         balls             24
+a vertex         5       136/27        balls             48
+a vertex         5       152/27        balls             48
+a vertex         5       200/27        balls             24
+a vertex         5       8             balls             24
+a vertex         5       32/3          balls             12
+a vertex         6       19/3          balls             48
+a vertex         6       9             balls             24
+a vertex         6       43/3          balls             24
+a vertex         6       17            balls             48
+a vertex         6       59/3          balls             24
+nothing          3       4             balls             20
+nothing          4       41/9          balls             24
+nothing          4       49/9          balls             48
+nothing          4       19/3          balls             48
+nothing          4       9             balls             16
+nothing          5       8             balls             24
+nothing          5       76/9          balls             24
+nothing          5       256/27        balls             12
+nothing          5       272/27        balls             24
+nothing          5       92/9          balls             48
+nothing          5       32/3          balls             12
+nothing          5       12            balls             48
+nothing          5       16            balls             12
+by method: {'face of u': 1, 'balls': 25}
+all separated: True
