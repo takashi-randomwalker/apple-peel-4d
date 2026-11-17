@@ -1,0 +1,8 @@
+16-cell, root 0: classes not separated by balls, by the first plane that separates them
+kind           path   centroid axis     face plane    edge x edge        OVERLAP
+cut ridge         4               1              0              0              0
+cut ridge         6               3              0              0              0
+not adjacent      3               1              0              0              0
+not adjacent      4               1              0              0              0
+not adjacent      5               2              0              0              0
+total                            8              0              0              0

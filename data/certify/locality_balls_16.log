@@ -1,0 +1,12 @@
+16-cell, root 0: (2R)^2 = 9.0000 (glued distance^2 = 1)
+kind           path   classes   by balls   not   min |c_u-c_v|^2   overlapping
+cut ridge         4         1          0     1       2.7778        0
+cut ridge         6         3          0     3       5.9383        0
+cut ridge         8        12         12     0      14.7174        0
+not adjacent      3         1          0     1       2.6667        0
+not adjacent      4         1          0     1       5.4444        0
+not adjacent      5         3          1     2       5.6296        0
+not adjacent      6         4          4     0      10.3827        0
+not adjacent      7        10         10     0      10.8971        0
+longest tree path with a class not separated by balls: 6 cells
+classes not separated by balls: 8 of 35

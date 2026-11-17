@@ -1,0 +1,7 @@
+16-cell, root 0: 4 cut-ridge classes closer than the ball bound (2R)^2 = 9.0000
+turns: cycle a ... L ... b, one letter per cell from a (s straight, a sharp, b bent)
+cycle layers turns        rot(deg) dist  normal  across  separated by   F-margin  pairs  overlap
+  4   1,2   aaaa           77.88  1.667  +0.296   1.048  plane of F      +0.000     60  False
+  6   2,3   aaaaaa        131.92  2.437  -0.757   2.425  face of a       -2.963     48  False
+  6   2,3   aaaaaa        131.92  2.778  +0.132   2.537  face of a       -0.741     48  False
+  6   2,3   aaaaaa        158.66  2.983  -0.263   2.891  face of a       -0.790     48  False
