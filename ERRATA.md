@@ -56,12 +56,36 @@ The 13 polytopes that changed, and the 16 self-intersecting files among the
 published nets, are listed in [`uniform_nets/README.md`](uniform_nets/README.md).
 No root changed from invalid to valid.
 
-**Not yet recomputed, and to be treated as void:** the comparison of the
-queue, max-index and min-index tie-breaking rules on the uniform polytopes
-(including "the grand antiprism is valid from all 320 roots under two rules
-and from none under the third"), the random-tree experiments on the uniform
-polytopes, and the symmetric-tree experiments (e.g. "70 of 600 symmetric trees
-of the runcinated 24-cell are valid").
+**Tie-breaking rules and random trees, recomputed (2026-11-17).** The
+max-index and min-index rules from every root, and 10 random BFS trees from
+root 1, for all 64 polytopes
+([`data/uniform_recheck/rules_compare.txt`](data/uniform_recheck/rules_compare.txt)):
+
+| rule | from every root | some roots | no root | valid roots |
+|---|---:|---:|---:|---:|
+| queue ($\mathcal{T}_r$) | 51 | 5 | 8 | 9,872 |
+| max-index | 49 | 10 | 5 | 10,901 |
+| min-index | 49 | 9 | 6 | 10,297 |
+
+48 polytopes are valid from every root under all three rules; 38 of them
+also give a net in all 10 random trees, and 20 polytopes in none of them.
+The examples published before change as follows (valid roots, queue /
+max-index / min-index):
+
+| polytope | published | corrected |
+|---|---|---|
+| grand antiprism | 320 / 320 / 0 | 320 / 256 / 0 |
+| runcinated 24-cell `x3o4o3x` | 0 / 0 / 0 | 0 / 26 / 26 |
+| runcitruncated 600-cell `x5o3x3x` | 47 / 2,635 / 2,627 | 0 / 720 / 0 |
+| runcitruncated 120-cell `x5x3o3x` | 2,570 / 2,640 / 2,151 | 0 / 0 / 110 |
+
+So "the grand antiprism is valid from all 320 roots under two rules and from
+none under the third" is false: two rules disagree on it entirely, the third
+gives 256. The runcinated 24-cell is not invalid under every rule.
+
+**Not yet recomputed, and to be treated as void:** the symmetric-tree
+experiments (e.g. "70 of 600 symmetric trees of the runcinated 24-cell are
+valid").
 
 ## Where the wrong claims appeared
 
